@@ -175,7 +175,7 @@ with st.sidebar:
         ham_count = st.session_state.model_stats[selected_model_name]['ham']
         spam_rate = (spam_count / total_classifications) * 100
         
-        st.metric("Total Analyzed", total_classifications)
+        st.metric("Total Analysed", total_classifications)
         st.metric("Spam Detected", spam_count)
         st.metric("Ham (Safe)", ham_count)
         st.metric("Spam Rate", f"{spam_rate:.1f}%")
@@ -194,8 +194,8 @@ def load_pipeline(model_id):
         return None
 
 # Helper functions
-def analyze_message_features(message):
-    """Analyze message characteristics"""
+def analyse_message_features(message):
+    """Analyse message characteristics"""
     features = {
         'length': len(message),
         'word_count': len(message.split()),
@@ -248,7 +248,7 @@ with col1:
     
     # Message input
     user_sms = st.text_area(
-        "Enter SMS message to analyze",
+        "Enter SMS message to analyse",
         height=120,
         placeholder="Type or paste your SMS message here...",
         help="Enter the SMS message you want to classify as spam or ham (legitimate)"
@@ -258,7 +258,7 @@ with col1:
     col_a, col_b, col_c = st.columns([1, 1, 2])
     
     with col_a:
-        analyze_btn = st.button("🔍 Analyze Message", type="primary", use_container_width=True)
+        analyse_btn = st.button("🔍 Analyse Message", type="primary", use_container_width=True)
     
     with col_b:
         clear_btn = st.button("🗑️ Clear", use_container_width=True)
@@ -269,7 +269,7 @@ with col1:
 # Load the selected model
 classifier = load_pipeline(model_info["id"])
 
-if analyze_btn and user_sms.strip() and classifier:
+if analyse_btn and user_sms.strip() and classifier:
     with st.spinner("🤖 Analyzing message..."):
         # Simulate processing time for better UX
         time.sleep(0.5)
@@ -292,8 +292,8 @@ if analyze_btn and user_sms.strip() and classifier:
             'model': selected_model_name
         })
         
-        # Analyze message features
-        features = analyze_message_features(user_sms)
+        # Analyse message features
+        features = analyse_message_features(user_sms)
         risk_indicators = get_risk_indicators(user_sms, label)
         
         # Display results
@@ -308,7 +308,7 @@ if analyze_btn and user_sms.strip() and classifier:
             <h2 style="margin: 0 0 15px 0;">{icon} {label}</h2>
             <h3 style="margin: 0;">Confidence: {confidence:.2%}</h3>
             <p style="margin: 15px 0 0 0; opacity: 0.8;">
-                Model: {selected_model_name} | Analyzed: {datetime.now().strftime('%H:%M:%S')}
+                Model: {selected_model_name} | Analysed: {datetime.now().strftime('%H:%M:%S')}
             </p>
         </div>
         """, unsafe_allow_html=True)
@@ -404,8 +404,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Error handling
-if analyze_btn and user_sms.strip() and not classifier:
+if analyse_btn and user_sms.strip() and not classifier:
     st.error("❌ Failed to load the selected model. Please try again or select a different model.")
 
-if analyze_btn and not user_sms.strip():
+if analyse_btn and not user_sms.strip():
     st.warning("⚠️ Please enter an SMS message to analyse.")
