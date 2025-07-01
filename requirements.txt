@@ -3,3 +3,5 @@ pandas>=1.5.0
 plotly>=5.16.0
 transformers>=4.38.0
 torch>=2.1.0
+base64
+os
