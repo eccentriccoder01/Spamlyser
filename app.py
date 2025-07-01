@@ -1,17 +1,16 @@
 import streamlit as st
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
-import torch
 
 # Title and description
 st.title("📱 Spamlyser: SMS Spam Classifier")
 st.markdown("Classify SMS messages using different transformer backbones trained on the `sms_spam` dataset.")
 
-# Available models in your Hugging Face repo
+# Updated Hugging Face model repo locations
 MODEL_OPTIONS = {
-    "DistilBERT": "mreccentric/spamlyser/distilbert-base-uncased",
-    "BERT": "mreccentric/spamlyser/bert-base-uncased",
-    "RoBERTa": "mreccentric/spamlyser/roberta-base",
-    "ALBERT": "mreccentric/spamlyser/albert-base-v2"
+    "DistilBERT": "mreccentric/distilbert-base-uncased-spamlyser",
+    "BERT": "mreccentric/bert-base-uncased-spamlyser",
+    "RoBERTa": "mreccentric/roberta-base-spamlyser",
+    "ALBERT": "mreccentric/albert-base-v2-spamlyser"
 }
 
 # Sidebar for model selection
