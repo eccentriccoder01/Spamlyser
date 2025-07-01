@@ -103,7 +103,7 @@ st.markdown("""
 <div style="text-align: center; padding: 20px 0; background: linear-gradient(90deg, #1a1a1a, #2d2d2d); border-radius: 15px; margin-bottom: 30px; border: 1px solid #404040;">
     <h1 style="color: #00d4aa; font-size: 3rem; margin: 0; text-shadow: 0 0 20px rgba(0, 212, 170, 0.3); display: flex; align-items: center; justify-content: center; gap: 10px;">
         🛡️ 
-        <img src="https://raw.githubusercontent.com/eccentriccoder01/spamlyser/master/S.png" style="height: 2.6rem; vertical-align: middle;">
+        <img src="https://raw.githubusercontent.com/eccentriccoder01/spamlyser/master/SpamlyserLogo.png" style="height: 2.6rem; vertical-align: middle;">
         pamlyser Pro
     </h1>
     <p style="color: #888; font-size: 1.2rem; margin: 10px 0 0 0;">
