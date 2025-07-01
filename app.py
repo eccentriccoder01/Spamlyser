@@ -108,7 +108,7 @@ def get_base64_img(image_path):
     return base64.b64encode(data).decode()
 
 # Get base64 string of the image
-s_image_base64 = get_base64_img("SpamlyserLogo.png")
+s_image_base64 = get_base64_img("./SpamlyserLogo.png")
 
 st.markdown("""
 <div style="text-align: center; padding: 20px 0; background: linear-gradient(90deg, #1a1a1a, #2d2d2d); border-radius: 15px; margin-bottom: 30px; border: 1px solid #404040;">
