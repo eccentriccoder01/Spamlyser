@@ -99,11 +99,22 @@ if 'model_stats' not in st.session_state:
     st.session_state.model_stats = {model: {'spam': 0, 'ham': 0, 'total': 0} for model in ["DistilBERT", "BERT", "RoBERTa", "ALBERT"]}
 
 # Header
+import base64
+
+# Encode S.png to base64
+def get_base64_img(image_path):
+    with open(image_path, "rb") as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+# Get base64 string of the image
+s_image_base64 = get_base64_img("SpamlyserLogo.png")
+
 st.markdown("""
 <div style="text-align: center; padding: 20px 0; background: linear-gradient(90deg, #1a1a1a, #2d2d2d); border-radius: 15px; margin-bottom: 30px; border: 1px solid #404040;">
     <h1 style="color: #00d4aa; font-size: 3rem; margin: 0; text-shadow: 0 0 20px rgba(0, 212, 170, 0.3); display: flex; align-items: center; justify-content: center; gap: 10px;">
         🛡️ 
-        <img src="https://github.com/eccentriccoder01/Spamlyser/blob/cd1e28075054c89f8c37f55ea8b2d00c4ee73876/SpamlyserLogo.png" style="height: 2.6rem; vertical-align: middle;">
+        <img src="data:image/png;base64,{s_image_base64}" style="height: 2.6rem; vertical-align: middle;">
         pamlyser Pro
     </h1>
     <p style="color: #888; font-size: 1.2rem; margin: 10px 0 0 0;">
