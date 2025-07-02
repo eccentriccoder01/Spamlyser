@@ -338,6 +338,36 @@ if analyse_btn and user_sms.strip() and classifier:
                     st.markdown(f"- {indicator}")
             else:
                 st.markdown("✅ No significant risk indicators detected")
+                
+            # Stats visualization
+            if len(st.session_state.classification_history) > 1:
+                st.markdown("#### 📊 Model Performance")
+                
+                # Create dataframe for visualization
+                df = pd.DataFrame(st.session_state.classification_history)
+                
+                # Pie chart for spam/ham distribution
+                spam_count = len(df[df['prediction'] == 'SPAM'])
+                ham_count = len(df[df['prediction'] == 'HAM'])
+                
+                if spam_count > 0 or ham_count > 0:
+                    fig = go.Figure(data=[go.Pie(
+                        labels=['SPAM', 'HAM'],
+                        values=[spam_count, ham_count],
+                        hole=0.6,
+                        marker_colors=['#ff6b6b', '#4ecdc4']
+                    )])
+                    
+                    fig.update_layout(
+                        title="Classification Distribution",
+                        showlegend=True,
+                        height=300,
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        font=dict(color='white')
+                    )
+                    
+                    st.plotly_chart(fig, use_container_width=True)
 
 with col2:
     st.markdown("""
@@ -361,36 +391,6 @@ with col2:
                 <small style="color: #666;">{item['model']} • {item['timestamp'].strftime('%H:%M')}</small>
             </div>
             """, unsafe_allow_html=True)
-        
-        # Stats visualization
-        if len(st.session_state.classification_history) > 1:
-            st.markdown("#### 📊 Model Performance")
-            
-            # Create dataframe for visualization
-            df = pd.DataFrame(st.session_state.classification_history)
-            
-            # Pie chart for spam/ham distribution
-            spam_count = len(df[df['prediction'] == 'SPAM'])
-            ham_count = len(df[df['prediction'] == 'HAM'])
-            
-            if spam_count > 0 or ham_count > 0:
-                fig = go.Figure(data=[go.Pie(
-                    labels=['SPAM', 'HAM'],
-                    values=[spam_count, ham_count],
-                    hole=0.6,
-                    marker_colors=['#ff6b6b', '#4ecdc4']
-                )])
-                
-                fig.update_layout(
-                    title="Classification Distribution",
-                    showlegend=True,
-                    height=300,
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    font=dict(color='white')
-                )
-                
-                st.plotly_chart(fig, use_container_width=True)
     
     else:
         st.info("📝 No classifications yet. Analyse some messages to see statistics!")
