@@ -399,11 +399,11 @@ with col2:
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; padding: 20px; background: rgba(255,255,255,0.02); border-radius: 10px; margin-top: 30px;">
-    <p style="color: #666; margin: 0;">
+    <p style="color: #888; margin: 0;">
         🛡️ <strong>Spamlyser Pro</strong> | Advanced SMS Threat Detection<br>
-        Powered by Custom-Trained Transformer Models
+        Powered by Custom-Trained Transformer Models<br>
+        Developed by <a href="https://eccentriccoder01.github.io/Me" target="_blank" style="color: #1f77b4; text-decoration: none; font-weight: 600;">MrEccentric</a>
     </p>
-    Developed by [MrEccentric](https://eccentriccoder01.github.io/Me)
 </div>
 """, unsafe_allow_html=True)
 
