@@ -402,6 +402,7 @@ st.markdown("""
     <p style="color: #666; margin: 0;">
         🛡️ <strong>Spamlyser Pro</strong> | Advanced SMS Threat Detection<br>
         Powered by Custom-Trained Transformer Models
+        Developed by [MrEccentric](https://eccentriccoder01.github.io/Me)
     </p>
 </div>
 """, unsafe_allow_html=True)
