@@ -7,11 +7,14 @@ import time
 import re
 from datetime import datetime
 import hashlib
+from pathlib import Path
+
+logo_path = str(Path(__file__).resolve().parent.parent / "SpamlyserLogo.png")
 
 # Page configuration
 st.set_page_config(
     page_title="Spamlyser Pro",
-    page_icon="🛡️",
+    page_icon=logo_path,
     layout="wide",
     initial_sidebar_state="expanded"
 )
