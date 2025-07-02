@@ -101,24 +101,11 @@ if 'classification_history' not in st.session_state:
 if 'model_stats' not in st.session_state:
     st.session_state.model_stats = {model: {'spam': 0, 'ham': 0, 'total': 0} for model in ["DistilBERT", "BERT", "RoBERTa", "ALBERT"]}
 
-# Header 
-import base64
-
-def get_base64_of_bin_file(bin_file):
-    with open(bin_file, 'rb') as f:
-        data = f.read()
-    return base64.b64encode(data).decode()
-
-def apply_custom_css():
-    # Path to your background image
-    background_image_path = "SpamlyserLogo.png"
-    
-    # Encode the image to base64
-    base64_image = get_base64_of_bin_file(background_image_path)
+# Header
 st.markdown("""
 <div style="text-align: center; padding: 20px 0; background: linear-gradient(90deg, #1a1a1a, #2d2d2d); border-radius: 15px; margin-bottom: 30px; border: 1px solid #404040;">
     <h1 style="color: #00d4aa; font-size: 3rem; margin: 0; text-shadow: 0 0 20px rgba(0, 212, 170, 0.3);">
-        🛡️ <strong><div style="background-image: url("data:image/png;base64,{base64_image}"); vertical-align: middle;"></div>pamlyser Pro</strong>
+        🛡️ Spamlyser Pro
     </h1>
     <p style="color: #888; font-size: 1.2rem; margin: 10px 0 0 0;">
         Advanced SMS Threat Detection & Analysis Platform
