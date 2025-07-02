@@ -95,7 +95,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize session state
+# Initialise session state
 if 'classification_history' not in st.session_state:
     st.session_state.classification_history = []
 if 'model_stats' not in st.session_state:
@@ -185,7 +185,6 @@ with st.sidebar:
     else:
         st.info("No classifications yet")
 
-# Load model pipeline
 @st.cache_resource
 def load_pipeline(model_id):
     try:
@@ -216,7 +215,6 @@ def get_risk_indicators(message, prediction):
     """Get risk indicators for the message"""
     indicators = []
     
-    # Common spam keywords
     spam_keywords = ['free', 'win', 'winner', 'congratulations', 'urgent', 'limited', 'offer', 'click', 'call now']
     found_keywords = [word for word in spam_keywords if word.lower() in message.lower()]
     
@@ -274,19 +272,12 @@ classifier = load_pipeline(model_info["id"])
 
 if analyse_btn and user_sms.strip() and classifier:
     with st.spinner("🤖 Analyzing message..."):
-        # Simulate processing time for better UX
         time.sleep(0.5)
-        
-        # Get prediction
         result = classifier(user_sms)[0]
         label = result['label'].upper()
         confidence = result['score']
-        
-        # Update session state
         st.session_state.model_stats[selected_model_name][label.lower()] += 1
         st.session_state.model_stats[selected_model_name]['total'] += 1
-        
-        # Add to history
         st.session_state.classification_history.append({
             'timestamp': datetime.now(),
             'message': user_sms[:50] + "..." if len(user_sms) > 50 else user_sms,
@@ -294,15 +285,9 @@ if analyse_btn and user_sms.strip() and classifier:
             'confidence': confidence,
             'model': selected_model_name
         })
-        
-        # Analyse message features
         features = analyse_message_features(user_sms)
         risk_indicators = get_risk_indicators(user_sms, label)
-        
-        # Display results
         st.markdown("### 🎯 Classification Results")
-        
-        # Main prediction card
         card_class = "spam-alert" if label == "SPAM" else "ham-safe"
         icon = "🚨" if label == "SPAM" else "✅"
         
@@ -315,8 +300,6 @@ if analyse_btn and user_sms.strip() and classifier:
             </p>
         </div>
         """, unsafe_allow_html=True)
-        
-        # Detailed analysis
         col_detail1, col_detail2 = st.columns(2)
         
         with col_detail1:
@@ -338,15 +321,9 @@ if analyse_btn and user_sms.strip() and classifier:
                     st.markdown(f"- {indicator}")
             else:
                 st.markdown("✅ No significant risk indicators detected")
-                
-            # Stats visualization
             if len(st.session_state.classification_history) > 1:
                 st.markdown("#### 📊 Model Performance")
-                
-                # Create dataframe for visualization
                 df = pd.DataFrame(st.session_state.classification_history)
-                
-                # Pie chart for spam/ham distribution
                 spam_count = len(df[df['prediction'] == 'SPAM'])
                 ham_count = len(df[df['prediction'] == 'HAM'])
                 
@@ -378,7 +355,6 @@ with col2:
     
     # Model comparison
     if st.session_state.classification_history:
-        # Recent history
         st.markdown("#### 🕒 Recent Classifications")
         recent = st.session_state.classification_history[-5:]
         
