@@ -101,7 +101,8 @@ if 'classification_history' not in st.session_state:
 if 'model_stats' not in st.session_state:
     st.session_state.model_stats = {model: {'spam': 0, 'ham': 0, 'total': 0} for model in ["DistilBERT", "BERT", "RoBERTa", "ALBERT"]}
 
-# Header
+# Header 
+import base64
 with open(logo_path, "rb") as image_file:
     encoded = base64.b64encode(image_file.read()).decode()
 st.markdown("""
