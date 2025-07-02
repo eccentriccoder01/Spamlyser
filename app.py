@@ -9,7 +9,7 @@ from datetime import datetime
 import hashlib
 from pathlib import Path
 
-logo_path = str(Path(__file__).resolve().parent.parent / "SpamlyserLogo.png")
+logo_path = str(Path(__file__).resolve().parent / "SpamlyserLogo.png")
 
 # Page configuration
 st.set_page_config(
