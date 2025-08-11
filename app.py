@@ -186,14 +186,12 @@ with st.sidebar:
         st.info("No classifications yet")
 
 @st.cache_resource
-def load_pipeline(model_id):
-    try:
-        tokenizer = AutoTokenizer.from_pretrained(model_id)
-        model = AutoModelForSequenceClassification.from_pretrained(model_id)
-        return pipeline("text-classification", model=model, tokenizer=tokenizer)
-    except Exception as e:
-        st.error(f"Error loading model: {str(e)}")
-        return None
+def load_tokenizer(model_id):
+    return AutoTokenizer.from_pretrained(model_id)
+
+@st.cache_resource
+def load_model(model_id):
+    return AutoModelForSequenceClassification.from_pretrained(model_id)
 
 # Helper functions
 def analyse_message_features(message):
@@ -236,6 +234,10 @@ def get_risk_indicators(message, prediction):
         indicators.append("🔗 URL detected")
     
     return indicators
+def get_pipeline(model_id):
+    tokenizer = load_tokenizer(model_id)
+    model = load_model(model_id)
+    return pipeline("text-classification", model=model, tokenizer=tokenizer)
 
 # Main interface
 col1, col2 = st.columns([2, 1])
@@ -268,7 +270,7 @@ with col1:
         st.rerun()
 
 # Load the selected model
-classifier = load_pipeline(model_info["id"])
+classifier = get_pipeline(model_info["id"])
 
 if analyse_btn and user_sms.strip() and classifier:
     with st.spinner("🤖 Analyzing message..."):
