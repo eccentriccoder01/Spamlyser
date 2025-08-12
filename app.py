@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
+from export_feature import export_results_button
 
 # Model configurations
 MODEL_OPTIONS = {
@@ -746,6 +747,8 @@ with col2:
                 <small style="color: #666;">{item['model']} • {item['timestamp'].strftime('%H:%M')}</small>
             </div>
             """, unsafe_allow_html=True)
+        # Single Model export button
+        export_results_button(st.session_state.classification_history, filename_prefix="spamlyser_singlemodel")
     
     elif analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history:
         # Ensemble analytics
@@ -761,6 +764,8 @@ with col2:
                 <small style="color: #666;">{ENSEMBLE_METHODS[item['method']]['name']} • {item['timestamp'].strftime('%H:%M')}</small>
             </div>
             """, unsafe_allow_html=True)
+        export_results_button(st.session_state.ensemble_history, filename_prefix="spamlyser_ensemble")
+
         
         # Ensemble performance chart
         if len(st.session_state.ensemble_history) > 3:
