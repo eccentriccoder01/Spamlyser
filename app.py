@@ -340,29 +340,46 @@ with st.sidebar:
         else:
             st.info("No ensemble analyses yet")
 
-# Cache only the model loading part without Streamlit elements
+# Cache individual components for better reusability
+@st.cache_resource
+def load_tokenizer(model_id):
+    """Load and return a tokenizer for the specified model"""
+    try:
+        return AutoTokenizer.from_pretrained(model_id)
+    except Exception as e:
+        st.error(f"❌ Error loading tokenizer for {model_id}: {str(e)}")
+        return None
+
+@st.cache_resource
+def load_model(model_id):
+    """Load and return a model with device management"""
+    try:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        return AutoModelForSequenceClassification.from_pretrained(model_id).to(device)
+    except Exception as e:
+        st.error(f"❌ Error loading model {model_id}: {str(e)}")
+        return None
+
 @st.cache_resource
 def _load_model_cached(model_id):
-    """Load a single model without any Streamlit elements"""
+    """Load a complete pipeline with tokenizer and model"""
     try:
-        # Load tokenizer
-        tokenizer = AutoTokenizer.from_pretrained(model_id)
+        tokenizer = load_tokenizer(model_id)
+        model = load_model(model_id)
         
-        # Load model with device management
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        model = AutoModelForSequenceClassification.from_pretrained(model_id).to(device)
-        
-        # Create pipeline
+        if tokenizer is None or model is None:
+            return None
+            
+        # Create pipeline with device management
         pipe = pipeline(
             "text-classification", 
             model=model, 
             tokenizer=tokenizer,
             device=0 if torch.cuda.is_available() else -1
         )
-        
         return pipe
     except Exception as e:
-        print(f"Error loading model {model_id}: {str(e)}")
+        st.error(f"❌ Error creating pipeline for {model_id}: {str(e)}")
         return None
 
 def load_model_if_needed(model_name, _progress_callback=None):
