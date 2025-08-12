@@ -52,7 +52,7 @@ def export_results_button(history, filename_prefix="spamlyser_results"):
             file_name=f"{filename_prefix}_{ts}.csv",
             mime="text/csv"
         )
-    elif export_format == "PDF":
+    else :
         pdf_data = dataframe_to_pdf(df)
         st.download_button(
             label="📥 Download Results PDF",
