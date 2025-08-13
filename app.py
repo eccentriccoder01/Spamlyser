@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
+from export_feature import export_results_button
 
 import time
 import re
@@ -117,7 +118,15 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+
 # --- Session State Initialization ---
+
+#Load sample messages
+sample_df = pd.read_csv("sample_data.csv")
+
+
+# Initialize session state
+
 if 'classification_history' not in st.session_state:
     st.session_state.classification_history = []
 if 'model_stats' not in st.session_state:
@@ -423,12 +432,29 @@ with col1:
         <h3 style="color: #00d4aa; margin: 0;">🔍 {analysis_mode} Analysis</h3>
     </div>
     """, unsafe_allow_html=True)
+
     user_sms = st.text_area(
         "Enter SMS message to analyse",
         height=120,
         placeholder="Type or paste your SMS message here...",
         help="Enter the SMS message you want to classify as spam or ham (legitimate)"
     )
+
+    
+    # Message input
+    selected_message=st.selectbox("Choose a sample message (or type your own below): ",[""]+sample_df["message"].tolist())
+    if selected_message:
+        user_sms=selected_message
+    if not selected_message:
+        user_sms = st.text_area(
+           "Enter SMS message to analyse",
+            height=120,
+            placeholder="Type or paste your SMS message here...",
+            help="Enter the SMS message you want to classify as spam or ham (legitimate)"
+        )
+    
+    # Analysis controls
+
     col_a, col_b, col_c = st.columns([1, 1, 2])
     with col_a:
         analyse_btn = st.button("🔍 Analyse Message", type="primary", use_container_width=True)
@@ -572,6 +598,7 @@ with col2:
         <h3 style="color: #00d4aa; margin: 0;">📈 Analytics</h3>
     </div>
     """, unsafe_allow_html=True)
+
     # ... (analytics code as in your file) ...
 
 # --- Bulk CSV Classification Section (Drag & Drop) ---
@@ -642,6 +669,69 @@ if uploaded_csv is not None:
                 data=csv_buffer.getvalue(),
                 file_name="spam_predictions.csv",
                 mime="text/csv"
+
+    
+    if analysis_mode == "Single Model" and st.session_state.classification_history:
+        # Single model analytics
+        st.markdown("#### 🕒 Recent Classifications")
+        recent = st.session_state.classification_history[-5:]
+        
+        for item in reversed(recent):
+            status_color = "#ff6b6b" if item['prediction'] == "SPAM" else "#4ecdc4"
+            st.markdown(f"""
+            <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin: 5px 0; border-left: 3px solid {status_color};">
+                <strong style="color: {status_color};">{item['prediction']}</strong> ({item['confidence']:.1%})<br>
+                <small style="color: #888;">{item['message']}</small><br>
+                <small style="color: #666;">{item['model']} • {item['timestamp'].strftime('%H:%M')}</small>
+            </div>
+            """, unsafe_allow_html=True)
+        # Single Model export button
+        export_results_button(st.session_state.classification_history, filename_prefix="spamlyser_singlemodel")
+    
+    elif analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history:
+        # Ensemble analytics
+        st.markdown("#### 🕒 Recent Ensemble Results")
+        recent = st.session_state.ensemble_history[-5:]
+        
+        for item in reversed(recent):
+            status_color = "#ff6b6b" if item['prediction'] == "SPAM" else "#4ecdc4"
+            st.markdown(f"""
+            <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin: 5px 0; border-left: 3px solid {status_color};">
+                <strong style="color: {status_color};">{item['prediction']}</strong> ({item['confidence']:.1%})<br>
+                <small style="color: #888;">{item['message']}</small><br>
+                <small style="color: #666;">{ENSEMBLE_METHODS[item['method']]['name']} • {item['timestamp'].strftime('%H:%M')}</small>
+            </div>
+            """, unsafe_allow_html=True)
+        export_results_button(st.session_state.ensemble_history, filename_prefix="spamlyser_ensemble")
+
+        
+        # Ensemble performance chart
+        if len(st.session_state.ensemble_history) > 3:
+            st.markdown("#### 📊 Ensemble Performance")
+            df_ensemble = pd.DataFrame(st.session_state.ensemble_history)
+            
+            # Create performance chart
+            fig = go.Figure()
+            
+            fig.add_trace(go.Scatter(
+                x=list(range(len(df_ensemble))),
+                y=df_ensemble['confidence'],
+                mode='lines+markers',
+                name='Confidence',
+                line=dict(color='#00d4aa', width=2),
+                marker=dict(size=6)
+            ))
+            
+            fig.update_layout(
+                title="Confidence Over Time",
+                xaxis_title="Analysis #",
+                yaxis_title="Confidence",
+                height=250,
+                showlegend=False,
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white')
+
             )
 
 # --- Footer ---
