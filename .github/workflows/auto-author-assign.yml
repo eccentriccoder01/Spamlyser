@@ -2,7 +2,7 @@ name: Auto Author Assign
 
 on:
   pull_request_target:
-    types: [ opened, reopened ]
+    types: [opened, reopened]
 
 permissions:
   pull-requests: write
@@ -13,4 +13,4 @@ jobs:
     steps:
       - uses: toshimaru/auto-author-assign@v2.1.1
         with:
-          repo-token: ${{ secrets.GH_PERSONAL_TOKEN }}
+          repo-token: ${{ github.token }} 
