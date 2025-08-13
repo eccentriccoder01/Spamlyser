@@ -669,8 +669,7 @@ if uploaded_csv is not None:
                 data=csv_buffer.getvalue(),
                 file_name="spam_predictions.csv",
                 mime="text/csv"
-
-    
+            )
     if analysis_mode == "Single Model" and st.session_state.classification_history:
         # Single model analytics
         st.markdown("#### 🕒 Recent Classifications")
