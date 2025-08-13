@@ -146,6 +146,10 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+#Load sample messages
+sample_df = pd.read_csv("sample_data.csv")
+
+
 # Initialize session state
 if 'classification_history' not in st.session_state:
     st.session_state.classification_history = []
@@ -535,12 +539,16 @@ with col1:
     """, unsafe_allow_html=True)
     
     # Message input
-    user_sms = st.text_area(
-        "Enter SMS message to analyse",
-        height=120,
-        placeholder="Type or paste your SMS message here...",
-        help="Enter the SMS message you want to classify as spam or ham (legitimate)"
-    )
+    selected_message=st.selectbox("Choose a sample message (or type your own below): ",[""]+sample_df["message"].tolist())
+    if selected_message:
+        user_sms=selected_message
+    if not selected_message:
+        user_sms = st.text_area(
+           "Enter SMS message to analyse",
+            height=120,
+            placeholder="Type or paste your SMS message here...",
+            help="Enter the SMS message you want to classify as spam or ham (legitimate)"
+        )
     
     # Analysis controls
     col_a, col_b, col_c = st.columns([1, 1, 2])
