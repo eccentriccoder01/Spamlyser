@@ -3,8 +3,64 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
-from export_feature import export_results_button
 
+# Assuming these files exist in the same directory
+from export_feature import export_results_button 
+# from ensemble_classifier_method import EnsembleSpamClassifier, ModelPerformanceTracker, PredictionResult
+# Dummy classes if you don't have the actual files for testing
+try:
+    from ensemble_classifier_method import EnsembleSpamClassifier, ModelPerformanceTracker, PredictionResult
+except ImportError:
+    st.warning("`ensemble_classifier_method.py` not found. Using dummy classes. Please provide the actual file for full functionality.")
+    class PredictionResult:
+        def __init__(self, label, score, spam_probability=None):
+            self.label = label
+            self.score = score
+            self.spam_probability = spam_probability
+    class ModelPerformanceTracker:
+        def __init__(self):
+            self.stats = {}
+        def update_performance(self, model_name, correct): pass
+        def get_all_stats(self): return {}
+        def save_to_file(self, filename): pass
+    class EnsembleSpamClassifier:
+        def __init__(self, performance_tracker):
+            self.performance_tracker = performance_tracker
+            self.default_weights = {"DistilBERT": 0.25, "BERT": 0.25, "RoBERTa": 0.25, "ALBERT": 0.25}
+            self.model_weights = self.default_weights.copy()
+        def update_model_weights(self, weights): self.model_weights.update(weights)
+        def get_model_weights(self): return self.model_weights
+        def get_ensemble_prediction(self, predictions, method):
+            # Dummy implementation for ensemble prediction
+            if not predictions:
+                return {'label': 'UNKNOWN', 'confidence': 0.0, 'spam_probability': 0.0, 'method': method, 'details': 'No model predictions'}
+            
+            # Simple majority voting for dummy
+            spam_votes = sum(1 for p in predictions.values() if p['label'] == 'SPAM')
+            ham_votes = sum(1 for p in predictions.values() if p['label'] == 'HAM')
+            
+            if spam_votes > ham_votes:
+                label = 'SPAM'
+                score = sum(p['score'] for p in predictions.values() if p['label'] == 'SPAM') / spam_votes if spam_votes else 0
+                spam_prob = score # Simplified
+            elif ham_votes > spam_votes:
+                label = 'HAM'
+                score = sum(p['score'] for p in predictions.values() if p['label'] == 'HAM') / ham_votes if ham_votes else 0
+                spam_prob = 1 - score # Simplified
+            else: # Tie or no clear majority, default to HAM for safety or SPAM for caution
+                label = 'HAM' 
+                score = 0.5
+                spam_prob = 0.5
+            return {'label': label, 'confidence': score, 'spam_probability': spam_prob, 'method': method, 'details': f'Dummy {method} applied'}
+        
+        def get_all_predictions(self, predictions):
+            # Dummy method to return results for all ensemble methods
+            dummy_results = {}
+            for method_key in ["majority_voting", "weighted_average", "confidence_weighted", "adaptive_threshold", "meta_ensemble"]:
+                dummy_results[method_key] = self.get_ensemble_prediction(predictions, method_key)
+            return dummy_results
+        
+# Core Python imports
 import time
 import re
 from datetime import datetime
@@ -13,11 +69,9 @@ import numpy as np
 from typing import Dict, List, Tuple, Any, Optional
 from io import StringIO
 import torch
+from collections import defaultdict # Added for easier analytics data aggregation
 
-from ensemble_classifier_method import EnsembleSpamClassifier, ModelPerformanceTracker, PredictionResult
-
-logo_path = str(Path(__file__).resolve().parent / "SpamlyserLogo.png")
-
+# --- Streamlit Page Configuration ---
 st.set_page_config(
     page_title="Spamlyser Pro - Ensemble Edition",
     page_icon="🛡️",
@@ -25,7 +79,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- Custom CSS (keep your original CSS here for styling) ---
+# --- Custom CSS for Styling ---
 st.markdown("""
 <style>
     .main {
@@ -119,14 +173,26 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
+# --- Load Sample Messages (with fallback) ---
+try:
+    sample_df = pd.read_csv("sample_data.csv")
+except FileNotFoundError:
+    st.warning("`sample_data.csv` not found. Creating a dummy DataFrame for sample messages.")
+    sample_df = pd.DataFrame({
+        'message': [
+            "WINNER! You have been selected for a £1000 prize. Call now!",
+            "Hi Mom, just letting you know I'm home safe.",
+            "Free entry to our exclusive lottery! Text WIN to 87879.",
+            "Meeting at 3 PM, don't be late.",
+            "Urgent: Your bank account has been compromised. Verify at https://bit.ly/malicious",
+            "Hey, how are you doing today?",
+            "Congratulations! You've won a new iPhone! Claim your prize here: http://tinyurl.com/prize",
+            "Just confirming our appointment for tomorrow at 10 AM.",
+            "Your subscription is expiring. Renew now to avoid service interruption."
+        ]
+    })
+
 # --- Session State Initialization ---
-
-#Load sample messages
-sample_df = pd.read_csv("sample_data.csv")
-
-
-# Initialize session state
-
 if 'classification_history' not in st.session_state:
     st.session_state.classification_history = []
 if 'model_stats' not in st.session_state:
@@ -139,6 +205,7 @@ if 'ensemble_history' not in st.session_state:
     st.session_state.ensemble_history = []
 if 'loaded_models' not in st.session_state:
     st.session_state.loaded_models = {model_name: None for model_name in ["DistilBERT", "BERT", "RoBERTa", "ALBERT"]}
+
 
 # --- Model Configurations ---
 MODEL_OPTIONS = {
@@ -245,7 +312,7 @@ with st.sidebar:
             </p>
         </div>
         """, unsafe_allow_html=True)
-    else:
+    else: # Ensemble Analysis Mode
         st.markdown("### 🎯 Ensemble Configuration")
         selected_ensemble_method = st.selectbox(
             "Choose Ensemble Method",
@@ -277,9 +344,44 @@ with st.sidebar:
                 st.success("Weights updated!")
         if selected_ensemble_method == "adaptive_threshold":
             st.markdown("#### 🎛️ Threshold Settings")
-            base_threshold = st.slider("Base Threshold", 0.1, 0.9, 0.5, 0.05)
+            base_threshold = st.slider("Base Threshold", 0.1, 0.9, 0.5, 0.05) # This variable is not used further in the provided code logic.
+
     st.markdown("---")
-    # ... (Sidebar stats code - as in your original file) ...
+    
+    # Sidebar Overall Stats
+    st.markdown("### 📊 Overall Statistics")
+    total_single_predictions = sum(st.session_state.model_stats[model]['total'] for model in MODEL_OPTIONS)
+    total_ensemble_predictions = len(st.session_state.ensemble_history)
+    total_predictions_overall = total_single_predictions + total_ensemble_predictions
+
+    st.markdown(f"""
+    <div class="metric-container">
+        <p style="color: #00d4aa; font-size: 1.2rem; margin-bottom: 5px;">Total Predictions</p>
+        <h3 style="color: #eee; margin-top: 0;">{total_predictions_overall}</h3>
+    </div>
+    """, unsafe_allow_html=True)
+
+    overall_spam_count = sum(st.session_state.model_stats[model]['spam'] for model in MODEL_OPTIONS) + \
+                         sum(1 for entry in st.session_state.ensemble_history if entry['prediction'] == 'SPAM')
+    overall_ham_count = sum(st.session_state.model_stats[model]['ham'] for model in MODEL_OPTIONS) + \
+                        sum(1 for entry in st.session_state.ensemble_history if entry['prediction'] == 'HAM')
+    
+    col_spam, col_ham = st.columns(2)
+    with col_spam:
+        st.markdown(f"""
+        <div class="metric-container spam-alert" style="padding: 15px;">
+            <p style="color: #ff6b6b; font-size: 1rem; margin-bottom: 5px;">Spam Count</p>
+            <h4 style="color: #ff6b6b; margin-top: 0;">{overall_spam_count}</h4>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_ham:
+        st.markdown(f"""
+        <div class="metric-container ham-safe" style="padding: 15px;">
+            <p style="color: #6bff6b; font-size: 1rem; margin-bottom: 5px;">Ham Count</p>
+            <h4 style="color: #6bff6b; margin-top: 0;">{overall_ham_count}</h4>
+        </div>
+        """, unsafe_allow_html=True)
+
 
 # --- Model Loading Helpers ---
 @st.cache_resource
@@ -433,35 +535,33 @@ with col1:
     </div>
     """, unsafe_allow_html=True)
 
+    # Message input with sample selector
+    sample_messages = [""] + sample_df["message"].tolist()
+    selected_message = st.selectbox("Choose a sample message (or type your own below): ", sample_messages, key="sample_selector")
+
+    # Set initial value of text_area based on sample_selector or previous user input
+    user_sms_initial_value = selected_message if selected_message else st.session_state.get('user_sms_input_value', "")
     user_sms = st.text_area(
         "Enter SMS message to analyse",
+        value=user_sms_initial_value,
         height=120,
         placeholder="Type or paste your SMS message here...",
-        help="Enter the SMS message you want to classify as spam or ham (legitimate)"
+        help="Enter the SMS message you want to classify as spam or ham (legitimate)",
+        key="user_sms_input"
     )
+    # Store current text_area value in session state for persistence
+    st.session_state.user_sms_input_value = user_sms
 
-    
-    # Message input
-    selected_message=st.selectbox("Choose a sample message (or type your own below): ",[""]+sample_df["message"].tolist())
-    if selected_message:
-        user_sms=selected_message
-    if not selected_message:
-        user_sms = st.text_area(
-           "Enter SMS message to analyse",
-            height=120,
-            placeholder="Type or paste your SMS message here...",
-            help="Enter the SMS message you want to classify as spam or ham (legitimate)"
-        )
-    
     # Analysis controls
-
     col_a, col_b, col_c = st.columns([1, 1, 2])
     with col_a:
         analyse_btn = st.button("🔍 Analyse Message", type="primary", use_container_width=True)
     with col_b:
         clear_btn = st.button("🗑️ Clear", use_container_width=True)
     if clear_btn:
-        st.rerun()
+        st.session_state.user_sms_input_value = "" # Clear text area content
+        st.session_state.sample_selector = "" # Reset sample selection
+        st.rerun() # Rerun to update the UI with cleared values
 
 if analyse_btn and user_sms.strip():
     if analysis_mode == "Single Model":
@@ -476,7 +576,7 @@ if analyse_btn and user_sms.strip():
                 st.session_state.model_stats[selected_model_name]['total'] += 1
                 st.session_state.classification_history.append({
                     'timestamp': datetime.now(),
-                    'message': user_sms[:50] + "..." if len(user_sms) > 50 else user_sms,
+                    'message': user_sms[:100] + "..." if len(user_sms) > 100 else user_sms, # Increased snippet length
                     'prediction': label,
                     'confidence': confidence,
                     'model': selected_model_name
@@ -495,7 +595,7 @@ if analyse_btn and user_sms.strip():
                     </p>
                 </div>
                 """, unsafe_allow_html=True)
-    else:
+    else: # Ensemble Analysis
         with st.spinner("🤖 Loading all models for ensemble analysis..."):
             models = {}
             for model_name in MODEL_OPTIONS:
@@ -509,7 +609,7 @@ if analyse_btn and user_sms.strip():
                     )
                     st.session_state.ensemble_history.append({
                         'timestamp': datetime.now(),
-                        'message': user_sms[:50] + "..." if len(user_sms) > 50 else user_sms,
+                        'message': user_sms[:100] + "..." if len(user_sms) > 100 else user_sms, # Increased snippet length
                         'prediction': ensemble_result['label'],
                         'confidence': ensemble_result['confidence'],
                         'method': selected_ensemble_method,
@@ -571,7 +671,11 @@ if analyse_btn and user_sms.strip():
                             })
                         df_comparison = pd.DataFrame(comparison_data)
                         st.dataframe(df_comparison, use_container_width=True)
-    if 'features' in locals():
+                else:
+                    st.warning("No predictions could be generated from the ensemble models for this message.")
+        else:
+            st.error("No ensemble models were loaded successfully. Cannot perform ensemble analysis.")
+    if 'features' in locals(): # Only show features if analysis was successful
         col_detail1, col_detail2 = st.columns(2)
         with col_detail1:
             st.markdown("#### 📋 Message Features")
@@ -599,7 +703,160 @@ with col2:
     </div>
     """, unsafe_allow_html=True)
 
-    # ... (analytics code as in your file) ...
+    # Analytics Section - Visuals
+    
+    if analysis_mode == "Single Model":
+        st.markdown("#### 📊 Single Model Performance")
+        
+        # Check if there's any data for any model
+        if any(st.session_state.model_stats[model]['total'] > 0 for model in MODEL_OPTIONS):
+            # Pie Chart for Spam/Ham Distribution of the SELECTED model
+            current_model_stats = st.session_state.model_stats[selected_model_name]
+            if current_model_stats['total'] > 0:
+                data_selected_model = pd.DataFrame({
+                    'Label': ['SPAM', 'HAM'],
+                    'Count': [current_model_stats['spam'], current_model_stats['ham']]
+                })
+                fig_pie_single = px.pie(
+                    data_selected_model, 
+                    values='Count', 
+                    names='Label', 
+                    title=f'Spam/Ham Distribution for {selected_model_name}',
+                    color_discrete_map={'SPAM': '#ff6b6b', 'HAM': '#4ecdc4'}
+                )
+                fig_pie_single.update_layout(
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color='white'),
+                    height=300,
+                    margin=dict(t=50, b=0, l=0, r=0) # Adjust margins
+                )
+                st.plotly_chart(fig_pie_single, use_container_width=True)
+            else:
+                st.info(f"No prediction data for {selected_model_name} yet.")
+
+            # Confidence over time for the SELECTED model
+            df_single_history = pd.DataFrame(st.session_state.classification_history)
+            df_selected_model_history = df_single_history[df_single_history['model'] == selected_model_name].copy()
+            if not df_selected_model_history.empty:
+                df_selected_model_history['time_index'] = range(len(df_selected_model_history)) # Use index for X-axis
+                fig_conf_single = px.line(
+                    df_selected_model_history, 
+                    x='time_index', 
+                    y='confidence', 
+                    title=f'Confidence Over Time ({selected_model_name})',
+                    color_discrete_sequence=['#00d4aa']
+                )
+                fig_conf_single.update_layout(
+                    xaxis_title="Prediction #",
+                    yaxis_title="Confidence",
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color='white'),
+                    height=250,
+                    margin=dict(t=50, b=0, l=0, r=0)
+                )
+                st.plotly_chart(fig_conf_single, use_container_width=True)
+            else:
+                st.info(f"No confidence trend history for {selected_model_name} yet.")
+
+            # Overall Model Usage (Bar chart)
+            model_usage_data = []
+            for model, stats in st.session_state.model_stats.items():
+                model_usage_data.append({'Model': model, 'Total Predictions': stats['total']})
+            df_model_usage = pd.DataFrame(model_usage_data)
+
+            if not df_model_usage.empty and df_model_usage['Total Predictions'].sum() > 0:
+                fig_model_usage = px.bar(
+                    df_model_usage,
+                    x='Model',
+                    y='Total Predictions',
+                    title='Total Predictions per Model (All Time)',
+                    color='Model',
+                    color_discrete_map={name: info['color'] for name, info in MODEL_OPTIONS.items()}
+                )
+                fig_model_usage.update_layout(
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color='white'),
+                    height=300,
+                    margin=dict(t=50, b=0, l=0, r=0)
+                )
+                st.plotly_chart(fig_model_usage, use_container_width=True)
+            else:
+                st.info("No overall model usage data yet.")
+        else:
+            st.info("Run an analysis in 'Single Model' mode to see analytics.")
+
+    else: # Ensemble Analysis
+        st.markdown("#### 📊 Ensemble Performance")
+        if st.session_state.ensemble_history:
+            df_ensemble_history = pd.DataFrame(st.session_state.ensemble_history)
+
+            # Pie Chart for Spam/Ham Distribution (Ensemble)
+            ensemble_counts = df_ensemble_history['prediction'].value_counts().reset_index()
+            ensemble_counts.columns = ['Label', 'Count']
+            fig_pie_ensemble = px.pie(
+                ensemble_counts, 
+                values='Count', 
+                names='Label', 
+                title='Ensemble Spam/Ham Distribution',
+                color_discrete_map={'SPAM': '#ff6b6b', 'HAM': '#4ecdc4'}
+            )
+            fig_pie_ensemble.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white'),
+                height=300,
+                margin=dict(t=50, b=0, l=0, r=0)
+            )
+            st.plotly_chart(fig_pie_ensemble, use_container_width=True)
+
+            # Confidence over time (Ensemble)
+            fig_conf_ensemble = px.line(
+                df_ensemble_history, 
+                x=df_ensemble_history.index, # Use index for chronological order
+                y='confidence', 
+                title='Ensemble Confidence Over Time',
+                color_discrete_sequence=['#a855f7']
+            )
+            fig_conf_ensemble.update_layout(
+                xaxis_title="Prediction #",
+                yaxis_title="Confidence",
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white'),
+                height=250,
+                margin=dict(t=50, b=0, l=0, r=0)
+            )
+            st.plotly_chart(fig_conf_ensemble, use_container_width=True)
+
+            # Ensemble Method Usage (Bar chart)
+            method_usage_data = df_ensemble_history['method'].value_counts().reset_index()
+            method_usage_data.columns = ['Method Key', 'Count']
+            # Map method keys to display names
+            method_usage_data['Method'] = method_usage_data['Method Key'].apply(lambda x: ENSEMBLE_METHODS.get(x, {}).get('name', x))
+            
+            fig_method_usage = px.bar(
+                method_usage_data,
+                x='Method',
+                y='Count',
+                title='Ensemble Method Usage',
+                color='Method',
+                color_discrete_map={info['name']: info['color'] for name, info in ENSEMBLE_METHODS.items()}
+            )
+            fig_method_usage.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white'),
+                height=300,
+                margin=dict(t=50, b=0, l=0, r=0)
+            )
+            st.plotly_chart(fig_method_usage, use_container_width=True)
+
+        else:
+            st.info("No ensemble prediction history yet. Run an analysis to see stats.")
+
 
 # --- Bulk CSV Classification Section (Drag & Drop) ---
 st.markdown("---")
@@ -611,55 +868,89 @@ uploaded_csv = st.file_uploader(
     accept_multiple_files=False
 )
 
-def classify_csv(file, ensemble_mode, selected_models):
+def classify_csv(file, ensemble_mode, selected_models_for_bulk, selected_ensemble_method_for_bulk):
     try:
         df = pd.read_csv(file)
         if 'message' not in df.columns:
             st.error("CSV file must contain a 'message' column.")
             return None
+        
+        # Load models once for bulk classification
         if ensemble_mode:
-            models = load_all_models()
-            results = []
-            for message in df['message']:
-                predictions = get_ensemble_predictions(str(message), models)
-                method = selected_ensemble_method if 'selected_ensemble_method' in globals() or 'selected_ensemble_method' in locals() else 'majority_voting'
-                ensemble_result = st.session_state.ensemble_classifier.get_ensemble_prediction(
-                    predictions, method
-                )
-                results.append({
-                    'message': message,
-                    'prediction': ensemble_result['label'],
-                    'confidence': ensemble_result['confidence'],
-                    'spam_probability': ensemble_result['spam_probability']
-                })
-            df_results = pd.DataFrame(results)
+            models_to_use = load_all_models() # Loads all models
         else:
-            model_name = selected_models[0] if isinstance(selected_models, list) and selected_models else selected_models
-            classifier = load_model_if_needed(model_name)
-            results = []
-            for message in df['message']:
-                result = classifier(str(message))[0]
-                results.append({
-                    'message': message,
-                    'prediction': result['label'].upper(),
-                    'confidence': result['score']
-                })
-            df_results = pd.DataFrame(results)
+            # For single model, load only the selected one
+            models_to_use = {selected_models_for_bulk: load_model_if_needed(selected_models_for_bulk)}
+            
+        if not any(models_to_use.values()):
+            st.error("No models loaded for classification. Please check model loading status.")
+            return None
+
+        results = []
+        progress_text = "Operation in progress. Please wait."
+        bulk_progress_bar = st.progress(0, text=progress_text)
+
+        for i, message in enumerate(df['message']):
+            current_progress = (i + 1) / len(df)
+            bulk_progress_bar.progress(current_progress, text=f"Classifying message {i+1}/{len(df)}...")
+
+            if ensemble_mode:
+                predictions = get_ensemble_predictions(str(message), models_to_use)
+                if predictions: # Ensure there are predictions
+                    ensemble_result = st.session_state.ensemble_classifier.get_ensemble_prediction(
+                        predictions, selected_ensemble_method_for_bulk
+                    )
+                    results.append({
+                        'message': message,
+                        'prediction': ensemble_result['label'],
+                        'confidence': ensemble_result['confidence'],
+                        'spam_probability': ensemble_result['spam_probability']
+                    })
+                else:
+                    results.append({ # Fallback for no predictions from ensemble models
+                        'message': message,
+                        'prediction': 'ERROR',
+                        'confidence': 0.0,
+                        'spam_probability': 0.0
+                    })
+            else: # Single Model
+                model_name = selected_models_for_bulk # This will be just one model name
+                classifier = models_to_use.get(model_name)
+                if classifier:
+                    result = classifier(str(message))[0]
+                    results.append({
+                        'message': message,
+                        'prediction': result['label'].upper(),
+                        'confidence': result['score']
+                    })
+                else:
+                    results.append({ # Fallback if single classifier not loaded
+                        'message': message,
+                        'prediction': 'ERROR',
+                        'confidence': 0.0
+                    })
+        bulk_progress_bar.empty() # Clear progress bar after completion
+        df_results = pd.DataFrame(results)
         return df_results
     except Exception as e:
         st.error(f"Error processing CSV: {str(e)}")
         return None
 
-ensemble_mode = analysis_mode == "Ensemble Analysis"
-if ensemble_mode:
-    selected_models = list(MODEL_OPTIONS.keys())
+ensemble_mode_bulk = analysis_mode == "Ensemble Analysis" 
+if ensemble_mode_bulk:
+    selected_models_for_bulk = list(MODEL_OPTIONS.keys())
+    # Ensure selected_ensemble_method is defined if in ensemble mode, fallback to majority_voting
+    selected_ensemble_method_for_bulk = selected_ensemble_method if 'selected_ensemble_method' in locals() else 'majority_voting'
 else:
-    selected_models = [selected_model_name]
+    selected_models_for_bulk = selected_model_name
+    selected_ensemble_method_for_bulk = None # Not applicable for single model
 
 if uploaded_csv is not None:
+    st.info("Initiating bulk classification. This might take a while for large files, depending on model loading status.")
     with st.spinner("Classifying messages..."):
-        df_results = classify_csv(uploaded_csv, ensemble_mode, selected_models)
+        df_results = classify_csv(uploaded_csv, ensemble_mode_bulk, selected_models_for_bulk, selected_ensemble_method_for_bulk)
         if df_results is not None:
+            st.success("Bulk classification complete!")
             st.write("### Classification Results")
             st.dataframe(df_results)
             csv_buffer = StringIO()
@@ -670,68 +961,69 @@ if uploaded_csv is not None:
                 file_name="spam_predictions.csv",
                 mime="text/csv"
             )
-    if analysis_mode == "Single Model" and st.session_state.classification_history:
-        # Single model analytics
-        st.markdown("#### 🕒 Recent Classifications")
-        recent = st.session_state.classification_history[-5:]
-        
-        for item in reversed(recent):
-            status_color = "#ff6b6b" if item['prediction'] == "SPAM" else "#4ecdc4"
-            st.markdown(f"""
-            <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin: 5px 0; border-left: 3px solid {status_color};">
-                <strong style="color: {status_color};">{item['prediction']}</strong> ({item['confidence']:.1%})<br>
-                <small style="color: #888;">{item['message']}</small><br>
-                <small style="color: #666;">{item['model']} • {item['timestamp'].strftime('%H:%M')}</small>
-            </div>
-            """, unsafe_allow_html=True)
-        # Single Model export button
-        export_results_button(st.session_state.classification_history, filename_prefix="spamlyser_singlemodel")
+
+# --- Recent Classifications (Always visible if data exists) ---
+st.markdown("---") # Add a separator
+
+if analysis_mode == "Single Model" and st.session_state.classification_history:
+    st.markdown("#### 🕒 Recent Single Model Classifications")
+    recent = st.session_state.classification_history[-5:] # Show last 5
     
-    elif analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history:
-        # Ensemble analytics
-        st.markdown("#### 🕒 Recent Ensemble Results")
-        recent = st.session_state.ensemble_history[-5:]
-        
-        for item in reversed(recent):
-            status_color = "#ff6b6b" if item['prediction'] == "SPAM" else "#4ecdc4"
-            st.markdown(f"""
-            <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin: 5px 0; border-left: 3px solid {status_color};">
-                <strong style="color: {status_color};">{item['prediction']}</strong> ({item['confidence']:.1%})<br>
-                <small style="color: #888;">{item['message']}</small><br>
-                <small style="color: #666;">{ENSEMBLE_METHODS[item['method']]['name']} • {item['timestamp'].strftime('%H:%M')}</small>
-            </div>
-            """, unsafe_allow_html=True)
-        export_results_button(st.session_state.ensemble_history, filename_prefix="spamlyser_ensemble")
+    for item in reversed(recent):
+        status_color = "#ff6b6b" if item['prediction'] == "SPAM" else "#4ecdc4"
+        st.markdown(f"""
+        <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin: 5px 0; border-left: 3px solid {status_color};">
+            <strong style="color: {status_color};">{item['prediction']}</strong> ({item['confidence']:.1%})<br>
+            <small style="color: #888;">{item['message']}</small><br>
+            <small style="color: #666;">{item['model']} • {item['timestamp'].strftime('%H:%M')}</small>
+        </div>
+        """, unsafe_allow_html=True)
+    # Single Model export button
+    export_results_button(st.session_state.classification_history, filename_prefix="spamlyser_singlemodel")
 
-        
-        # Ensemble performance chart
-        if len(st.session_state.ensemble_history) > 3:
-            st.markdown("#### 📊 Ensemble Performance")
-            df_ensemble = pd.DataFrame(st.session_state.ensemble_history)
-            
-            # Create performance chart
-            fig = go.Figure()
-            
-            fig.add_trace(go.Scatter(
-                x=list(range(len(df_ensemble))),
-                y=df_ensemble['confidence'],
-                mode='lines+markers',
-                name='Confidence',
-                line=dict(color='#00d4aa', width=2),
-                marker=dict(size=6)
-            ))
-            
-            fig.update_layout(
-                title="Confidence Over Time",
-                xaxis_title="Analysis #",
-                yaxis_title="Confidence",
-                height=250,
-                showlegend=False,
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
-                font=dict(color='white')
+elif analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history:
+    st.markdown("#### 🕒 Recent Ensemble Results")
+    recent = st.session_state.ensemble_history[-5:] # Show last 5
+    
+    for item in reversed(recent):
+        status_color = "#ff6b6b" if item['prediction'] == "SPAM" else "#4ecdc4"
+        st.markdown(f"""
+        <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin: 5px 0; border-left: 3px solid {status_color};">
+            <strong style="color: {status_color};">{item['prediction']}</strong> ({item['confidence']:.1%})<br>
+            <small style="color: #888;">{item['message']}</small><br>
+            <small style="color: #666;">{ENSEMBLE_METHODS[item['method']]['name']} • {item['timestamp'].strftime('%H:%M')}</small>
+        </div>
+        """, unsafe_allow_html=True)
+    export_results_button(st.session_state.ensemble_history, filename_prefix="spamlyser_ensemble")
 
-            )
+    # Ensemble performance chart (Only show if enough data for a meaningful chart)
+    if len(st.session_state.ensemble_history) > 3:
+        st.markdown("#### 📊 Ensemble Confidence Trend")
+        df_ensemble = pd.DataFrame(st.session_state.ensemble_history)
+        
+        fig = go.Figure()
+        
+        fig.add_trace(go.Scatter(
+            x=list(range(len(df_ensemble))),
+            y=df_ensemble['confidence'],
+            mode='lines+markers',
+            name='Confidence',
+            line=dict(color='#00d4aa', width=2),
+            marker=dict(size=6)
+        ))
+        
+        fig.update_layout(
+            title="Ensemble Confidence Over Time", # More specific title
+            xaxis_title="Analysis #",
+            yaxis_title="Confidence",
+            height=250,
+            showlegend=False,
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white'),
+            margin=dict(t=50, b=0, l=0, r=0)
+        )
+        st.plotly_chart(fig, use_container_width=True)
 
 # --- Footer ---
 st.markdown("---")
@@ -766,10 +1058,10 @@ if analysis_mode == "Ensemble Analysis":
                 for model_name, stats in tracker_stats.items():
                     if stats:
                         st.markdown(f"#### {MODEL_OPTIONS[model_name]['icon']} {model_name}")
-                        st.write(f"- **Accuracy:** {stats['accuracy']:.2%}")
-                        st.write(f"- **Total Predictions:** {stats['total_predictions']}")
-                        st.write(f"- **Trend:** {stats['performance_trend']}")
-                        st.write(f"- **Current Weight:** {stats['current_weight']:.3f}")
+                        st.write(f"- **Accuracy:** {stats.get('accuracy', 'N/A'):.2%}")
+                        st.write(f"- **Total Predictions:** {stats.get('total_predictions', 0)}")
+                        st.write(f"- **Trend:** {stats.get('performance_trend', 'N/A')}")
+                        st.write(f"- **Current Weight:** {stats.get('current_weight', 0):.3f}")
                         st.markdown("---")
             else:
                 st.info("No performance data available yet. Make some predictions to see stats!")
@@ -800,7 +1092,7 @@ if analysis_mode == "Ensemble Analysis":
             st.success("Weights reset to default values!")
             st.rerun()
 
-# --- Real-time Ensemble Method Performance Comparison ---
+# --- Real-time Ensemble Method Performance Comparison (Always visible if data exists) ---
 if analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history:
     st.markdown("---")
     st.markdown("## 📊 Ensemble Method Performance Comparison")
@@ -836,10 +1128,13 @@ if analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history:
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
             font=dict(color='white'),
-            height=400
+            height=400,
+            margin=dict(t=50, b=0, l=0, r=0)
         )
 
         st.plotly_chart(fig, use_container_width=True)
 
         # Show detailed comparison table
         st.dataframe(df_comparison, use_container_width=True)
+    else:
+        st.info("Not enough data to compare ensemble methods. Try more predictions with different methods.")
