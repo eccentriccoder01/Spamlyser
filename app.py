@@ -432,14 +432,6 @@ with col1:
         <h3 style="color: #00d4aa; margin: 0;">🔍 {analysis_mode} Analysis</h3>
     </div>
     """, unsafe_allow_html=True)
-
-    user_sms = st.text_area(
-        "Enter SMS message to analyse",
-        height=120,
-        placeholder="Type or paste your SMS message here...",
-        help="Enter the SMS message you want to classify as spam or ham (legitimate)",
-        key="main_text_area"
-    )
     
     selected_message = st.selectbox(
         "Choose a sample message (or type your own below): ",
@@ -454,7 +446,7 @@ with col1:
             height=120,
             placeholder="Type or paste your SMS message here...",
             help="Enter the SMS message you want to classify as spam or ham (legitimate)",
-            key="secondary_text_area"
+            key="main_text_area"
         )
     
     # Analysis controls
