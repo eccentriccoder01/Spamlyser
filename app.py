@@ -437,20 +437,24 @@ with col1:
         "Enter SMS message to analyse",
         height=120,
         placeholder="Type or paste your SMS message here...",
-        help="Enter the SMS message you want to classify as spam or ham (legitimate)"
+        help="Enter the SMS message you want to classify as spam or ham (legitimate)",
+        key="main_text_area"
     )
-
     
-    # Message input
-    selected_message=st.selectbox("Choose a sample message (or type your own below): ",[""]+sample_df["message"].tolist())
+    selected_message = st.selectbox(
+        "Choose a sample message (or type your own below): ",
+        [""] + sample_df["message"].tolist()
+    )
+    
     if selected_message:
-        user_sms=selected_message
+        user_sms = selected_message
     if not selected_message:
         user_sms = st.text_area(
-           "Enter SMS message to analyse",
+            "Enter SMS message to analyse",
             height=120,
             placeholder="Type or paste your SMS message here...",
-            help="Enter the SMS message you want to classify as spam or ham (legitimate)"
+            help="Enter the SMS message you want to classify as spam or ham (legitimate)",
+            key="secondary_text_area"
         )
     
     # Analysis controls
