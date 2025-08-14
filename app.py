@@ -551,7 +551,7 @@ with col1:
     )
     # Store current text_area value in session state for persistence
     st.session_state.user_sms_input_value = user_sms
-
+    
     # Analysis controls
     col_a, col_b, col_c = st.columns([1, 1, 2])
     with col_a:
