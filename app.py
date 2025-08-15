@@ -1165,6 +1165,11 @@ with col1:
 
     # Message input with sample selector
     sample_messages = [""] + sample_df["message"].tolist()
+# Handle sample_selector clearing before widget creation
+if st.session_state.get('__clear_sample_selector_flag'):
+    st.session_state.pop('sample_selector', None)
+    st.session_state['__clear_sample_selector_flag'] = False
+
     selected_message = st.selectbox("Choose a sample message (or type your own below): ", sample_messages, key="sample_selector")
 
     # Set initial value of text_area based on sample_selector or previous user input
@@ -1185,7 +1190,12 @@ with col1:
     with col_a:
         analyse_btn = st.button("🔍 Analyse Message", type="primary", use_container_width=True)
     with col_b:
-        clear_btn = st.button("🗑️ Clear", use_container_width=True)
+def _request_clear():
+    st.session_state.user_sms_input_value = ''
+    st.session_state['__clear_sample_selector_flag'] = True
+    st.rerun()
+
+st.button('🗑️ Clear', use_container_width=True, on_click=_request_clear)
     if clear_btn:
         st.session_state.user_sms_input_value = "" # Clear text area content
         st.session_state.sample_selector = "" # Reset sample selection
