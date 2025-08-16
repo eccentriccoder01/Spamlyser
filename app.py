@@ -197,7 +197,6 @@ if 'classification_history' not in st.session_state:
     st.session_state.classification_history = []
 if 'model_stats' not in st.session_state:
     st.session_state.model_stats = {model: {'spam': 0, 'ham': 0, 'total': 0} for model in ["DistilBERT", "BERT", "RoBERTa", "ALBERT"]}
-<<<
 # Persisted theme default
 if 'theme_choice' not in st.session_state:
     st.session_state.theme_choice = "Dark"
