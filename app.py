@@ -522,7 +522,7 @@ def get_risk_indicators(message, prediction):
     if re.search(r'http[s]?://', message):
         indicators.append("🔗 URL detected")
     return indicators
-<<<
+
 
 def get_pipeline(model_id):
     tokenizer = load_tokenizer(model_id)
