@@ -2,7 +2,7 @@
 streamlit>=1.30.0
 pandas>=1.5.0,<3.0.0
 plotly>=5.16.0,<6.0.0
-transformers>=4.38.0,<5.0.0
+transformers==4.35.2
 torch>=2.1.0,<3.0.0
 
 # Data Processing
