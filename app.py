@@ -1183,12 +1183,12 @@ if analyse_btn and not user_sms.strip():
     st.warning("⚠️ Please enter an SMS message to analyse.")
 
         # Reset to default weights
-        if st.button("🔄 Reset to Default Weights"):
-            st.session_state.ensemble_classifier.update_model_weights(
-                st.session_state.ensemble_classifier.default_weights
-            )
-            st.success("Weights reset to default values!")
-            st.rerun()
+if st.button("🔄 Reset to Default Weights"):
+    st.session_state.ensemble_classifier.update_model_weights(
+        st.session_state.ensemble_classifier.default_weights
+    )
+    st.success("Weights reset to default values!")
+    st.rerun()
 
 # --- Real-time Ensemble Method Performance Comparison (Always visible if data exists) ---
 if analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history:
