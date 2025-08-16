@@ -208,7 +208,7 @@ if 'ensemble_classifier' not in st.session_state:
 if 'ensemble_history' not in st.session_state:
     st.session_state.ensemble_history = []
 if 'loaded_models' not in st.session_state:
-    st.session_state.loaded_models = {model_name: None for model_name in ["DistilBERT", "BERT", "RoBERTa", "ALBERT"]
+    st.session_state.loaded_models = {model_name: None for model_name in ["DistilBERT", "BERT", "RoBERTa", "ALBERT"]}
 
 
 # --- Model Configurations ---
