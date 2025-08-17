@@ -127,6 +127,41 @@ For a detailed walkthrough of Spamlyser's features and how to use them, check ou
    streamlit run app.py
    ```
 
+## 🚀 Example Usage
+
+Once the app is running, it will open in your browser at  
+👉 [http://localhost:8501](http://localhost:8501)
+
+Now you can try Spamlyser in a few different ways:
+
+---
+
+### 🔹 (i). Analyze a sample message  
+- Use the **dropdown menu** in the app.  
+- Pick any example message (e.g., “You won a free prize 🎉”).  
+- Spamlyser will instantly tell you if it’s **Spam** or **Not Spam**.  
+
+---
+
+### 🔹 (ii). Try your own message  
+- Find the text box that says *“Enter your message here”*.  
+- Type any message you like (e.g., “Hey, are we meeting later?”).  
+- Hit **Analyze** → see the live result right away!  
+
+---
+
+### 🔹 (iii). Test with the sample dataset  
+Want to analyze multiple messages at once?  
+- Click **Browse files** in the app.  
+- Select the file: `sample_data.csv` (already included in the project folder).  
+- Spamlyser will process the entire file and show which ones are spam vs. safe.  
+
+📊 You’ll see results in a neat table and charts — super useful for quick testing!  
+
+---
+
+✨ That’s it — you’ve successfully used Spamlyser!
+
 ---
 
 ## Issue Creation ✴
