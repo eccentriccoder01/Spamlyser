@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
+from datetime import datetime, timedelta
 
 # Assuming these files exist in the same directory
 from export_feature import export_results_button 
@@ -1496,73 +1497,92 @@ uploaded_csv = st.file_uploader(
     accept_multiple_files=False
 )
 
-def classify_csv(file, ensemble_mode, selected_models_for_bulk, selected_ensemble_method_for_bulk):
+def classify_csv(file, ensemble_mode, selected_models_for_bulk, selected_ensemble_method_for_bulk, batch_size=100):
     try:
         df = pd.read_csv(file)
         if 'message' not in df.columns:
             st.error("CSV file must contain a 'message' column.")
             return None
-        
-        # Load models once for bulk classification
+
+        total_messages = len(df)
+        results = []
+
+        # ✅ Load models only once
         if ensemble_mode:
-            models_to_use = load_all_models() # Loads all models
+            models_to_use = load_all_models()
         else:
-            # For single model, load only the selected one
             models_to_use = {selected_models_for_bulk: load_model_if_needed(selected_models_for_bulk)}
-            
+
         if not any(models_to_use.values()):
             st.error("No models loaded for classification. Please check model loading status.")
             return None
 
-        results = []
-        progress_text = "Operation in progress. Please wait."
-        bulk_progress_bar = st.progress(0, text=progress_text)
+        # ✅ Progress + ETA text
+        progress_bar = st.progress(0)
+        status_text = st.empty()
 
-        for i, message in enumerate(df['message']):
-            current_progress = (i + 1) / len(df)
-            bulk_progress_bar.progress(current_progress, text=f"Classifying message {i+1}/{len(df)}...")
+        start_time = time.time()
 
-            if ensemble_mode:
-                predictions = get_ensemble_predictions(str(message), models_to_use)
-                if predictions: # Ensure there are predictions
-                    ensemble_result = st.session_state.ensemble_classifier.get_ensemble_prediction(
-                        predictions, selected_ensemble_method_for_bulk
-                    )
-                    results.append({
-                        'message': message,
-                        'prediction': ensemble_result['label'],
-                        'confidence': ensemble_result['confidence'],
-                        'spam_probability': ensemble_result['spam_probability']
-                    })
+        # Process in batches
+        for start in range(0, total_messages, batch_size):
+            end = min(start + batch_size, total_messages)
+            batch_messages = df['message'][start:end].astype(str).tolist()
+
+            try:
+                if ensemble_mode:
+                    # batch predictions from multiple models
+                    batch_results = []
+                    for msg in batch_messages:
+                        predictions = get_ensemble_predictions(msg, models_to_use)
+                        if predictions:
+                            ensemble_result = st.session_state.ensemble_classifier.get_ensemble_prediction(
+                                predictions, selected_ensemble_method_for_bulk
+                            )
+                            batch_results.append({
+                                'message': msg,
+                                'prediction': ensemble_result['label'],
+                                'confidence': ensemble_result['confidence'],
+                                'spam_probability': ensemble_result['spam_probability']
+                            })
+                        else:
+                            batch_results.append({'message': msg, 'prediction': 'ERROR', 'confidence': 0.0, 'spam_probability': 0.0})
                 else:
-                    results.append({ # Fallback for no predictions from ensemble models
-                        'message': message,
-                        'prediction': 'ERROR',
-                        'confidence': 0.0,
-                        'spam_probability': 0.0
-                    })
-            else: # Single Model
-                model_name = selected_models_for_bulk # This will be just one model name
-                classifier = models_to_use.get(model_name)
-                if classifier:
-                    result = classifier(str(message))[0]
-                    results.append({
-                        'message': message,
-                        'prediction': result['label'].upper(),
-                        'confidence': result['score']
-                    })
-                else:
-                    results.append({ # Fallback if single classifier not loaded
-                        'message': message,
-                        'prediction': 'ERROR',
-                        'confidence': 0.0
-                    })
-        bulk_progress_bar.empty() # Clear progress bar after completion
-        df_results = pd.DataFrame(results)
-        return df_results
+                    classifier = models_to_use.get(selected_models_for_bulk)
+                    if classifier:
+                        preds = classifier(batch_messages)  # 🚀 batch inference
+                        batch_results = [
+                            {'message': msg, 'prediction': p['label'].upper(), 'confidence': p['score']}
+                            for msg, p in zip(batch_messages, preds)
+                        ]
+                    else:
+                        batch_results = [{'message': msg, 'prediction': 'ERROR', 'confidence': 0.0} for msg in batch_messages]
+
+                results.extend(batch_results)
+
+            except Exception as batch_err:
+                results.extend([{'message': msg, 'prediction': 'ERROR', 'confidence': 0.0} for msg in batch_messages])
+
+            # ✅ Progress update with ETA
+            processed = end
+            elapsed = time.time() - start_time
+            rate = processed / elapsed
+            remaining = total_messages - processed
+            eta = remaining / rate if rate > 0 else 0
+
+            progress_bar.progress(processed / total_messages)
+            status_text.text(
+                f"Processing message {processed}/{total_messages} - ETA: {int(eta//60)}m {int(eta%60)}s"
+            )
+
+        progress_bar.empty()
+        status_text.text("✅ Classification complete!")
+
+        return pd.DataFrame(results)
+
     except Exception as e:
         st.error(f"Error processing CSV: {str(e)}")
         return None
+
 
 ensemble_mode_bulk = analysis_mode == "Ensemble Analysis" 
 if ensemble_mode_bulk:
