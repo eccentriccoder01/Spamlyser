@@ -283,25 +283,29 @@ st.markdown("""
 
 # --- Sidebar ---
 with st.sidebar:
+
+    # --- Dark Mode Toggle ---
+    if 'dark_mode' not in st.session_state:
+        st.session_state.dark_mode = False
     st.markdown("""
     <div style="text-align: center; padding: 20px; background: linear-gradient(145deg, #1e1e1e, #2a2a2a); border-radius: 15px; margin-bottom: 20px;">
         <h3 style="color: #00d4aa; margin: 0;">Analysis Mode</h3>
     </div>
     """, unsafe_allow_html=True)
-    
+    st.session_state.dark_mode = st.checkbox("🌙 Enable Dark Mode", value=st.session_state.dark_mode, help="Toggle dark mode for the app")
+
     analysis_mode = st.radio(
         "Choose Analysis Mode",
         ["Single Model", "Ensemble Analysis"],
         help="Single Model: Use one model at a time\nEnsemble: Use all models together"
     )
-    
+
     if analysis_mode == "Single Model":
         selected_model_name = st.selectbox(
             "Choose AI Model",
             list(MODEL_OPTIONS.keys()),
             format_func=lambda x: f"{MODEL_OPTIONS[x]['icon']} {x} - {MODEL_OPTIONS[x]['description']}"
         )
-        
         model_info = MODEL_OPTIONS[selected_model_name]
         st.markdown(f"""
         <div class="model-info">
@@ -345,10 +349,10 @@ with st.sidebar:
                 st.success("Weights updated!")
         if selected_ensemble_method == "adaptive_threshold":
             st.markdown("#### 🎛️ Threshold Settings")
-            base_threshold = st.slider("Base Threshold", 0.1, 0.9, 0.5, 0.05) # This variable is not used further in the provided code logic.
+            base_threshold = st.slider("Base Threshold", 0.1, 0.9, 0.5, 0.05)
 
     st.markdown("---")
-    
+
     # Sidebar Overall Stats
     st.markdown("### 📊 Overall Statistics")
     total_single_predictions = sum(st.session_state.model_stats[model]['total'] for model in MODEL_OPTIONS)
@@ -366,7 +370,6 @@ with st.sidebar:
                          sum(1 for entry in st.session_state.ensemble_history if entry['prediction'] == 'SPAM')
     overall_ham_count = sum(st.session_state.model_stats[model]['ham'] for model in MODEL_OPTIONS) + \
                         sum(1 for entry in st.session_state.ensemble_history if entry['prediction'] == 'HAM')
-    
     col_spam, col_ham = st.columns(2)
     with col_spam:
         st.markdown(f"""
@@ -393,90 +396,123 @@ def load_tokenizer(model_id):
         st.error(f"❌ Error loading tokenizer for {model_id}: {str(e)}")
         return None
 
-@st.cache_resource
-def load_model(model_id):
-    try:
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        return AutoModelForSequenceClassification.from_pretrained(model_id).to(device)
-    except Exception as e:
-        st.error(f"❌ Error loading model {model_id}: {str(e)}")
-        return None
-
-@st.cache_resource
-def _load_model_cached(model_id):
-    try:
-        tokenizer = load_tokenizer(model_id)
-        model = load_model(model_id)
-        if tokenizer is None or model is None:
-            return None
-        pipe = pipeline(
-            "text-classification", 
-            model=model, 
-            tokenizer=tokenizer,
-            device=0 if torch.cuda.is_available() else -1
-        )
-        return pipe
-    except Exception as e:
-        st.error(f"❌ Error creating pipeline for {model_id}: {str(e)}")
-        return None
-
-def load_model_if_needed(model_name, _progress_callback=None):
-    if st.session_state.loaded_models[model_name] is None:
-        model_id = MODEL_OPTIONS[model_name]["id"]
-        status_container = st.empty()
-        def update_status(message):
-            if status_container:
-                status_container.info(message)
-            if _progress_callback:
-                _progress_callback(message)
-        try:
-            update_status(f"Starting to load {model_name}...")
-            update_status(f"🔄 Loading tokenizer for {model_name}...")
-            update_status(f"🤖 Loading {model_name} model... (This may take a few minutes)")
-            model = _load_model_cached(model_id)
-            if model is not None:
-                update_status(f"✅ Successfully loaded {model_name}")
-                st.session_state.loaded_models[model_name] = model
-            else:
-                update_status(f"❌ Failed to load {model_name}")
-                return None
-            time.sleep(1)
-        except Exception as e:
-            update_status(f"❌ Error loading {model_name}: {str(e)}")
-            return None
-        finally:
-            time.sleep(1)
-            status_container.empty()
-    return st.session_state.loaded_models[model_name]
-
-def get_loaded_models():
-    models = {}
-    progress_bar = st.progress(0)
-    status_text = st.empty()
-    total_models = len(MODEL_OPTIONS)
-    def update_progress(progress, message=""):
-        progress_bar.progress(progress)
-        if message:
-            status_text.info(message)
-    for i, (name, model_info) in enumerate(MODEL_OPTIONS.items()):
-        update_progress(
-            (i / total_models) * 0.9,
-            f"Loading {name} model ({i+1}/{total_models})..."
-        )
-        models[name] = load_model_if_needed(
-            name, 
-            _progress_callback=lambda msg: update_progress(
-                (i / total_models) * 0.9, 
-                f"{name}: {msg}"
-            )
-        )
-    update_progress(1.0, "✅ All models loaded successfully!")
-    time.sleep(1)
-    progress_bar.empty()
-    status_text.empty()
-    return models
-
-load_all_models = get_loaded_models
+# --- Dynamic CSS for Dark Mode ---
+if st.session_state.get('dark_mode', False):
+    st.markdown("""
+    <style>
+        .main, .stApp {
+            background: #181f2f;
+        }
+        .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison {
+            background: #232a3d;
+            border-radius: 16px;
+            border: 1px solid #324a7c;
+            color: #f8fafc;
+            box-shadow: 0 2px 12px rgba(44, 62, 80, 0.08);
+        }
+        .spam-alert {
+            background: #2a3350;
+            border: 2px solid #ff4444;
+            color: #ff6b6b;
+        }
+        .ham-safe {
+            background: #233d2a;
+            border: 2px solid #44ff44;
+            color: #6bff6b;
+        }
+        .analysis-header {
+            background: #232a3d;
+            border-left: 4px solid #324a7c;
+            color: #f8fafc;
+        }
+        /* Input fields and dropdowns */
+        .stTextInput>div>input, .stTextArea>div>textarea, .stSelectbox>div>div>div {
+            background: #232a3d !important;
+            color: #f8fafc !important;
+            border: 1px solid #324a7c !important;
+        }
+        .stTextInput>div>input::placeholder, .stTextArea>div>textarea::placeholder {
+            color: #b3c7f7 !important;
+        }
+        /* Button styling */
+        .stButton>button {
+            background: #324a7c;
+            color: #f8fafc;
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+        }
+        .stButton>button:hover {
+            background: #415a9c;
+            color: #fff;
+        }
+        /* Label and text color for clarity */
+        label, .stMarkdown, .stRadio>div>label, .stSelectbox label, .stTextInput label {
+            color: #f8fafc !important;
+        }
+        /* Scrollbar styling for dark mode */
+        ::-webkit-scrollbar {
+            width: 8px;
+            background: #232a3d;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #324a7c;
+            border-radius: 8px;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+else:
+    st.markdown("""
+    <style>
+        .main, .stApp {
+            background: #f4f8ff;
+        }
+        .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison {
+            background: #e3eafc;
+            border-radius: 16px;
+            border: 1px solid #b3c7f7;
+            color: #232a3d;
+            box-shadow: 0 2px 12px rgba(44, 62, 80, 0.06);
+        }
+        .spam-alert {
+            background: #ffe3e3;
+            border: 2px solid #ff4444;
+            color: #ff6b6b;
+        }
+        .ham-safe {
+            background: #e3ffe3;
+            border: 2px solid #44ff44;
+            color: #6bff6b;
+        }
+        .analysis-header {
+            background: #e3eafc;
+            border-left: 4px solid #324a7c;
+            color: #232a3d;
+        }
+        /* Scrollbar styling for light mode */
+        ::-webkit-scrollbar {
+            width: 8px;
+            background: #e3eafc;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #324a7c;
+            border-radius: 8px;
+        }
+        /* Button styling */
+        .stButton>button {
+            background: #324a7c;
+            color: #e3eafc;
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+        }
+        .stButton>button:hover {
+            background: #415a9c;
+            color: #fff;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+    # ...existing code...
 
 # --- Helper Functions ---
 def analyse_message_features(message):
@@ -492,7 +528,6 @@ def analyse_message_features(message):
         'question_marks': message.count('?')
     }
     return features
-# Add this section to your app.py file after the main analysis section
 # This creates a comprehensive dashboard using your existing session state data
 
 def render_spamlyser_dashboard():
@@ -590,7 +625,7 @@ def render_overview_dashboard():
         st.markdown(f"""
         <div class="metric-container">
             <h2 style="color: #a855f7; margin: 0; font-size: 2.2rem;">📱 {total_messages}</h2>
-            <p style="color: #ccc; margin: 5px 0;">Total Analyzed</p>
+            C:/Users/kaurk/Spamlyser/.venv/Scripts/python.exe -m streamlit run app.py            <p style="color: #ccc; margin: 5px 0;">Total Analyzed</p>
             <small style="color: #888;">Messages processed</small>
         </div>
         """, unsafe_allow_html=True)
