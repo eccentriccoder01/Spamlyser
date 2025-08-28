@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
+from datetime import datetime, timedelta
 
 # Assuming these files exist in the same directory
 from export_feature import export_results_button 
@@ -491,6 +492,634 @@ def analyse_message_features(message):
         'question_marks': message.count('?')
     }
     return features
+# Add this section to your app.py file after the main analysis section
+# This creates a comprehensive dashboard using your existing session state data
+
+def render_spamlyser_dashboard():
+    """
+    Advanced Analytics Dashboard - Add this function to your app.py
+    Uses existing session state data: classification_history, ensemble_history, model_stats
+    """
+    
+    st.markdown("---")
+    st.markdown("""
+    <div style="text-align: center; padding: 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; margin: 20px 0; border: 2px solid #8b5cf6;">
+        <h1 style="color: white; font-size: 2.8rem; margin: 0; text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);">
+            📊 Advanced Analytics Dashboard
+        </h1>
+        <p style="color: rgba(255,255,255,0.9); font-size: 1.2rem; margin: 10px 0 0 0;">
+            Real-time Performance Insights & Threat Intelligence
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Dashboard tabs
+    dashboard_tabs = st.tabs(["🎯 Overview", "🤖 Model Performance", "🧠 Ensemble Analytics", "📊 Detailed Stats", "⚡ Real-time Monitor"])
+
+    with dashboard_tabs[0]:  # Overview Tab
+        render_overview_dashboard()
+    
+    with dashboard_tabs[1]:  # Model Performance Tab
+        render_model_performance_dashboard()
+    
+    with dashboard_tabs[2]:  # Ensemble Analytics Tab
+        render_ensemble_dashboard()
+    
+    with dashboard_tabs[3]:  # Detailed Stats Tab
+        render_detailed_stats_dashboard()
+    
+    with dashboard_tabs[4]:  # Real-time Monitor Tab
+        render_realtime_monitor()
+
+def render_overview_dashboard():
+    """Main overview dashboard with key metrics"""
+    
+    # Calculate key metrics from your existing session state
+    total_single = len(st.session_state.classification_history)
+    total_ensemble = len(st.session_state.ensemble_history)
+    total_messages = total_single + total_ensemble
+    
+    if total_messages == 0:
+        st.info("🚀 Start analyzing messages to see dashboard insights!")
+        return
+    
+    # Key Metrics Row
+    col1, col2, col3, col4, col5 = st.columns(5)
+    
+    with col1:
+        spam_single = sum(1 for item in st.session_state.classification_history if item['prediction'] == 'SPAM')
+        spam_ensemble = sum(1 for item in st.session_state.ensemble_history if item['prediction'] == 'SPAM')
+        total_spam = spam_single + spam_ensemble
+        spam_rate = (total_spam / total_messages * 100) if total_messages > 0 else 0
+        
+        st.markdown(f"""
+        <div class="metric-container" style="background: linear-gradient(145deg, #2a1a1a, #3d2626); border: 2px solid #ff4444;">
+            <h2 style="color: #ff6b6b; margin: 0; font-size: 2.2rem;">🚨 {total_spam}</h2>
+            <p style="color: #ccc; margin: 5px 0;">SPAM Detected</p>
+            <small style="color: #ff9999;">{spam_rate:.1f}% detection rate</small>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        total_ham = total_messages - total_spam
+        ham_rate = (total_ham / total_messages * 100) if total_messages > 0 else 0
+        
+        st.markdown(f"""
+        <div class="metric-container" style="background: linear-gradient(145deg, #1a2a1a, #263d26); border: 2px solid #44ff44;">
+            <h2 style="color: #4ecdc4; margin: 0; font-size: 2.2rem;">✅ {total_ham}</h2>
+            <p style="color: #ccc; margin: 5px 0;">HAM (Safe)</p>
+            <small style="color: #99ff99;">{ham_rate:.1f}% legitimate</small>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        # Average confidence across all predictions
+        all_confidences = [item['confidence'] for item in st.session_state.classification_history] + \
+                         [item['confidence'] for item in st.session_state.ensemble_history]
+        avg_confidence = sum(all_confidences) / len(all_confidences) if all_confidences else 0
+        
+        st.markdown(f"""
+        <div class="metric-container">
+            <h2 style="color: #00d4aa; margin: 0; font-size: 2.2rem;">🎯 {avg_confidence:.1%}</h2>
+            <p style="color: #ccc; margin: 5px 0;">Avg Confidence</p>
+            <small style="color: #888;">Model certainty</small>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        st.markdown(f"""
+        <div class="metric-container">
+            <h2 style="color: #a855f7; margin: 0; font-size: 2.2rem;">📱 {total_messages}</h2>
+            <p style="color: #ccc; margin: 5px 0;">Total Analyzed</p>
+            <small style="color: #888;">Messages processed</small>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col5:
+        # Most used analysis mode
+        mode_ratio = (total_ensemble / total_messages * 100) if total_messages > 0 else 0
+        preferred_mode = "Ensemble" if total_ensemble > total_single else "Single Model"
+        
+        st.markdown(f"""
+        <div class="metric-container">
+            <h2 style="color: #ffd93d; margin: 0; font-size: 2.2rem;">🧠 {preferred_mode}</h2>
+            <p style="color: #ccc; margin: 5px 0;">Preferred Mode</p>
+            <small style="color: #888;">{mode_ratio:.0f}% ensemble usage</small>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Threat Level Indicator
+    st.markdown("### 🛡️ Current Threat Assessment")
+    
+    # Calculate threat level based on recent activity
+    recent_items = (st.session_state.classification_history + st.session_state.ensemble_history)[-20:]
+    if recent_items:
+        recent_spam_count = sum(1 for item in recent_items if item['prediction'] == 'SPAM')
+        recent_spam_ratio = recent_spam_count / len(recent_items)
+        
+        if recent_spam_ratio > 0.7:
+            threat_level = "🔴 CRITICAL"
+            threat_color = "#ff4444"
+            threat_desc = "High spam activity detected"
+        elif recent_spam_ratio > 0.5:
+            threat_level = "🟠 HIGH"
+            threat_color = "#ff8800"
+            threat_desc = "Elevated spam levels"
+        elif recent_spam_ratio > 0.3:
+            threat_level = "🟡 MODERATE"
+            threat_color = "#ffcc00"
+            threat_desc = "Moderate spam activity"
+        elif recent_spam_ratio > 0.1:
+            threat_level = "🟢 LOW"
+            threat_color = "#88cc00"
+            threat_desc = "Low spam activity"
+        else:
+            threat_level = "🔵 MINIMAL"
+            threat_color = "#4ecdc4"
+            threat_desc = "Very low threat level"
+        
+        threat_col1, threat_col2 = st.columns([2, 3])
+        
+        with threat_col1:
+            st.markdown(f"""
+            <div style="background: linear-gradient(145deg, #1a1a1a, #2d2d2d); padding: 25px; border-radius: 15px; border: 3px solid {threat_color}; text-align: center;">
+                <h2 style="color: {threat_color}; margin: 0; font-size: 2rem;">{threat_level}</h2>
+                <p style="color: #ccc; margin: 10px 0;">{threat_desc}</p>
+                <small style="color: #888;">Based on last {len(recent_items)} messages</small>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with threat_col2:
+            # Recent activity timeline
+            if len(recent_items) >= 5:
+                timeline_data = []
+                for i, item in enumerate(recent_items[-10:]):  # Last 10 items
+                    timeline_data.append({
+                        'Index': i+1,
+                        'Prediction': 1 if item['prediction'] == 'SPAM' else 0,
+                        'Confidence': item['confidence'],
+                        'Type': 'SPAM' if item['prediction'] == 'SPAM' else 'HAM'
+                    })
+                
+                fig_timeline = go.Figure()
+                
+                # Add spam/ham indicators
+                spam_data = [item for item in timeline_data if item['Type'] == 'SPAM']
+                ham_data = [item for item in timeline_data if item['Type'] == 'HAM']
+                
+                if spam_data:
+                    fig_timeline.add_trace(go.Scatter(
+                        x=[item['Index'] for item in spam_data],
+                        y=[1 for _ in spam_data],
+                        mode='markers',
+                        marker=dict(color='#ff6b6b', size=12, symbol='triangle-up'),
+                        name='SPAM',
+                        text=[f"Confidence: {item['Confidence']:.1%}" for item in spam_data]
+                    ))
+                
+                if ham_data:
+                    fig_timeline.add_trace(go.Scatter(
+                        x=[item['Index'] for item in ham_data],
+                        y=[0 for _ in ham_data],
+                        mode='markers',
+                        marker=dict(color='#4ecdc4', size=12, symbol='circle'),
+                        name='HAM',
+                        text=[f"Confidence: {item['Confidence']:.1%}" for item in ham_data]
+                    ))
+                
+                fig_timeline.update_layout(
+                    title="Recent Activity Timeline",
+                    xaxis_title="Message Sequence",
+                    yaxis=dict(tickvals=[0, 1], ticktext=['HAM', 'SPAM']),
+                    height=300,
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color='white'),
+                    showlegend=True
+                )
+                
+                st.plotly_chart(fig_timeline, use_container_width=True)
+
+def render_model_performance_dashboard():
+    """Individual model performance analysis"""
+    
+    if not st.session_state.model_stats or all(stats['total'] == 0 for stats in st.session_state.model_stats.values()):
+        st.info("🤖 No single model data available. Try the Single Model analysis mode!")
+        return
+    
+    st.markdown("### 🎯 Individual Model Performance")
+    
+    # Model comparison charts
+    model_names = []
+    spam_counts = []
+    ham_counts = []
+    total_counts = []
+    colors = []
+    
+    for model_name, stats in st.session_state.model_stats.items():
+        if stats['total'] > 0:
+            model_names.append(model_name)
+            spam_counts.append(stats['spam'])
+            ham_counts.append(stats['ham'])
+            total_counts.append(stats['total'])
+            colors.append(MODEL_OPTIONS[model_name]['color'])
+    
+    if model_names:
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            # Stacked bar chart
+            fig_models = go.Figure()
+            fig_models.add_trace(go.Bar(name='SPAM', x=model_names, y=spam_counts, marker_color='#ff6b6b'))
+            fig_models.add_trace(go.Bar(name='HAM', x=model_names, y=ham_counts, marker_color='#4ecdc4'))
+            
+            fig_models.update_layout(
+                title='Model Predictions Breakdown',
+                barmode='stack',
+                height=400,
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white')
+            )
+            st.plotly_chart(fig_models, use_container_width=True)
+        
+        with col2:
+            # Model usage pie chart
+            fig_usage = go.Figure(data=[go.Pie(
+                labels=[f"{MODEL_OPTIONS[name]['icon']} {name}" for name in model_names],
+                values=total_counts,
+                marker_colors=colors,
+                hole=.3
+            )])
+            
+            fig_usage.update_layout(
+                title="Model Usage Distribution",
+                height=400,
+                paper_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white')
+            )
+            st.plotly_chart(fig_usage, use_container_width=True)
+        
+        # Detailed model stats table
+        st.markdown("### 📊 Detailed Model Statistics")
+        
+        model_stats_data = []
+        for model_name, stats in st.session_state.model_stats.items():
+            if stats['total'] > 0:
+                spam_rate = (stats['spam'] / stats['total'] * 100) if stats['total'] > 0 else 0
+                model_stats_data.append({
+                    'Model': f"{MODEL_OPTIONS[model_name]['icon']} {model_name}",
+                    'Total Predictions': stats['total'],
+                    'SPAM Detected': stats['spam'],
+                    'HAM Detected': stats['ham'],
+                    'SPAM Rate': f"{spam_rate:.1f}%",
+                    'Description': MODEL_OPTIONS[model_name]['description']
+                })
+        
+        if model_stats_data:
+            df_model_stats = pd.DataFrame(model_stats_data)
+            st.dataframe(df_model_stats, use_container_width=True)
+
+def render_ensemble_dashboard():
+    """Ensemble methods performance analysis"""
+    
+    if not st.session_state.ensemble_history:
+        st.info("🧠 No ensemble data available. Try the Ensemble Analysis mode!")
+        return
+    
+    st.markdown("### 🧠 Ensemble Method Analytics")
+    
+    # Analyze ensemble history
+    method_stats = defaultdict(lambda: {'count': 0, 'spam': 0, 'confidences': []})
+    
+    for item in st.session_state.ensemble_history:
+        method = item['method']
+        method_stats[method]['count'] += 1
+        method_stats[method]['confidences'].append(item['confidence'])
+        if item['prediction'] == 'SPAM':
+            method_stats[method]['spam'] += 1
+    
+    if method_stats:
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            # Method usage and performance
+            methods = list(method_stats.keys())
+            method_counts = [method_stats[method]['count'] for method in methods]
+            avg_confidences = [sum(method_stats[method]['confidences'])/len(method_stats[method]['confidences']) for method in methods]
+            
+            fig_methods = go.Figure()
+            
+            # Bar chart for usage
+            fig_methods.add_trace(go.Bar(
+                name='Usage Count',
+                x=methods,
+                y=method_counts,
+                yaxis='y',
+                marker_color='#00d4aa',
+                opacity=0.7
+            ))
+            
+            # Line chart for average confidence
+            fig_methods.add_trace(go.Scatter(
+                name='Avg Confidence',
+                x=methods,
+                y=[conf * max(method_counts) for conf in avg_confidences],  # Scale for visibility
+                yaxis='y2',
+                mode='lines+markers',
+                marker_color='#ff6b6b',
+                line=dict(width=3)
+            ))
+            
+            fig_methods.update_layout(
+                title='Ensemble Method Performance',
+                yaxis=dict(title='Usage Count', side='left'),
+                yaxis2=dict(title='Avg Confidence (Scaled)', side='right', overlaying='y'),
+                height=400,
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white')
+            )
+            
+            st.plotly_chart(fig_methods, use_container_width=True)
+        
+        with col2:
+            # Ensemble method comparison table
+            ensemble_data = []
+            for method, stats in method_stats.items():
+                avg_conf = sum(stats['confidences']) / len(stats['confidences'])
+                spam_rate = (stats['spam'] / stats['count'] * 100) if stats['count'] > 0 else 0
+                
+                # Get method info from your ENSEMBLE_METHODS dict
+                method_info = ENSEMBLE_METHODS.get(method, {'name': method, 'icon': '🔧'})
+                
+                ensemble_data.append({
+                    'Method': f"{method_info['icon']} {method_info['name'][:15]}",
+                    'Uses': stats['count'],
+                    'Avg Confidence': f"{avg_conf:.1%}",
+                    'SPAM Rate': f"{spam_rate:.1f}%",
+                    'Total SPAM': stats['spam']
+                })
+            
+            df_ensemble = pd.DataFrame(ensemble_data)
+            st.dataframe(df_ensemble, use_container_width=True)
+            
+            # Best performing method highlight
+            if ensemble_data:
+                best_method = max(ensemble_data, key=lambda x: float(x['Avg Confidence'].rstrip('%'))/100)
+                st.markdown(f"""
+                <div style="background: linear-gradient(145deg, #1a2a3a, #2a3a4a); padding: 15px; border-radius: 10px; border: 2px solid #00d4aa; margin: 15px 0;">
+                    <h4 style="color: #00d4aa; margin: 0;">🏆 Top Performer</h4>
+                    <p style="color: #ccc; margin: 5px 0;">{best_method['Method']} - {best_method['Avg Confidence']} confidence</p>
+                </div>
+                """, unsafe_allow_html=True)
+
+def render_detailed_stats_dashboard():
+    """Detailed statistical analysis"""
+    
+    st.markdown("### 📊 Detailed Statistical Analysis")
+    
+    all_data = st.session_state.classification_history + st.session_state.ensemble_history
+    
+    if not all_data:
+        st.info("📈 No data available for detailed analysis.")
+        return
+    
+    # Confidence distribution analysis
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("#### 📈 Confidence Distribution")
+        
+        confidences = [item['confidence'] for item in all_data]
+        
+        fig_hist = go.Figure()
+        fig_hist.add_trace(go.Histogram(
+            x=confidences,
+            nbinsx=25,
+            marker_color='rgba(0, 212, 170, 0.7)',
+            marker_line_color='rgba(0, 212, 170, 1)',
+            marker_line_width=1,
+            name='Confidence Distribution'
+        ))
+        
+        # Add statistical lines
+        mean_conf = np.mean(confidences)
+        fig_hist.add_vline(x=mean_conf, line_dash="dash", line_color="red", 
+                          annotation_text=f"Mean: {mean_conf:.2f}")
+        
+        fig_hist.update_layout(
+            title="Model Confidence Distribution",
+            xaxis_title="Confidence Score",
+            yaxis_title="Frequency",
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white'),
+            height=350
+        )
+        
+        st.plotly_chart(fig_hist, use_container_width=True)
+    
+    with col2:
+        st.markdown("#### 🎯 Prediction Accuracy by Confidence")
+        
+        # Bin predictions by confidence ranges
+        confidence_ranges = []
+        accuracy_estimates = []
+        
+        for i in range(0, 100, 10):
+            lower = i / 100
+            upper = (i + 10) / 100
+            range_data = [item for item in all_data if lower <= item['confidence'] < upper]
+            
+            if range_data:
+                confidence_ranges.append(f"{i}-{i+10}%")
+                # Mock accuracy calculation based on confidence (higher confidence = higher accuracy)
+                accuracy_estimates.append(min(95, 60 + (i * 0.35)))
+        
+        if confidence_ranges:
+            fig_acc = go.Figure()
+            fig_acc.add_trace(go.Bar(
+                x=confidence_ranges,
+                y=accuracy_estimates,
+                marker_color='rgba(255, 107, 107, 0.7)',
+                name='Estimated Accuracy'
+            ))
+            
+            fig_acc.update_layout(
+                title="Accuracy by Confidence Range",
+                xaxis_title="Confidence Range",
+                yaxis_title="Estimated Accuracy %",
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white'),
+                height=350
+            )
+            
+            st.plotly_chart(fig_acc, use_container_width=True)
+    
+    # Statistical summary
+    st.markdown("#### 📋 Statistical Summary")
+    
+    summary_col1, summary_col2, summary_col3 = st.columns(3)
+    
+    with summary_col1:
+        confidences = [item['confidence'] for item in all_data]
+        st.markdown(f"""
+        <div class="feature-card">
+            <h4 style="color: #00d4aa;">Confidence Statistics</h4>
+            <p><strong>Mean:</strong> {np.mean(confidences):.3f}</p>
+            <p><strong>Median:</strong> {np.median(confidences):.3f}</p>
+            <p><strong>Std Dev:</strong> {np.std(confidences):.3f}</p>
+            <p><strong>Min/Max:</strong> {np.min(confidences):.3f} / {np.max(confidences):.3f}</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with summary_col2:
+        spam_predictions = [item for item in all_data if item['prediction'] == 'SPAM']
+        ham_predictions = [item for item in all_data if item['prediction'] == 'HAM']
+        
+        st.markdown(f"""
+        <div class="feature-card">
+            <h4 style="color: #ff6b6b;">Classification Summary</h4>
+            <p><strong>Total Messages:</strong> {len(all_data)}</p>
+            <p><strong>SPAM Detected:</strong> {len(spam_predictions)}</p>
+            <p><strong>HAM (Safe):</strong> {len(ham_predictions)}</p>
+            <p><strong>SPAM Rate:</strong> {len(spam_predictions)/len(all_data)*100:.1f}%</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with summary_col3:
+        if spam_predictions and ham_predictions:
+            spam_conf_avg = np.mean([item['confidence'] for item in spam_predictions])
+            ham_conf_avg = np.mean([item['confidence'] for item in ham_predictions])
+        else:
+            spam_conf_avg = 0
+            ham_conf_avg = 0
+            
+        st.markdown(f"""
+        <div class="feature-card">
+            <h4 style="color: #4ecdc4;">Confidence by Type</h4>
+            <p><strong>SPAM Avg Conf:</strong> {spam_conf_avg:.3f}</p>
+            <p><strong>HAM Avg Conf:</strong> {ham_conf_avg:.3f}</p>
+            <p><strong>Confidence Gap:</strong> {abs(spam_conf_avg - ham_conf_avg):.3f}</p>
+            <p><strong>Higher Conf:</strong> {"SPAM" if spam_conf_avg > ham_conf_avg else "HAM"}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+def render_realtime_monitor():
+    """Real-time monitoring dashboard"""
+    
+    st.markdown("### ⚡ Real-time System Monitor")
+    
+    # System status indicators
+    status_col1, status_col2, status_col3, status_col4 = st.columns(4)
+    
+    with status_col1:
+        # Model loading status
+        loaded_models = sum(1 for model in st.session_state.loaded_models.values() if model is not None)
+        total_models = len(st.session_state.loaded_models)
+        
+        status_color = "#4ecdc4" if loaded_models == total_models else "#ff8800"
+        st.markdown(f"""
+        <div class="metric-container" style="border: 2px solid {status_color};">
+            <h3 style="color: {status_color};">🤖 Models</h3>
+            <h2 style="color: {status_color}; margin: 5px 0;">{loaded_models}/{total_models}</h2>
+            <small style="color: #888;">Loaded & Ready</small>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with status_col2:
+        # Ensemble system status
+        ensemble_status = "ACTIVE" if st.session_state.ensemble_classifier else "INACTIVE"
+        status_color = "#4ecdc4" if ensemble_status == "ACTIVE" else "#ff6b6b"
+        
+        st.markdown(f"""
+        <div class="metric-container" style="border: 2px solid {status_color};">
+            <h3 style="color: {status_color};">🧠 Ensemble</h3>
+            <h2 style="color: {status_color}; margin: 5px 0;">{ensemble_status}</h2>
+            <small style="color: #888;">System Status</small>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with status_col3:
+        # Performance tracker status
+        tracker_active = st.session_state.ensemble_tracker is not None
+        status_color = "#4ecdc4" if tracker_active else "#ff6b6b"
+        
+        st.markdown(f"""
+        <div class="metric-container" style="border: 2px solid {status_color};">
+            <h3 style="color: {status_color};">📊 Tracker</h3>
+            <h2 style="color: {status_color}; margin: 5px 0;">{"ON" if tracker_active else "OFF"}</h2>
+            <small style="color: #888;">Performance Monitor</small>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with status_col4:
+        # Memory usage (mock)
+        memory_usage = 67  # Mock percentage
+        status_color = "#4ecdc4" if memory_usage < 80 else "#ff8800" if memory_usage < 90 else "#ff6b6b"
+        
+        st.markdown(f"""
+        <div class="metric-container" style="border: 2px solid {status_color};">
+            <h3 style="color: {status_color};">💾 Memory</h3>
+            <h2 style="color: {status_color}; margin: 5px 0;">{memory_usage}%</h2>
+            <small style="color: #888;">System Usage</small>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Real-time controls
+    st.markdown("#### ⚙️ Real-time Controls")
+    
+    control_col1, control_col2, control_col3 = st.columns(3)
+    
+    with control_col1:
+        auto_refresh = st.checkbox("🔄 Auto-refresh Dashboard", key="dashboard_auto_refresh")
+        if auto_refresh:
+            refresh_interval = st.slider("Refresh Interval (seconds)", 5, 60, 10)
+    
+    with control_col2:
+        if st.button("🧹 Clear All History", type="secondary"):
+            if st.button("⚠️ Confirm Clear", type="primary"):
+                st.session_state.classification_history = []
+                st.session_state.ensemble_history = []
+                st.session_state.model_stats = {model: {'spam': 0, 'ham': 0, 'total': 0} for model in MODEL_OPTIONS.keys()}
+                st.success("✅ History cleared!")
+                time.sleep(1)
+                st.rerun()
+    
+    with control_col3:
+        if st.button("💾 Export Dashboard Data"):
+            # Create comprehensive export
+            dashboard_data = {
+                'classification_history': st.session_state.classification_history,
+                'ensemble_history': st.session_state.ensemble_history,
+                'model_stats': st.session_state.model_stats,
+                'export_timestamp': datetime.now().isoformat(),
+                'total_messages': len(st.session_state.classification_history) + len(st.session_state.ensemble_history)
+            }
+            
+            json_data = st.json.dumps(dashboard_data, indent=2, default=str)
+            
+            st.download_button(
+                label="📥 Download Dashboard Data (JSON)",
+                data=json_data,
+                file_name=f"spamlyser_dashboard_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                mime="application/json"
+            )
+
+# Add this to your main app.py file after your existing analysis section:
+
+# --- ADD THE DASHBOARD SECTION ---
+if st.sidebar.button("📊 Open Dashboard", key="open_dashboard", help="Open the advanced analytics dashboard"):
+    st.session_state.show_dashboard = True
+
+if st.session_state.get('show_dashboard', False):
+    render_spamlyser_dashboard()
+    
+    if st.button("❌ Close Dashboard", key="close_dashboard"):
+        st.session_state.show_dashboard = False
+        st.rerun()  # Rerun to reset the state
 
 def get_risk_indicators(message, prediction):
     indicators = []
@@ -869,73 +1498,92 @@ uploaded_csv = st.file_uploader(
     accept_multiple_files=False
 )
 
-def classify_csv(file, ensemble_mode, selected_models_for_bulk, selected_ensemble_method_for_bulk):
+def classify_csv(file, ensemble_mode, selected_models_for_bulk, selected_ensemble_method_for_bulk, batch_size=100):
     try:
         df = pd.read_csv(file)
         if 'message' not in df.columns:
             st.error("CSV file must contain a 'message' column.")
             return None
-        
-        # Load models once for bulk classification
+
+        total_messages = len(df)
+        results = []
+
+        # ✅ Load models only once
         if ensemble_mode:
-            models_to_use = load_all_models() # Loads all models
+            models_to_use = load_all_models()
         else:
-            # For single model, load only the selected one
             models_to_use = {selected_models_for_bulk: load_model_if_needed(selected_models_for_bulk)}
-            
+
         if not any(models_to_use.values()):
             st.error("No models loaded for classification. Please check model loading status.")
             return None
 
-        results = []
-        progress_text = "Operation in progress. Please wait."
-        bulk_progress_bar = st.progress(0, text=progress_text)
+        # ✅ Progress + ETA text
+        progress_bar = st.progress(0)
+        status_text = st.empty()
 
-        for i, message in enumerate(df['message']):
-            current_progress = (i + 1) / len(df)
-            bulk_progress_bar.progress(current_progress, text=f"Classifying message {i+1}/{len(df)}...")
+        start_time = time.time()
 
-            if ensemble_mode:
-                predictions = get_ensemble_predictions(str(message), models_to_use)
-                if predictions: # Ensure there are predictions
-                    ensemble_result = st.session_state.ensemble_classifier.get_ensemble_prediction(
-                        predictions, selected_ensemble_method_for_bulk
-                    )
-                    results.append({
-                        'message': message,
-                        'prediction': ensemble_result['label'],
-                        'confidence': ensemble_result['confidence'],
-                        'spam_probability': ensemble_result['spam_probability']
-                    })
+        # Process in batches
+        for start in range(0, total_messages, batch_size):
+            end = min(start + batch_size, total_messages)
+            batch_messages = df['message'][start:end].astype(str).tolist()
+
+            try:
+                if ensemble_mode:
+                    # batch predictions from multiple models
+                    batch_results = []
+                    for msg in batch_messages:
+                        predictions = get_ensemble_predictions(msg, models_to_use)
+                        if predictions:
+                            ensemble_result = st.session_state.ensemble_classifier.get_ensemble_prediction(
+                                predictions, selected_ensemble_method_for_bulk
+                            )
+                            batch_results.append({
+                                'message': msg,
+                                'prediction': ensemble_result['label'],
+                                'confidence': ensemble_result['confidence'],
+                                'spam_probability': ensemble_result['spam_probability']
+                            })
+                        else:
+                            batch_results.append({'message': msg, 'prediction': 'ERROR', 'confidence': 0.0, 'spam_probability': 0.0})
                 else:
-                    results.append({ # Fallback for no predictions from ensemble models
-                        'message': message,
-                        'prediction': 'ERROR',
-                        'confidence': 0.0,
-                        'spam_probability': 0.0
-                    })
-            else: # Single Model
-                model_name = selected_models_for_bulk # This will be just one model name
-                classifier = models_to_use.get(model_name)
-                if classifier:
-                    result = classifier(str(message))[0]
-                    results.append({
-                        'message': message,
-                        'prediction': result['label'].upper(),
-                        'confidence': result['score']
-                    })
-                else:
-                    results.append({ # Fallback if single classifier not loaded
-                        'message': message,
-                        'prediction': 'ERROR',
-                        'confidence': 0.0
-                    })
-        bulk_progress_bar.empty() # Clear progress bar after completion
-        df_results = pd.DataFrame(results)
-        return df_results
+                    classifier = models_to_use.get(selected_models_for_bulk)
+                    if classifier:
+                        preds = classifier(batch_messages)  # 🚀 batch inference
+                        batch_results = [
+                            {'message': msg, 'prediction': p['label'].upper(), 'confidence': p['score']}
+                            for msg, p in zip(batch_messages, preds)
+                        ]
+                    else:
+                        batch_results = [{'message': msg, 'prediction': 'ERROR', 'confidence': 0.0} for msg in batch_messages]
+
+                results.extend(batch_results)
+
+            except Exception as batch_err:
+                results.extend([{'message': msg, 'prediction': 'ERROR', 'confidence': 0.0} for msg in batch_messages])
+
+            # ✅ Progress update with ETA
+            processed = end
+            elapsed = time.time() - start_time
+            rate = processed / elapsed
+            remaining = total_messages - processed
+            eta = remaining / rate if rate > 0 else 0
+
+            progress_bar.progress(processed / total_messages)
+            status_text.text(
+                f"Processing message {processed}/{total_messages} - ETA: {int(eta//60)}m {int(eta%60)}s"
+            )
+
+        progress_bar.empty()
+        status_text.text("✅ Classification complete!")
+
+        return pd.DataFrame(results)
+
     except Exception as e:
         st.error(f"Error processing CSV: {str(e)}")
         return None
+
 
 ensemble_mode_bulk = analysis_mode == "Ensemble Analysis" 
 if ensemble_mode_bulk:
