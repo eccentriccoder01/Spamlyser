@@ -1264,6 +1264,18 @@ if analyse_btn and user_sms.strip():
                     st.markdown("#### 🤖 Individual Model Predictions")
                     cols = st.columns(len(predictions))
                     for i, (model_name, pred) in enumerate(predictions.items()):
+                        # Save individual model prediction to a global tracking list
+                        if 'model_vote_history' not in st.session_state:
+                            st.session_state.model_vote_history = []
+
+                        st.session_state.model_vote_history.append({
+                            'model': model_name,
+                            'label': pred['label'],
+                            'confidence': pred['score'],
+                            'message': user_sms,
+                            'timestamp': datetime.now()
+                        })
+
                         with cols[i]:
                             color = "#ff6b6b" if pred['label'] == "SPAM" else "#4ecdc4"
                             st.markdown(f"""
@@ -1424,23 +1436,40 @@ with col2:
             df_ensemble_history = pd.DataFrame(st.session_state.ensemble_history)
 
             # Pie Chart for Spam/Ham Distribution (Ensemble)
-            ensemble_counts = df_ensemble_history['prediction'].value_counts().reset_index()
-            ensemble_counts.columns = ['Label', 'Count']
-            fig_pie_ensemble = px.pie(
-                ensemble_counts, 
-                values='Count', 
-                names='Label', 
-                title='Ensemble Spam/Ham Distribution',
-                color_discrete_map={'SPAM': '#ff6b6b', 'HAM': '#4ecdc4'}
-            )
-            fig_pie_ensemble.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
-                font=dict(color='white'),
-                height=300,
-                margin=dict(t=50, b=0, l=0, r=0)
-            )
-            st.plotly_chart(fig_pie_ensemble, use_container_width=True)
+
+            st.markdown("#### 🧠 Ensemble Spam/Ham Distribution")
+
+            # Display vote pie chart
+            if 'model_vote_history' in st.session_state and st.session_state.model_vote_history:
+                df_votes = pd.DataFrame(st.session_state.model_vote_history)
+
+                vote_counts = df_votes['label'].value_counts().to_dict()
+                vote_counts_fixed = {
+                    'SPAM': vote_counts.get('SPAM', 0),
+                    'HAM': vote_counts.get('HAM', 0)
+                }
+
+                df_vote_chart = pd.DataFrame(list(vote_counts_fixed.items()), columns=['Label', 'Count'])
+
+                fig_model_votes = px.pie(
+                    df_vote_chart,
+                    values='Count',
+                    names='Label',
+                    title='Individual Model Votes Distribution',
+                    color_discrete_map={'SPAM': '#ff6b6b', 'HAM': '#4ecdc4'}
+                )
+
+                fig_model_votes.update_layout(
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color='white'),
+                    height=300,
+                    margin=dict(t=50, b=0, l=0, r=0)
+                )
+
+                st.plotly_chart(fig_model_votes, use_container_width=True)
+            else:
+                st.info("No individual model votes recorded yet. Run some ensemble predictions first.")
 
             # Confidence over time (Ensemble)
             fig_conf_ensemble = px.line(
