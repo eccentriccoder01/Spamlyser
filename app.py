@@ -1489,7 +1489,6 @@ with col2:
 
 
 # --- Bulk CSV Classification Section (Drag & Drop) ---
-st.markdown("---")
 st.subheader("📂 Drag & Drop CSV for Bulk Classification")
 
 uploaded_csv = st.file_uploader(
@@ -1673,27 +1672,8 @@ elif analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history:
             margin=dict(t=50, b=0, l=0, r=0)
         )
         st.plotly_chart(fig, use_container_width=True)
-
-# --- Footer ---
-st.markdown("---")
-st.markdown("""
-<div style="text-align: center; padding: 20px; background: rgba(255,255,255,0.02); border-radius: 10px; margin-top: 30px;">
-    <p style="color: #888; margin: 0;">
-        🛡️ <strong>Spamlyser Pro - Ensemble Edition</strong> | Advanced Multi-Model SMS Threat Detection<br>
-        Powered by Custom-Trained Transformer Models & Ensemble Learning<br>
-        Developed by <a href="https://eccentriccoder01.github.io/Me" target="_blank" style="color: #1f77b4; text-decoration: none; font-weight: 600;">MrEccentric</a>
-    </p>
-    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
-        <small style="color: #666;">
-            🎯 Features: Single Model Analysis | 🤖 Ensemble Methods | 📊 Performance Tracking | ⚖️ Adaptive Weights
-        </small>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
 # --- Advanced Features Section ---
 if analysis_mode == "Ensemble Analysis":
-    st.markdown("---")
     st.markdown("## 🔧 Advanced Ensemble Settings")
 
     col_advanced1, col_advanced2 = st.columns(2)
@@ -1787,3 +1767,18 @@ if analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history:
         st.dataframe(df_comparison, use_container_width=True)
     else:
         st.info("Not enough data to compare ensemble methods. Try more predictions with different methods.")
+# --- Footer ---
+st.markdown("""
+<div style="text-align: center; padding: 20px; background: rgba(255,255,255,0.02); border-radius: 10px; margin-top: 30px;">
+    <p style="color: #888; margin: 0;">
+        🛡️ <strong>Spamlyser Pro - Ensemble Edition</strong> | Advanced Multi-Model SMS Threat Detection<br>
+        Powered by Custom-Trained Transformer Models & Ensemble Learning<br>
+        Developed by <a href="https://eccentriccoder01.github.io/Me" target="_blank" style="color: #1f77b4; text-decoration: none; font-weight: 600;">MrEccentric</a>
+    </p>
+    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <small style="color: #666;">
+            🎯 Features: Single Model Analysis | 🤖 Ensemble Methods | 📊 Performance Tracking | ⚖️ Adaptive Weights
+        </small>
+    </div>
+</div>
+""", unsafe_allow_html=True)
