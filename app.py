@@ -198,6 +198,10 @@ if 'classification_history' not in st.session_state:
     st.session_state.classification_history = []
 if 'model_stats' not in st.session_state:
     st.session_state.model_stats = {model: {'spam': 0, 'ham': 0, 'total': 0} for model in ["DistilBERT", "BERT", "RoBERTa", "ALBERT"]}
+# Persisted theme default
+if 'theme_choice' not in st.session_state:
+    st.session_state.theme_choice = "Dark"
+
 if 'ensemble_tracker' not in st.session_state:
     st.session_state.ensemble_tracker = ModelPerformanceTracker()
 if 'ensemble_classifier' not in st.session_state:
@@ -283,6 +287,14 @@ st.markdown("""
 
 # --- Sidebar ---
 with st.sidebar:
+    theme_choice = st.radio(
+        "🎨 Theme",
+        ["Dark", "Light"],
+        index=0 if st.session_state.get("theme_choice", "Dark") == "Dark" else 1
+    )
+    # persist choice
+    st.session_state.theme_choice = theme_choice
+
     st.markdown("""
     <div style="text-align: center; padding: 20px; background: linear-gradient(145deg, #1e1e1e, #2a2a2a); border-radius: 15px; margin-bottom: 20px;">
         <h3 style="color: #00d4aa; margin: 0;">Analysis Mode</h3>
@@ -1139,6 +1151,60 @@ def get_risk_indicators(message, prediction):
         indicators.append("🔗 URL detected")
     return indicators
 
+
+def get_pipeline(model_id):
+    tokenizer = load_tokenizer(model_id)
+    model = load_model(model_id)
+    return pipeline("text-classification", model=model, tokenizer=tokenizer)
+
+# --- THEME UTILS (ADD-ONLY) ---
+def apply_chart_theme(fig, theme):
+    """Ensure Plotly charts match light/dark theme without changing your styling logic."""
+    if theme == "Light":
+        fig.update_layout(
+            paper_bgcolor='rgba(255,255,255,0)',
+            plot_bgcolor='rgba(255,255,255,0)',
+            font=dict(color='black')
+        )
+    else:
+        fig.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white')
+        )
+    return fig
+
+# Light theme CSS override (keeps your original dark CSS as default)
+if st.session_state.theme_choice == "Light":
+    st.markdown("""
+    <style>
+      .main, .stApp {
+        background: linear-gradient(135deg, #ffffff 0%, #f5f5f7 100%) !important;
+        color: #111 !important;
+        transition: background 0.3s ease, color 0.3s ease;
+      }
+      .prediction-card {
+        background: linear-gradient(145deg, #fafafa, #ffffff) !important;
+        border: 1px solid #ddd !important;
+        color: #111 !important;
+      }
+      .analysis-header {
+        background: linear-gradient(90deg, #e9e9e9, #f6f6f6) !important;
+        border-left-color: #00b89a !important;
+      }
+      .feature-card {
+        background: rgba(0,0,0,0.03) !important;
+        border: 1px solid rgba(0,0,0,0.1) !important;
+      }
+      .model-info {
+        background: linear-gradient(145deg, #f3f3f3, #ffffff) !important;
+        border-left-color: #00b89a !important;
+      }
+    </style>
+    """, unsafe_allow_html=True)
+
+# Main interface
+
 def get_ensemble_predictions(message, models):
     predictions = {}
     for model_name, model in models.items():
@@ -1325,6 +1391,34 @@ if analyse_btn and user_sms.strip():
                     st.markdown(f"- {indicator}")
             else:
                 st.markdown("✅ No significant risk indicators detected")
+
+            if len(st.session_state.classification_history) > 1:
+                st.markdown("#### 📊 Model Performance")
+                df = pd.DataFrame(st.session_state.classification_history)
+                spam_count = len(df[df['prediction'] == 'SPAM'])
+                ham_count = len(df[df['prediction'] == 'HAM'])
+                
+                if spam_count > 0 or ham_count > 0:
+                    fig = go.Figure(data=[go.Pie(
+                        labels=['SPAM', 'HAM'],
+                        values=[spam_count, ham_count],
+                        hole=0.6,
+                        marker_colors=['#ff6b6b', '#4ecdc4']
+                    )])
+                    
+                    fig.update_layout(
+                        title="Classification Distribution",
+                        showlegend=True,
+                        height=300,
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        font=dict(color='white')
+                    )
+                    # Theme-safe override (keeps your layout, adjusts only colors for light)
+                    fig = apply_chart_theme(fig, st.session_state.theme_choice)
+                    
+                    st.plotly_chart(fig, use_container_width=True)
+
 
 with col2:
     st.markdown("""
@@ -1733,13 +1827,17 @@ if analysis_mode == "Ensemble Analysis":
         for model, weight in current_weights.items():
             st.write(f"- {MODEL_OPTIONS[model]['icon']} {model}: {weight:.3f}")
 
+
+if analyse_btn and not user_sms.strip():
+    st.warning("⚠️ Please enter an SMS message to analyse.")
+
         # Reset to default weights
-        if st.button("🔄 Reset to Default Weights"):
-            st.session_state.ensemble_classifier.update_model_weights(
-                st.session_state.ensemble_classifier.default_weights
-            )
-            st.success("Weights reset to default values!")
-            st.rerun()
+if st.button("🔄 Reset to Default Weights"):
+    st.session_state.ensemble_classifier.update_model_weights(
+        st.session_state.ensemble_classifier.default_weights
+    )
+    st.success("Weights reset to default values!")
+    st.rerun()
 
 # --- Real-time Ensemble Method Performance Comparison (Always visible if data exists) ---
 if analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history:
@@ -1787,3 +1885,4 @@ if analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history:
         st.dataframe(df_comparison, use_container_width=True)
     else:
         st.info("Not enough data to compare ensemble methods. Try more predictions with different methods.")
+
