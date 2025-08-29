@@ -1175,8 +1175,7 @@ with col1:
         value=user_sms_initial_value,
         height=120,
         placeholder="Type or paste your SMS message here...",
-        help="Enter the SMS message you want to classify as spam or ham (legitimate)",
-        key="user_sms_input"
+        help="Enter the SMS message you want to classify as spam or ham (legitimate)"
     )
     # Store current text_area value in session state for persistence
     st.session_state.user_sms_input_value = user_sms
@@ -1188,10 +1187,16 @@ with col1:
     with col_b:
         clear_btn = st.button("🗑️ Clear", use_container_width=True)
     if clear_btn:
-        st.session_state.user_sms_input_value = "" # Clear text area content
+        # Clear text area content
+        st.session_state.user_sms_input_value=""
+        
         if "sample_selector" in st.session_state:
-            st.session_state.pop("sample_selector") 
+            st.session_state.pop("sample_selector")
+        
+
         st.rerun() # Rerun to update the UI with cleared values
+
+
 
 if analyse_btn and user_sms.strip():
     if analysis_mode == "Single Model":
