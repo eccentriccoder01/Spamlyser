@@ -1190,7 +1190,7 @@ with col1:
     if clear_btn:
         st.session_state.user_sms_input_value = "" # Clear text area content
         if "sample_selector" in st.session_state:
-            st.session_state.pop("sample_selector") # Reset sample selection
+            st.session_state.pop("sample_selector") 
         st.rerun() # Rerun to update the UI with cleared values
 
 if analyse_btn and user_sms.strip():
