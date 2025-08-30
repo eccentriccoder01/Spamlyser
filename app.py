@@ -635,6 +635,7 @@ def render_spamlyser_dashboard():
     """, unsafe_allow_html=True)
 
     # Dashboard tabs
+    # Dashboard tabs
     dashboard_tabs = st.tabs(["🎯 Overview", "🤖 Model Performance", "🧠 Ensemble Analytics", "📊 Detailed Stats", "⚡ Real-time Monitor"])
 
     with dashboard_tabs[0]:  # Overview Tab
@@ -653,82 +654,113 @@ def render_spamlyser_dashboard():
         render_realtime_monitor()
 
 def render_overview_dashboard():
-    """Main overview dashboard with key metrics"""
+    st.markdown("""
+<style>
+.metric-container {
+    background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+
+    /* 🔑 Force same size for all cards */
+    min-height: 180px;
+    max-height: 180px;
+    min-width: 200px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.metric-container h2 {
+    margin: 0;
+    font-size: 2rem;
+}
+.metric-container p {
+    margin: 6px 0;
+    color: #ccc;
+}
+.metric-container small {
+    color: #aaa;
+}
+</style>
+""", unsafe_allow_html=True)
     
-    # Calculate key metrics from your existing session state
+    # --- Calculate key metrics ---
     total_single = len(st.session_state.classification_history)
     total_ensemble = len(st.session_state.ensemble_history)
     total_messages = total_single + total_ensemble
-    
+
     if total_messages == 0:
         st.info("🚀 Start analyzing messages to see dashboard insights!")
         return
-    
-    # Key Metrics Row
+
     col1, col2, col3, col4, col5 = st.columns(5)
-    
+
+    # --- SPAM ---
     with col1:
         spam_single = sum(1 for item in st.session_state.classification_history if item['prediction'] == 'SPAM')
         spam_ensemble = sum(1 for item in st.session_state.ensemble_history if item['prediction'] == 'SPAM')
         total_spam = spam_single + spam_ensemble
         spam_rate = (total_spam / total_messages * 100) if total_messages > 0 else 0
-        
+
         st.markdown(f"""
-        <div class="metric-container" style="background: linear-gradient(145deg, #2a1a1a, #3d2626); border: 2px solid #ff4444;">
-            <h2 style="color: #ff6b6b; margin: 0; font-size: 2.2rem;">🚨 {total_spam}</h2>
-            <p style="color: #ccc; margin: 5px 0;">SPAM Detected</p>
+        <div class="metric-container" style="border: 2px solid #ff4444;">
+            <h2 style="color: #ff6b6b;">🚨 {total_spam}</h2>
+            <p>SPAM Detected</p>
             <small style="color: #ff9999;">{spam_rate:.1f}% detection rate</small>
         </div>
         """, unsafe_allow_html=True)
-    
+
+    # --- HAM ---
     with col2:
         total_ham = total_messages - total_spam
         ham_rate = (total_ham / total_messages * 100) if total_messages > 0 else 0
-        
+
         st.markdown(f"""
-        <div class="metric-container" style="background: linear-gradient(145deg, #1a2a1a, #263d26); border: 2px solid #44ff44;">
-            <h2 style="color: #4ecdc4; margin: 0; font-size: 2.2rem;">✅ {total_ham}</h2>
-            <p style="color: #ccc; margin: 5px 0;">HAM (Safe)</p>
+        <div class="metric-container" style="border: 2px solid #44ff44;">
+            <h2 style="color: #4ecdc4;">✅ {total_ham}</h2>
+            <p>HAM (Safe)</p>
             <small style="color: #99ff99;">{ham_rate:.1f}% legitimate</small>
         </div>
         """, unsafe_allow_html=True)
-    
+
+    # --- Avg Confidence ---
     with col3:
-        # Average confidence across all predictions
         all_confidences = [item['confidence'] for item in st.session_state.classification_history] + \
-                         [item['confidence'] for item in st.session_state.ensemble_history]
+                          [item['confidence'] for item in st.session_state.ensemble_history]
         avg_confidence = sum(all_confidences) / len(all_confidences) if all_confidences else 0
-        
+
         st.markdown(f"""
-        <div class="metric-container">
-            <h2 style="color: #00d4aa; margin: 0; font-size: 2.2rem;">🎯 {avg_confidence:.1%}</h2>
-            <p style="color: #ccc; margin: 5px 0;">Avg Confidence</p>
-            <small style="color: #888;">Model certainty</small>
+        <div class="metric-container" style="border: 2px solid #00d4aa;">
+            <h2 style="color: #00d4aa;">🎯 {avg_confidence:.1%}</h2>
+            <p>Avg Confidence</p>
+            <small>Model certainty</small>
         </div>
         """, unsafe_allow_html=True)
-    
+
+    # --- Total Analyzed ---
     with col4:
         st.markdown(f"""
-        <div class="metric-container">
-            <h2 style="color: #a855f7; margin: 0; font-size: 2.2rem;">📱 {total_messages}</h2>
-            C:/Users/kaurk/Spamlyser/.venv/Scripts/python.exe -m streamlit run app.py            <p style="color: #ccc; margin: 5px 0;">Total Analyzed</p>
-            <small style="color: #888;">Messages processed</small>
+        <div class="metric-container" style="border: 2px solid #a855f7;">
+            <h2 style="color: #a855f7;">📱 {total_messages}</h2>
+            <p>Total Analyzed</p>
+            <small>Messages processed</small>
         </div>
         """, unsafe_allow_html=True)
-    
+
+    # --- Preferred Mode ---
     with col5:
-        # Most used analysis mode
         mode_ratio = (total_ensemble / total_messages * 100) if total_messages > 0 else 0
-        preferred_mode = "Ensemble" if total_ensemble > total_single else "Single Model"
-        
+        preferred_mode = "Ensemble" if total_ensemble > total_single else "Ensemble"
+
         st.markdown(f"""
-        <div class="metric-container">
-            <h2 style="color: #ffd93d; margin: 0; font-size: 2.2rem;">🧠 {preferred_mode}</h2>
-            <p style="color: #ccc; margin: 5px 0;">Preferred Mode</p>
-            <small style="color: #888;">{mode_ratio:.0f}% ensemble usage</small>
+        <div class="metric-container" style="border: 2px solid #ffd93d;">
+            <h2 style="color: #ffd93d;">🧠 {preferred_mode}</h2>
+            <p>Preferred Mode</p>
+            <small>{mode_ratio:.0f}% ensemble usage</small>
         </div>
         """, unsafe_allow_html=True)
-    
     # Threat Level Indicator
     st.markdown("### 🛡️ Current Threat Assessment")
     
