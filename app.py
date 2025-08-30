@@ -396,6 +396,92 @@ def load_tokenizer(model_id):
         st.error(f"❌ Error loading tokenizer for {model_id}: {str(e)}")
         return None
 
+
+@st.cache_resource
+def load_model(model_id):
+    try:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        return AutoModelForSequenceClassification.from_pretrained(model_id).to(device)
+    except Exception as e:
+        st.error(f"❌ Error loading model {model_id}: {str(e)}")
+        return None
+
+@st.cache_resource
+def _load_model_cached(model_id):
+    try:
+        tokenizer = load_tokenizer(model_id)
+        model = load_model(model_id)
+        if tokenizer is None or model is None:
+            return None
+        pipe = pipeline(
+            "text-classification", 
+            model=model, 
+            tokenizer=tokenizer,
+            device=0 if torch.cuda.is_available() else -1
+        )
+        return pipe
+    except Exception as e:
+        st.error(f"❌ Error creating pipeline for {model_id}: {str(e)}")
+        return None
+
+def load_model_if_needed(model_name, _progress_callback=None):
+    if st.session_state.loaded_models[model_name] is None:
+        model_id = MODEL_OPTIONS[model_name]["id"]
+        status_container = st.empty()
+        def update_status(message):
+            if status_container:
+                status_container.info(message)
+            if _progress_callback:
+                _progress_callback(message)
+        try:
+            update_status(f"Starting to load {model_name}...")
+            update_status(f"🔄 Loading tokenizer for {model_name}...")
+            update_status(f"🤖 Loading {model_name} model... (This may take a few minutes)")
+            model = _load_model_cached(model_id)
+            if model is not None:
+                update_status(f"✅ Successfully loaded {model_name}")
+                st.session_state.loaded_models[model_name] = model
+            else:
+                update_status(f"❌ Failed to load {model_name}")
+                return None
+            time.sleep(1)
+        except Exception as e:
+            update_status(f"❌ Error loading {model_name}: {str(e)}")
+            return None
+        finally:
+            time.sleep(1)
+            status_container.empty()
+    return st.session_state.loaded_models[model_name]
+
+def get_loaded_models():
+    models = {}
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+    total_models = len(MODEL_OPTIONS)
+    def update_progress(progress, message=""):
+        progress_bar.progress(progress)
+        if message:
+            status_text.info(message)
+    for i, (name, model_info) in enumerate(MODEL_OPTIONS.items()):
+        update_progress(
+            (i / total_models) * 0.9,
+            f"Loading {name} model ({i+1}/{total_models})..."
+        )
+        models[name] = load_model_if_needed(
+            name, 
+            _progress_callback=lambda msg: update_progress(
+                (i / total_models) * 0.9, 
+                f"{name}: {msg}"
+            )
+        )
+    update_progress(1.0, "✅ All models loaded successfully!")
+    time.sleep(1)
+    progress_bar.empty()
+    status_text.empty()
+    return models
+
+load_all_models = get_loaded_models
+
 # --- Dynamic CSS for Dark Mode ---
 if st.session_state.get('dark_mode', False):
     st.markdown("""
