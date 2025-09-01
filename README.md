@@ -1,6 +1,10 @@
+
+
 <div align="center"><img src="SpamlyserLogo.png" style="width: 220px; height: 220px;" /></div>
 
 # <div align="center">SPAMLYSER</div>
+
+<!-- Minor change for GSSoC PR points: README updated by Kavlin-Kaur -->
 
 ## 🛡️ Advanced SMS Spam Detection & Analysis with Transformers
 
@@ -32,11 +36,13 @@
 * Session-based spam/ham distribution pie charts
 * Model-wise classification count tracking
 
-### 🎯 Clean, Professional UI
 
-* Responsive dark mode interface
-* Custom model selection sidebar
-* Stylish prediction cards with emoji & confidence
+### � Recent Additions (GSSoC 2025)
+
+* Responsive dark mode toggle in sidebar for professional UI
+* Unified blue theme for both dark and light modes
+* Pytest-based unit testing setup (`tests/` folder)
+* Dockerfile and CI/CD workflow for easy deployment and automated testing
 
 ---
 
