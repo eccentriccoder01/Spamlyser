@@ -14,10 +14,12 @@
 - <a href="#project-insights"> Project Insights </a>
 - <a href="#demo"> Live Demo </a>
 - <a href="#screenshots"> Screenshots </a>
-- <a href="#core-features">Core Features</a>
-- <a href="#technology-stack"> Technology Stack </a>
-- <a href="#setup-instructions"> Setup Instructions </a>
-- <a href="#roadmap-enhancements">  Roadmap & Future Enhancements </a>
+- <a href="#features">Features</a>
+- <a href="#models-used">Models Used</a>
+- <a href="#video-explanation">Video Explanation</a>
+- <a href="#technologies-used"> Technologies Used </a>
+- <a href="#installation-setup"> Installation & Setup </a>
+- <a href="#example-usage"> Example Usage </a>
 - <a href="#acknowledgments">Acknowledgments</a>
 - <a href="#contact">Contact</a>
 - <a href="#how-to-contribute">How to Contribute</a>
@@ -101,7 +103,7 @@ Experience Spamlyser live here:
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
-<h2 id="features">  🌟Features </h2>
+<h2 id="features"> 🌟 Features </h2>
 
 ### 🤖 Transformer-Based Classification
 
@@ -251,6 +253,8 @@ Want to analyze multiple messages at once?
 
 Report bugs and issues or propose improvements through our GitHub repository's "Issues" tab.
 
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+
 ## Contribution Guidelines 📑
 
 - Firstly Star(⭐) the Repository
@@ -259,6 +263,8 @@ Report bugs and issues or propose improvements through our GitHub repository's "
 - Commit your changes
 - Create a Pull Request which will be reviewed and suggestions would be added to improve it.
 - Add Screenshots and updated website links to help us understand what changes is all about.
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
 ## Contributing is fun🧡
 
