@@ -4,8 +4,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
 from datetime import datetime, timedelta
-import onnxruntime as ort
-import json
 
 # Assuming these files exist in the same directory
 from export_feature import export_results_button 
@@ -88,9 +86,11 @@ st.markdown("""
     .main {
         background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
     }
+    
     .stApp {
         background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
     }
+    
     .metric-container {
         background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
         padding: 20px;
@@ -99,6 +99,7 @@ st.markdown("""
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         margin: 10px 0;
     }
+    
     .prediction-card {
         background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
         padding: 25px;
@@ -108,6 +109,7 @@ st.markdown("""
         text-align: center;
         margin: 20px 0;
     }
+    
     .ensemble-card {
         background: linear-gradient(145deg, #1a1a2a, #2d2d3d);
         padding: 20px;
@@ -115,16 +117,19 @@ st.markdown("""
         border: 2px solid #6366f1;
         margin: 15px 0;
     }
+    
     .spam-alert {
         background: linear-gradient(145deg, #2a1a1a, #3d2626);
         border: 2px solid #ff4444;
         color: #ff6b6b;
     }
+    
     .ham-safe {
         background: linear-gradient(145deg, #1a2a1a, #263d26);
         border: 2px solid #44ff44;
         color: #6bff6b;
     }
+    
     .analysis-header {
         background: linear-gradient(90deg, #333, #555);
         padding: 15px;
@@ -132,6 +137,7 @@ st.markdown("""
         margin: 20px 0;
         border-left: 4px solid #00d4aa;
     }
+    
     .feature-card {
         background: rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(10px);
@@ -140,6 +146,7 @@ st.markdown("""
         padding: 20px;
         margin: 10px 0;
     }
+    
     .model-info {
         background: linear-gradient(145deg, #252525, #3a3a3a);
         padding: 15px;
@@ -147,6 +154,7 @@ st.markdown("""
         border-left: 4px solid #00d4aa;
         margin: 15px 0;
     }
+    
     .ensemble-method {
         background: linear-gradient(145deg, #252545, #3a3a5a);
         padding: 12px;
@@ -154,6 +162,7 @@ st.markdown("""
         border-left: 4px solid #6366f1;
         margin: 8px 0;
     }
+    
     .method-comparison {
         background: rgba(255, 255, 255, 0.03);
         padding: 15px;
@@ -164,126 +173,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- Dark Mode Toggle ---
-if 'dark_mode' not in st.session_state:
-    st.session_state.dark_mode = False
-st.session_state.dark_mode = st.sidebar.checkbox("🌙 Enable Dark Mode", value=st.session_state.dark_mode, help="Toggle dark mode for the app")
-
-if st.session_state.get('dark_mode', False):
-    st.markdown("""
-    <style>
-        .main, .stApp {
-            background: #181f2f;
-        }
-        .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison {
-            background: #232a3d;
-            border-radius: 16px;
-            border: 1px solid #324a7c;
-            color: #f8fafc;
-            box-shadow: 0 2px 12px rgba(44, 62, 80, 0.08);
-        }
-        .spam-alert {
-            background: #2a3350;
-            border: 2px solid #ff4444;
-            color: #ff6b6b;
-        }
-        .ham-safe {
-            background: #233d2a;
-            border: 2px solid #44ff44;
-            color: #6bff6b;
-        }
-        .analysis-header {
-            background: #232a3d;
-            border-left: 4px solid #324a7c;
-            color: #f8fafc;
-        }
-        /* Input fields and dropdowns */
-        .stTextInput>div>input, .stTextArea>div>textarea, .stSelectbox>div>div>div {
-            background: #232a3d !important;
-            color: #f8fafc !important;
-            border: 1px solid #324a7c !important;
-        }
-        .stTextInput>div>input::placeholder, .stTextArea>div>textarea::placeholder {
-            color: #b3c7f7 !important;
-        }
-        /* Button styling */
-        .stButton>button {
-            background: #324a7c;
-            color: #f8fafc;
-            border-radius: 8px;
-            border: none;
-            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
-        }
-        .stButton>button:hover {
-            background: #415a9c;
-            color: #fff;
-        }
-        /* Label and text color for clarity */
-        label, .stMarkdown, .stRadio>div>label, .stSelectbox label, .stTextInput label {
-            color: #f8fafc !important;
-        }
-        /* Scrollbar styling for dark mode */
-        ::-webkit-scrollbar {
-            width: 8px;
-            background: #232a3d;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #324a7c;
-            border-radius: 8px;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-else:
-    st.markdown("""
-    <style>
-        .main, .stApp {
-            background: #f4f8ff;
-        }
-        .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison {
-            background: #e3eafc;
-            border-radius: 16px;
-            border: 1px solid #b3c7f7;
-            color: #232a3d;
-            box-shadow: 0 2px 12px rgba(44, 62, 80, 0.06);
-        }
-        .spam-alert {
-            background: #ffe3e3;
-            border: 2px solid #ff4444;
-            color: #ff6b6b;
-        }
-        .ham-safe {
-            background: #e3ffe3;
-            border: 2px solid #44ff44;
-            color: #6bff6b;
-        }
-        .analysis-header {
-            background: #e3eafc;
-            border-left: 4px solid #324a7c;
-            color: #232a3d;
-        }
-        /* Scrollbar styling for light mode */
-        ::-webkit-scrollbar {
-            width: 8px;
-            background: #e3eafc;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #324a7c;
-            border-radius: 8px;
-        }
-        /* Button styling */
-        .stButton>button {
-            background: #324a7c;
-            color: #e3eafc;
-            border-radius: 8px;
-            border: none;
-            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
-        }
-        .stButton>button:hover {
-            background: #415a9c;
-            color: #fff;
-        }
-    </style>
-    """, unsafe_allow_html=True)
 
 # --- Load Sample Messages (with fallback) ---
 try:
@@ -403,7 +292,7 @@ with st.sidebar:
         <h3 style="color: #00d4aa; margin: 0;">Analysis Mode</h3>
     </div>
     """, unsafe_allow_html=True)
-    st.session_state.dark_mode = st.checkbox("🌙 Enable Dark Mode", value=st.session_state.dark_mode, help="Toggle dark mode for the app", key="dark_mode_toggle")
+    st.session_state.dark_mode = st.checkbox("🌙 Enable Dark Mode", value=st.session_state.dark_mode, help="Toggle dark mode for the app")
 
     analysis_mode = st.radio(
         "Choose Analysis Mode",
@@ -498,61 +387,218 @@ with st.sidebar:
         """, unsafe_allow_html=True)
 
 
-# --- ONNX Model Path ---
-ONNX_MODEL_PATH = "distilbert_spamlyser.onnx"  # Update if your ONNX file has a different name
-
-# --- ONNX Inference Session (cached) ---
+# --- Model Loading Helpers ---
 @st.cache_resource
-def get_onnx_session():
+def load_tokenizer(model_id):
     try:
-        return ort.InferenceSession(ONNX_MODEL_PATH)
+        return AutoTokenizer.from_pretrained(model_id)
     except Exception as e:
-        st.error(f"❌ Error loading ONNX model: {str(e)}")
+        st.error(f"❌ Error loading tokenizer for {model_id}: {str(e)}")
         return None
 
-# --- ONNX Tokenizer Loader (cached) ---
+
 @st.cache_resource
-def get_onnx_tokenizer():
+def load_model(model_id):
     try:
-        return AutoTokenizer.from_pretrained("mreccentric/distilbert-base-uncased-spamlyser")
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        return AutoModelForSequenceClassification.from_pretrained(model_id).to(device)
     except Exception as e:
-        st.error(f"❌ Error loading tokenizer for ONNX: {str(e)}")
+        st.error(f"❌ Error loading model {model_id}: {str(e)}")
         return None
 
-# --- ONNX Prediction Function ---
-def predict_with_onnx(message):
-    session = get_onnx_session()
-    tokenizer = get_onnx_tokenizer()
-    if session is None or tokenizer is None:
-        return {"label": "ERROR", "score": 0.0}
-    inputs = tokenizer(message, return_tensors="np")
-    ort_inputs = {k: v for k, v in inputs.items()}
-    outputs = session.run(None, ort_inputs)
-    logits = outputs[0][0]
-    # Softmax
-    exp_logits = np.exp(logits - np.max(logits))
-    probs = exp_logits / exp_logits.sum()
-    label = "SPAM" if np.argmax(probs) == 1 else "HAM"
-    score = float(probs[np.argmax(probs)])
-    return {"label": label, "score": score}
-
-# --- Model Loader (with ONNX for DistilBERT) ---
 @st.cache_resource
-def load_model_if_needed(model_name):
-    if model_name == "DistilBERT":
-        # Use ONNX for DistilBERT
-        def onnx_classifier(msgs):
-            if isinstance(msgs, str):
-                return [predict_with_onnx(msgs)]
-            return [predict_with_onnx(m) for m in msgs]
-        return onnx_classifier
-    # Fallback to HuggingFace pipeline for other models
-    model_id = MODEL_OPTIONS[model_name]["id"]
+def _load_model_cached(model_id):
     try:
-        return pipeline("text-classification", model=model_id, tokenizer=model_id)
+        tokenizer = load_tokenizer(model_id)
+        model = load_model(model_id)
+        if tokenizer is None or model is None:
+            return None
+        pipe = pipeline(
+            "text-classification", 
+            model=model, 
+            tokenizer=tokenizer,
+            device=0 if torch.cuda.is_available() else -1
+        )
+        return pipe
     except Exception as e:
-        st.error(f"❌ Error loading model {model_name}: {str(e)}")
+        st.error(f"❌ Error creating pipeline for {model_id}: {str(e)}")
         return None
+
+def load_model_if_needed(model_name, _progress_callback=None):
+    if st.session_state.loaded_models[model_name] is None:
+        model_id = MODEL_OPTIONS[model_name]["id"]
+        status_container = st.empty()
+        def update_status(message):
+            if status_container:
+                status_container.info(message)
+            if _progress_callback:
+                _progress_callback(message)
+        try:
+            update_status(f"Starting to load {model_name}...")
+            update_status(f"🔄 Loading tokenizer for {model_name}...")
+            update_status(f"🤖 Loading {model_name} model... (This may take a few minutes)")
+            model = _load_model_cached(model_id)
+            if model is not None:
+                update_status(f"✅ Successfully loaded {model_name}")
+                st.session_state.loaded_models[model_name] = model
+            else:
+                update_status(f"❌ Failed to load {model_name}")
+                return None
+            time.sleep(1)
+        except Exception as e:
+            update_status(f"❌ Error loading {model_name}: {str(e)}")
+            return None
+        finally:
+            time.sleep(1)
+            status_container.empty()
+    return st.session_state.loaded_models[model_name]
+
+def get_loaded_models():
+    models = {}
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+    total_models = len(MODEL_OPTIONS)
+    def update_progress(progress, message=""):
+        progress_bar.progress(progress)
+        if message:
+            status_text.info(message)
+    for i, (name, model_info) in enumerate(MODEL_OPTIONS.items()):
+        update_progress(
+            (i / total_models) * 0.9,
+            f"Loading {name} model ({i+1}/{total_models})..."
+        )
+        models[name] = load_model_if_needed(
+            name, 
+            _progress_callback=lambda msg: update_progress(
+                (i / total_models) * 0.9, 
+                f"{name}: {msg}"
+            )
+        )
+    update_progress(1.0, "✅ All models loaded successfully!")
+    time.sleep(1)
+    progress_bar.empty()
+    status_text.empty()
+    return models
+
+load_all_models = get_loaded_models
+
+# --- Dynamic CSS for Dark Mode ---
+if st.session_state.get('dark_mode', False):
+    st.markdown("""
+    <style>
+        .main, .stApp {
+            background: #181f2f;
+        }
+        .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison {
+            background: #232a3d;
+            border-radius: 16px;
+            border: 1px solid #324a7c;
+            color: #f8fafc;
+            box-shadow: 0 2px 12px rgba(44, 62, 80, 0.08);
+        }
+        .spam-alert {
+            background: #2a3350;
+            border: 2px solid #ff4444;
+            color: #ff6b6b;
+        }
+        .ham-safe {
+            background: #233d2a;
+            border: 2px solid #44ff44;
+            color: #6bff6b;
+        }
+        .analysis-header {
+            background: #232a3d;
+            border-left: 4px solid #324a7c;
+            color: #f8fafc;
+        }
+        /* Input fields and dropdowns */
+        .stTextInput>div>input, .stTextArea>div>textarea, .stSelectbox>div>div>div {
+            background: #232a3d !important;
+            color: #f8fafc !important;
+            border: 1px solid #324a7c !important;
+        }
+        .stTextInput>div>input::placeholder, .stTextArea>div>textarea::placeholder {
+            color: #b3c7f7 !important;
+        }
+        /* Button styling */
+        .stButton>button {
+            background: #324a7c;
+            color: #f8fafc;
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+        }
+        .stButton>button:hover {
+            background: #415a9c;
+            color: #fff;
+        }
+        /* Label and text color for clarity */
+        label, .stMarkdown, .stRadio>div>label, .stSelectbox label, .stTextInput label {
+            color: #f8fafc !important;
+        }
+        /* Scrollbar styling for dark mode */
+        ::-webkit-scrollbar {
+            width: 8px;
+            background: #232a3d;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #324a7c;
+            border-radius: 8px;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+else:
+    st.markdown("""
+    <style>
+        .main, .stApp {
+            background: #f4f8ff;
+        }
+        .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison {
+            background: #e3eafc;
+            border-radius: 16px;
+            border: 1px solid #b3c7f7;
+            color: #232a3d;
+            box-shadow: 0 2px 12px rgba(44, 62, 80, 0.06);
+        }
+        .spam-alert {
+            background: #ffe3e3;
+            border: 2px solid #ff4444;
+            color: #ff6b6b;
+        }
+        .ham-safe {
+            background: #e3ffe3;
+            border: 2px solid #44ff44;
+            color: #6bff6b;
+        }
+        .analysis-header {
+            background: #e3eafc;
+            border-left: 4px solid #324a7c;
+            color: #232a3d;
+        }
+        /* Scrollbar styling for light mode */
+        ::-webkit-scrollbar {
+            width: 8px;
+            background: #e3eafc;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #324a7c;
+            border-radius: 8px;
+        }
+        /* Button styling */
+        .stButton>button {
+            background: #324a7c;
+            color: #e3eafc;
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+        }
+        .stButton>button:hover {
+            background: #415a9c;
+            color: #fff;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+    # ...existing code...
 
 # --- Helper Functions ---
 def analyse_message_features(message):
@@ -589,6 +635,7 @@ def render_spamlyser_dashboard():
     """, unsafe_allow_html=True)
 
     # Dashboard tabs
+    # Dashboard tabs
     dashboard_tabs = st.tabs(["🎯 Overview", "🤖 Model Performance", "🧠 Ensemble Analytics", "📊 Detailed Stats", "⚡ Real-time Monitor"])
 
     with dashboard_tabs[0]:  # Overview Tab
@@ -607,82 +654,113 @@ def render_spamlyser_dashboard():
         render_realtime_monitor()
 
 def render_overview_dashboard():
-    """Main overview dashboard with key metrics"""
+    st.markdown("""
+<style>
+.metric-container {
+    background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+
+    /* 🔑 Force same size for all cards */
+    min-height: 180px;
+    max-height: 180px;
+    min-width: 200px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.metric-container h2 {
+    margin: 0;
+    font-size: 2rem;
+}
+.metric-container p {
+    margin: 6px 0;
+    color: #ccc;
+}
+.metric-container small {
+    color: #aaa;
+}
+</style>
+""", unsafe_allow_html=True)
     
-    # Calculate key metrics from your existing session state
+    # --- Calculate key metrics ---
     total_single = len(st.session_state.classification_history)
     total_ensemble = len(st.session_state.ensemble_history)
     total_messages = total_single + total_ensemble
-    
+
     if total_messages == 0:
         st.info("🚀 Start analyzing messages to see dashboard insights!")
         return
-    
-    # Key Metrics Row
+
     col1, col2, col3, col4, col5 = st.columns(5)
-    
+
+    # --- SPAM ---
     with col1:
         spam_single = sum(1 for item in st.session_state.classification_history if item['prediction'] == 'SPAM')
         spam_ensemble = sum(1 for item in st.session_state.ensemble_history if item['prediction'] == 'SPAM')
         total_spam = spam_single + spam_ensemble
         spam_rate = (total_spam / total_messages * 100) if total_messages > 0 else 0
-        
+
         st.markdown(f"""
-        <div class="metric-container" style="background: linear-gradient(145deg, #2a1a1a, #3d2626); border: 2px solid #ff4444;">
-            <h2 style="color: #ff6b6b; margin: 0; font-size: 2.2rem;">🚨 {total_spam}</h2>
-            <p style="color: #ccc; margin: 5px 0;">SPAM Detected</p>
+        <div class="metric-container" style="border: 2px solid #ff4444;">
+            <h2 style="color: #ff6b6b;">🚨 {total_spam}</h2>
+            <p>SPAM Detected</p>
             <small style="color: #ff9999;">{spam_rate:.1f}% detection rate</small>
         </div>
         """, unsafe_allow_html=True)
-    
+
+    # --- HAM ---
     with col2:
         total_ham = total_messages - total_spam
         ham_rate = (total_ham / total_messages * 100) if total_messages > 0 else 0
-        
+
         st.markdown(f"""
-        <div class="metric-container" style="background: linear-gradient(145deg, #1a2a1a, #263d26); border: 2px solid #44ff44;">
-            <h2 style="color: #4ecdc4; margin: 0; font-size: 2.2rem;">✅ {total_ham}</h2>
-            <p style="color: #ccc; margin: 5px 0;">HAM (Safe)</p>
+        <div class="metric-container" style="border: 2px solid #44ff44;">
+            <h2 style="color: #4ecdc4;">✅ {total_ham}</h2>
+            <p>HAM (Safe)</p>
             <small style="color: #99ff99;">{ham_rate:.1f}% legitimate</small>
         </div>
         """, unsafe_allow_html=True)
-    
+
+    # --- Avg Confidence ---
     with col3:
-        # Average confidence across all predictions
         all_confidences = [item['confidence'] for item in st.session_state.classification_history] + \
-                         [item['confidence'] for item in st.session_state.ensemble_history]
+                          [item['confidence'] for item in st.session_state.ensemble_history]
         avg_confidence = sum(all_confidences) / len(all_confidences) if all_confidences else 0
-        
+
         st.markdown(f"""
-        <div class="metric-container">
-            <h2 style="color: #00d4aa; margin: 0; font-size: 2.2rem;">🎯 {avg_confidence:.1%}</h2>
-            <p style="color: #ccc; margin: 5px 0;">Avg Confidence</p>
-            <small style="color: #888;">Model certainty</small>
+        <div class="metric-container" style="border: 2px solid #00d4aa;">
+            <h2 style="color: #00d4aa;">🎯 {avg_confidence:.1%}</h2>
+            <p>Avg Confidence</p>
+            <small>Model certainty</small>
         </div>
         """, unsafe_allow_html=True)
-    
+
+    # --- Total Analyzed ---
     with col4:
         st.markdown(f"""
-        <div class="metric-container">
-            <h2 style="color: #a855f7; margin: 0; font-size: 2.2rem;">📱 {total_messages}</h2>
-            C:/Users/kaurk/Spamlyser/.venv/Scripts/python.exe -m streamlit run app.py            <p style="color: #ccc; margin: 5px 0;">Total Analyzed</p>
-            <small style="color: #888;">Messages processed</small>
+        <div class="metric-container" style="border: 2px solid #a855f7;">
+            <h2 style="color: #a855f7;">📱 {total_messages}</h2>
+            <p>Total Analyzed</p>
+            <small>Messages processed</small>
         </div>
         """, unsafe_allow_html=True)
-    
+
+    # --- Preferred Mode ---
     with col5:
-        # Most used analysis mode
         mode_ratio = (total_ensemble / total_messages * 100) if total_messages > 0 else 0
-        preferred_mode = "Ensemble" if total_ensemble > total_single else "Single Model"
-        
+        preferred_mode = "Ensemble" if total_ensemble > total_single else "Ensemble"
+
         st.markdown(f"""
-        <div class="metric-container">
-            <h2 style="color: #ffd93d; margin: 0; font-size: 2.2rem;">🧠 {preferred_mode}</h2>
-            <p style="color: #ccc; margin: 5px 0;">Preferred Mode</p>
-            <small style="color: #888;">{mode_ratio:.0f}% ensemble usage</small>
+        <div class="metric-container" style="border: 2px solid #ffd93d;">
+            <h2 style="color: #ffd93d;">🧠 {preferred_mode}</h2>
+            <p>Preferred Mode</p>
+            <small>{mode_ratio:.0f}% ensemble usage</small>
         </div>
         """, unsafe_allow_html=True)
-    
     # Threat Level Indicator
     st.markdown("### 🛡️ Current Threat Assessment")
     
@@ -1183,6 +1261,8 @@ def render_realtime_monitor():
                 mime="application/json"
             )
 
+# Add this to your main app.py file after your existing analysis section:
+
 # --- ADD THE DASHBOARD SECTION ---
 if st.sidebar.button("📊 Open Dashboard", key="open_dashboard", help="Open the advanced analytics dashboard"):
     st.session_state.show_dashboard = True
@@ -1248,8 +1328,7 @@ with col1:
         value=user_sms_initial_value,
         height=120,
         placeholder="Type or paste your SMS message here...",
-        help="Enter the SMS message you want to classify as spam or ham (legitimate)",
-        key="user_sms_input"
+        help="Enter the SMS message you want to classify as spam or ham (legitimate)"
     )
     # Store current text_area value in session state for persistence
     st.session_state.user_sms_input_value = user_sms
@@ -1261,9 +1340,16 @@ with col1:
     with col_b:
         clear_btn = st.button("🗑️ Clear", use_container_width=True)
     if clear_btn:
-        st.session_state.user_sms_input_value = "" # Clear text area content
-        st.session_state.sample_selector = "" # Reset sample selection
+        # Clear text area content
+        st.session_state.user_sms_input_value=""
+        
+        if "sample_selector" in st.session_state:
+            st.session_state.pop("sample_selector")
+        
+
         st.rerun() # Rerun to update the UI with cleared values
+
+
 
 if analyse_btn and user_sms.strip():
     if analysis_mode == "Single Model":
@@ -1278,7 +1364,7 @@ if analyse_btn and user_sms.strip():
                 st.session_state.model_stats[selected_model_name]['total'] += 1
                 st.session_state.classification_history.append({
                     'timestamp': datetime.now(),
-                    'message': user_sms[:100] + "..." if len(user_sms) > 100 else user_sms,
+                    'message': user_sms[:100] + "..." if len(user_sms) > 100 else user_sms, # Increased snippet length
                     'prediction': label,
                     'confidence': confidence,
                     'model': selected_model_name
@@ -1311,7 +1397,7 @@ if analyse_btn and user_sms.strip():
                     )
                     st.session_state.ensemble_history.append({
                         'timestamp': datetime.now(),
-                        'message': user_sms[:100] + "..." if len(user_sms) > 100 else user_sms,
+                        'message': user_sms[:100] + "..." if len(user_sms) > 100 else user_sms, # Increased snippet length
                         'prediction': ensemble_result['label'],
                         'confidence': ensemble_result['confidence'],
                         'method': selected_ensemble_method,
@@ -1336,6 +1422,18 @@ if analyse_btn and user_sms.strip():
                     st.markdown("#### 🤖 Individual Model Predictions")
                     cols = st.columns(len(predictions))
                     for i, (model_name, pred) in enumerate(predictions.items()):
+                        # Save individual model prediction to a global tracking list
+                        if 'model_vote_history' not in st.session_state:
+                            st.session_state.model_vote_history = []
+
+                        st.session_state.model_vote_history.append({
+                            'model': model_name,
+                            'label': pred['label'],
+                            'confidence': pred['score'],
+                            'message': user_sms,
+                            'timestamp': datetime.now()
+                        })
+
                         with cols[i]:
                             color = "#ff6b6b" if pred['label'] == "SPAM" else "#4ecdc4"
                             st.markdown(f"""
@@ -1496,23 +1594,40 @@ with col2:
             df_ensemble_history = pd.DataFrame(st.session_state.ensemble_history)
 
             # Pie Chart for Spam/Ham Distribution (Ensemble)
-            ensemble_counts = df_ensemble_history['prediction'].value_counts().reset_index()
-            ensemble_counts.columns = ['Label', 'Count']
-            fig_pie_ensemble = px.pie(
-                ensemble_counts, 
-                values='Count', 
-                names='Label', 
-                title='Ensemble Spam/Ham Distribution',
-                color_discrete_map={'SPAM': '#ff6b6b', 'HAM': '#4ecdc4'}
-            )
-            fig_pie_ensemble.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
-                font=dict(color='white'),
-                height=300,
-                margin=dict(t=50, b=0, l=0, r=0)
-            )
-            st.plotly_chart(fig_pie_ensemble, use_container_width=True)
+
+            st.markdown("#### 🧠 Ensemble Spam/Ham Distribution")
+
+            # Display vote pie chart
+            if 'model_vote_history' in st.session_state and st.session_state.model_vote_history:
+                df_votes = pd.DataFrame(st.session_state.model_vote_history)
+
+                vote_counts = df_votes['label'].value_counts().to_dict()
+                vote_counts_fixed = {
+                    'SPAM': vote_counts.get('SPAM', 0),
+                    'HAM': vote_counts.get('HAM', 0)
+                }
+
+                df_vote_chart = pd.DataFrame(list(vote_counts_fixed.items()), columns=['Label', 'Count'])
+
+                fig_model_votes = px.pie(
+                    df_vote_chart,
+                    values='Count',
+                    names='Label',
+                    title='Individual Model Votes Distribution',
+                    color_discrete_map={'SPAM': '#ff6b6b', 'HAM': '#4ecdc4'}
+                )
+
+                fig_model_votes.update_layout(
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color='white'),
+                    height=300,
+                    margin=dict(t=50, b=0, l=0, r=0)
+                )
+
+                st.plotly_chart(fig_model_votes, use_container_width=True)
+            else:
+                st.info("No individual model votes recorded yet. Run some ensemble predictions first.")
 
             # Confidence over time (Ensemble)
             fig_conf_ensemble = px.line(
@@ -1561,7 +1676,6 @@ with col2:
 
 
 # --- Bulk CSV Classification Section (Drag & Drop) ---
-st.markdown("---")
 st.subheader("📂 Drag & Drop CSV for Bulk Classification")
 
 uploaded_csv = st.file_uploader(
@@ -1745,27 +1859,8 @@ elif analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history:
             margin=dict(t=50, b=0, l=0, r=0)
         )
         st.plotly_chart(fig, use_container_width=True)
-
-# --- Footer ---
-st.markdown("---")
-st.markdown("""
-<div style="text-align: center; padding: 20px; background: rgba(255,255,255,0.02); border-radius: 10px; margin-top: 30px;">
-    <p style="color: #888; margin: 0;">
-        🛡️ <strong>Spamlyser Pro - Ensemble Edition</strong> | Advanced Multi-Model SMS Threat Detection<br>
-        Powered by Custom-Trained Transformer Models & Ensemble Learning<br>
-        Developed by <a href="https://eccentriccoder01.github.io/Me" target="_blank" style="color: #1f77b4; text-decoration: none; font-weight: 600;">MrEccentric</a>
-    </p>
-    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
-        <small style="color: #666;">
-            🎯 Features: Single Model Analysis | 🤖 Ensemble Methods | 📊 Performance Tracking | ⚖️ Adaptive Weights
-        </small>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
 # --- Advanced Features Section ---
 if analysis_mode == "Ensemble Analysis":
-    st.markdown("---")
     st.markdown("## 🔧 Advanced Ensemble Settings")
 
     col_advanced1, col_advanced2 = st.columns(2)
@@ -1859,3 +1954,19 @@ if analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history:
         st.dataframe(df_comparison, use_container_width=True)
     else:
         st.info("Not enough data to compare ensemble methods. Try more predictions with different methods.")
+# --- Footer ---
+st.markdown("""
+<div style="text-align: center; padding: 20px; background: rgba(255,255,255,0.02); border-radius: 10px; margin-top: 30px;">
+    <p style="color: #888; margin: 0;">
+        🛡️ <strong>Spamlyser Pro - Ensemble Edition</strong> | Advanced Multi-Model SMS Threat Detection<br>
+        Powered by Custom-Trained Transformer Models & Ensemble Learning<br>
+        Developed by <a href="https://eccentriccoder01.github.io/Me" target="_blank" style="color: #1f77b4; text-decoration: none; font-weight: 600;">MrEccentric</a>
+    </p>
+    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <small style="color: #666;">
+            🎯 Features: Single Model Analysis | 🤖 Ensemble Methods | 📊 Performance Tracking | ⚖️ Adaptive Weights
+        </small>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
