@@ -1,128 +1,104 @@
-# Contributor Covenant Code of Conduct
+# 📜 Code of Conduct 
+![Community](https://img.shields.io/badge/Community-Welcoming-brightgreen?style=for-the-badge) 
+![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-blue?style=for-the-badge) 
+![Contributors](https://img.shields.io/github/contributors/eccentriccoder01/Spamlyser?style=for-the-badge) !
+[License](https://img.shields.io/github/license/eccentriccoder01/Spamlyser?style=for-the-badge)
 
-## Our Pledge
+## 👋 Welcome to Spamlyser
+At **Spamlyser**, we’re committed to creating a **respectful, inclusive, and safe community** for everyone. This Code of Conduct explains our standards, expected behaviors, and how we handle violations.
 
-We as members, contributors, and leaders pledge to make participation in our
-community a harassment-free experience for everyone, regardless of age, body
-size, visible or invisible disability, ethnicity, sex characteristics, gender
-identity and expression, level of experience, education, socio-economic status,
-nationality, personal appearance, race, religion, or sexual identity
-and orientation.
+---
 
-We pledge to act and interact in ways that contribute to an open, welcoming,
-diverse, inclusive, and healthy community.
+## 🎯 Our Pledge
+We, as contributors and community members, pledge to make participation in our community a **harassment-free experience** for everyone, regardless of:  
+- 🌍 Age, nationality, ethnicity, race, religion  
+- 🧑‍🦽 Disability, body size, personal appearance  
+- 🧑‍🤝‍🧑 Gender identity and expression, sexual orientation  
+- 📚 Level of experience, technical background  
+- 💰 Socio-economic status  
 
-## Our Standards
+We promise to act in ways that contribute to an **open, welcoming, diverse, and healthy** community.  
+![Pledge GIF](https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExaWY2d3lncW9vcW90ZDViZzAxZ2p0a3Z0Z3dkczY0NmF2cmFycXh5ayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/L1R1tvI9svkIWwpVYr/giphy.gif)
 
-Examples of behavior that contributes to a positive environment for our
-community include:
+---
 
-* Demonstrating empathy and kindness toward other people
-* Being respectful of differing opinions, viewpoints, and experiences
-* Giving and gracefully accepting constructive feedback
-* Accepting responsibility and apologizing to those affected by our mistakes,
-  and learning from the experience
-* Focusing on what is best not just for us as individuals, but for the
-  overall community
+## ✅ Our Standards
+Positive behaviors that help build a welcoming community:  
+- 🤝 Show empathy and kindness toward others  
+- 🎤 Respect differing opinions and experiences  
+- 💡 Give and accept constructive feedback gracefully  
+- 🙏 Take responsibility for mistakes and learn from them  
+- 🌟 Focus on what benefits the **whole community**  
+![Teamwork GIF](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTBhMDdseWtraWtmYWVzamx1eTg1M2FwZjdzNXJ2YjI5anIzdTAweCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/ML15sUZFNyMy0Yv55m/giphy.gif)
 
-Examples of unacceptable behavior include:
+---
 
-* The use of sexualized language or imagery, and sexual attention or
-  advances of any kind
-* Trolling, insulting or derogatory comments, and personal or political attacks
-* Public or private harassment
-* Publishing others' private information, such as a physical or email
-  address, without their explicit permission
-* Other conduct which could reasonably be considered inappropriate in a
-  professional setting
+## 🚫 Unacceptable Behavior
+The following actions are not tolerated:  
+- ❌ Use of sexualized language or imagery  
+- ❌ Harassment, bullying, or personal/political attacks  
+- ❌ Public or private insults and derogatory comments  
+- ❌ Publishing private information without consent  
+- ❌ Disruptive, unprofessional, or harmful behavior  
+![No GIF](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTBhMDdseWtraWtmYWVzamx1eTg1M2FwZjdzNXJ2YjI5anIzdTAweCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/HscDLzkO8EOTmgkhQP/giphy.gif)
 
-## Enforcement Responsibilities
+---
 
-Community leaders are responsible for clarifying and enforcing our standards of
-acceptable behavior and will take appropriate and fair corrective action in
-response to any behavior that they deem inappropriate, threatening, offensive,
-or harmful.
+## 🛡 Enforcement Responsibilities
+Community leaders are responsible for:  
+- Clarifying and enforcing this Code of Conduct  
+- Taking fair corrective action when necessary  
+- Maintaining confidentiality of all reports  
+![Protection GIF](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTBhMDdseWtraWtmYWVzamx1eTg1M2FwZjdzNXJ2YjI5anIzdTAweCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/OumCa12QC9CIvBe2c1/giphy.gif)
 
-Community leaders have the right and responsibility to remove, edit, or reject
-comments, commits, code, wiki edits, issues, and other contributions that are
-not aligned to this Code of Conduct, and will communicate reasons for moderation
-decisions when appropriate.
+---
 
-## Scope
+## 📌 Scope
+This Code of Conduct applies to:  
+- All community spaces (online and offline)  
+- Any situation where an individual is representing the community  
 
-This Code of Conduct applies within all community spaces, and also applies when
-an individual is officially representing the community in public spaces.
-Examples of representing our community include using an official e-mail address,
-posting via an official social media account, or acting as an appointed
-representative at an online or offline event.
+Examples: official email, social media accounts, events, or meetups.  
+![Scope GIF](https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExaTU4b3d5cXFndndqem14Ym1uOG95cXUxbWpvcTdzMDN3YjR1ZnRqayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/H03PuVdwREB21ANkLX/giphy.gif)
 
-## Enforcement
+---
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-sagnikgraviton847@gmail.com.
-All complaints will be reviewed and investigated promptly and fairly.
+## 📣 Reporting Issues
+If you experience or witness unacceptable behavior, please report it at:  
+📧 **sagnikgraviton847@gmail.com**  
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+All reports will be reviewed promptly, fairly, and kept confidential.  
+![Report GIF](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTBhMDdseWtraWtmYWVzamx1eTg1M2FwZjdzNXJ2YjI5anIzdTAweCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/qgQUggAC3Pfv687qPC/giphy.gif)
 
-## Enforcement Guidelines
+---
 
-Community leaders will follow these Community Impact Guidelines in determining
-the consequences for any action they deem in violation of this Code of Conduct:
+## ⚖️ Enforcement Guidelines
+Consequences for violations:  
 
-### 1. Correction
+1. **Correction** 📝  
+- Private written warning  
+- Request for a public apology  
+![Warning GIF](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTBhMDdseWtraWtmYWVzamx1eTg1M2FwZjdzNXJ2YjI5anIzdTAweCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/26tn33aiTi1jkl6H6/giphy.gif)  
 
-**Community Impact**: Use of inappropriate language or other behavior deemed
-unprofessional or unwelcome in the community.
+2. **Warning** ⚠️  
+- Official warning with conditions  
+- Restricted interactions temporarily  
 
-**Consequence**: A private, written warning from community leaders, providing
-clarity around the nature of the violation and an explanation of why the
-behavior was inappropriate. A public apology may be requested.
+3. **Temporary Ban** ⏳  
+- Removal from community spaces for a period  
 
-### 2. Warning
+4. **Permanent Ban** 🚫  
+- Permanent removal for repeated or serious violations  
 
-**Community Impact**: A violation through a single incident or series
-of actions.
+---
 
-**Consequence**: A warning with consequences for continued behavior. No
-interaction with the people involved, including unsolicited interaction with
-those enforcing the Code of Conduct, for a specified period of time. This
-includes avoiding interactions in community spaces as well as external channels
-like social media. Violating these terms may lead to a temporary or
-permanent ban.
+## 📄 Attribution
+This Code of Conduct is adapted from:  
+- [Contributor Covenant v2.0](https://www.contributor-covenant.org/version/2/0/code_of_conduct.html)  
+- [Mozilla’s Community Guidelines](https://github.com/mozilla/diversity)
 
-### 3. Temporary Ban
+---
 
-**Community Impact**: A serious violation of community standards, including
-sustained inappropriate behavior.
-
-**Consequence**: A temporary ban from any sort of interaction or public
-communication with the community for a specified period of time. No public or
-private interaction with the people involved, including unsolicited interaction
-with those enforcing the Code of Conduct, is allowed during this period.
-Violating these terms may lead to a permanent ban.
-
-### 4. Permanent Ban
-
-**Community Impact**: Demonstrating a pattern of violation of community
-standards, including sustained inappropriate behavior,  harassment of an
-individual, or aggression toward or disparagement of classes of individuals.
-
-**Consequence**: A permanent ban from any sort of public interaction within
-the community.
-
-## Attribution
-
-This Code of Conduct is adapted from the [Contributor Covenant][homepage],
-version 2.0, available at
-https://www.contributor-covenant.org/version/2/0/code_of_conduct.html.
-
-Community Impact Guidelines were inspired by [Mozilla's code of conduct
-enforcement ladder](https://github.com/mozilla/diversity).
-
-[homepage]: https://www.contributor-covenant.org
-
-For answers to common questions about this code of conduct, see the FAQ at
-https://www.contributor-covenant.org/faq. Translations are available at
-https://www.contributor-covenant.org/translations.
+## ❤️ Final Note
+Spamlyser is **more than a tool** — it’s a community. Let’s keep it welcoming, inclusive, and empowering for everyone 🚀  
+![Community GIF](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcGxnMGpmaDl3MTR2aDIwZjlneTdkcHZkNGRlbTkxbm83ZHRoMnN4dCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/wIVA0zh5pt0G5YtcAL/giphy.gif)

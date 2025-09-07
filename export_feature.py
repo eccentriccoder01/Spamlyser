@@ -42,7 +42,7 @@ def export_results_button(history, filename_prefix="spamlyser_results"):
     export_format = st.selectbox(
         "Export results as:",
         options=["CSV", "PDF"],
-        key=f"export_format_{filename_prefix}_{ts}"
+        key=f"export_format_{filename_prefix}"
     )
     if export_format == "CSV":
         csv_data = df.to_csv(index=False)
