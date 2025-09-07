@@ -4,6 +4,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
 from datetime import datetime, timedelta
+import onnxruntime as ort
+import json
 
 # Assuming these files exist in the same directory
 from export_feature import export_results_button 
@@ -387,132 +389,61 @@ with st.sidebar:
         """, unsafe_allow_html=True)
 
 
-# --- Model Loading Helpers ---
+# --- ONNX Model Path ---
+ONNX_MODEL_PATH = "distilbert_spamlyser.onnx"  # Update if your ONNX file has a different name
+
+# --- ONNX Inference Session (cached) ---
 @st.cache_resource
-def load_tokenizer(model_id):
+def get_onnx_session():
     try:
-        return AutoTokenizer.from_pretrained(model_id)
+        return ort.InferenceSession(ONNX_MODEL_PATH)
     except Exception as e:
-        st.error(f"❌ Error loading tokenizer for {model_id}: {str(e)}")
+        st.error(f"❌ Error loading ONNX model: {str(e)}")
         return None
 
-# --- Dynamic CSS for Dark Mode ---
-if st.session_state.get('dark_mode', False):
-    st.markdown("""
-    <style>
-        .main, .stApp {
-            background: #181f2f;
-        }
-        .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison {
-            background: #232a3d;
-            border-radius: 16px;
-            border: 1px solid #324a7c;
-            color: #f8fafc;
-            box-shadow: 0 2px 12px rgba(44, 62, 80, 0.08);
-        }
-        .spam-alert {
-            background: #2a3350;
-            border: 2px solid #ff4444;
-            color: #ff6b6b;
-        }
-        .ham-safe {
-            background: #233d2a;
-            border: 2px solid #44ff44;
-            color: #6bff6b;
-        }
-        .analysis-header {
-            background: #232a3d;
-            border-left: 4px solid #324a7c;
-            color: #f8fafc;
-        }
-        /* Input fields and dropdowns */
-        .stTextInput>div>input, .stTextArea>div>textarea, .stSelectbox>div>div>div {
-            background: #232a3d !important;
-            color: #f8fafc !important;
-            border: 1px solid #324a7c !important;
-        }
-        .stTextInput>div>input::placeholder, .stTextArea>div>textarea::placeholder {
-            color: #b3c7f7 !important;
-        }
-        /* Button styling */
-        .stButton>button {
-            background: #324a7c;
-            color: #f8fafc;
-            border-radius: 8px;
-            border: none;
-            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
-        }
-        .stButton>button:hover {
-            background: #415a9c;
-            color: #fff;
-        }
-        /* Label and text color for clarity */
-        label, .stMarkdown, .stRadio>div>label, .stSelectbox label, .stTextInput label {
-            color: #f8fafc !important;
-        }
-        /* Scrollbar styling for dark mode */
-        ::-webkit-scrollbar {
-            width: 8px;
-            background: #232a3d;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #324a7c;
-            border-radius: 8px;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-else:
-    st.markdown("""
-    <style>
-        .main, .stApp {
-            background: #f4f8ff;
-        }
-        .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison {
-            background: #e3eafc;
-            border-radius: 16px;
-            border: 1px solid #b3c7f7;
-            color: #232a3d;
-            box-shadow: 0 2px 12px rgba(44, 62, 80, 0.06);
-        }
-        .spam-alert {
-            background: #ffe3e3;
-            border: 2px solid #ff4444;
-            color: #ff6b6b;
-        }
-        .ham-safe {
-            background: #e3ffe3;
-            border: 2px solid #44ff44;
-            color: #6bff6b;
-        }
-        .analysis-header {
-            background: #e3eafc;
-            border-left: 4px solid #324a7c;
-            color: #232a3d;
-        }
-        /* Scrollbar styling for light mode */
-        ::-webkit-scrollbar {
-            width: 8px;
-            background: #e3eafc;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #324a7c;
-            border-radius: 8px;
-        }
-        /* Button styling */
-        .stButton>button {
-            background: #324a7c;
-            color: #e3eafc;
-            border-radius: 8px;
-            border: none;
-            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
-        }
-        .stButton>button:hover {
-            background: #415a9c;
-            color: #fff;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-    # ...existing code...
+# --- ONNX Tokenizer Loader (cached) ---
+@st.cache_resource
+def get_onnx_tokenizer():
+    try:
+        return AutoTokenizer.from_pretrained("mreccentric/distilbert-base-uncased-spamlyser")
+    except Exception as e:
+        st.error(f"❌ Error loading tokenizer for ONNX: {str(e)}")
+        return None
+
+# --- ONNX Prediction Function ---
+def predict_with_onnx(message):
+    session = get_onnx_session()
+    tokenizer = get_onnx_tokenizer()
+    if session is None or tokenizer is None:
+        return {"label": "ERROR", "score": 0.0}
+    inputs = tokenizer(message, return_tensors="np")
+    ort_inputs = {k: v for k, v in inputs.items()}
+    outputs = session.run(None, ort_inputs)
+    logits = outputs[0][0]
+    # Softmax
+    exp_logits = np.exp(logits - np.max(logits))
+    probs = exp_logits / exp_logits.sum()
+    label = "SPAM" if np.argmax(probs) == 1 else "HAM"
+    score = float(probs[np.argmax(probs)])
+    return {"label": label, "score": score}
+
+# --- Model Loader (with ONNX for DistilBERT) ---
+@st.cache_resource
+def load_model_if_needed(model_name):
+    if model_name == "DistilBERT":
+        # Use ONNX for DistilBERT
+        def onnx_classifier(msgs):
+            if isinstance(msgs, str):
+                return [predict_with_onnx(msgs)]
+            return [predict_with_onnx(m) for m in msgs]
+        return onnx_classifier
+    # Fallback to HuggingFace pipeline for other models
+    model_id = MODEL_OPTIONS[model_name]["id"]
+    try:
+        return pipeline("text-classification", model=model_id, tokenizer=model_id)
+    except Exception as e:
+        st.error(f"❌ Error loading model {model_name}: {str(e)}")
+        return None
 
 # --- Helper Functions ---
 def analyse_message_features(message):
@@ -1240,7 +1171,7 @@ if analyse_btn and user_sms.strip():
                 st.session_state.model_stats[selected_model_name]['total'] += 1
                 st.session_state.classification_history.append({
                     'timestamp': datetime.now(),
-                    'message': user_sms[:100] + "..." if len(user_sms) > 100 else user_sms, # Increased snippet length
+                    'message': user_sms[:100] + "..." if len(user_sms) > 100 else user_sms,
                     'prediction': label,
                     'confidence': confidence,
                     'model': selected_model_name
@@ -1273,7 +1204,7 @@ if analyse_btn and user_sms.strip():
                     )
                     st.session_state.ensemble_history.append({
                         'timestamp': datetime.now(),
-                        'message': user_sms[:100] + "..." if len(user_sms) > 100 else user_sms, # Increased snippet length
+                        'message': user_sms[:100] + "..." if len(user_sms) > 100 else user_sms,
                         'prediction': ensemble_result['label'],
                         'confidence': ensemble_result['confidence'],
                         'method': selected_ensemble_method,
