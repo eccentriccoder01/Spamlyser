@@ -1353,11 +1353,15 @@ with col1:
 
 if analyse_btn and user_sms.strip():
     if analysis_mode == "Single Model":
+        from smart_preprocess import preprocess_message
+        preprocessed = preprocess_message(user_sms)
+        cleaned_sms = preprocessed["cleaned"]
+        suspicious_features = preprocessed["suspicious"]
         classifier = load_model_if_needed(selected_model_name)
         if classifier is not None:
             with st.spinner(f"🤖 Analyzing with {selected_model_name}..."):
                 time.sleep(0.5)
-                result = classifier(user_sms)[0]
+                result = classifier(cleaned_sms)[0]
                 label = result['label'].upper()
                 confidence = result['score']
                 st.session_state.model_stats[selected_model_name][label.lower()] += 1
@@ -1367,10 +1371,12 @@ if analyse_btn and user_sms.strip():
                     'message': user_sms[:100] + "..." if len(user_sms) > 100 else user_sms, # Increased snippet length
                     'prediction': label,
                     'confidence': confidence,
-                    'model': selected_model_name
+                    'model': selected_model_name,
+                    'preprocessed': cleaned_sms,
+                    'suspicious_features': suspicious_features
                 })
-                features = analyse_message_features(user_sms)
-                risk_indicators = get_risk_indicators(user_sms, label)
+                features = analyse_message_features(cleaned_sms)
+                risk_indicators = get_risk_indicators(cleaned_sms, label)
                 st.markdown("### 🎯 Classification Results")
                 card_class = "spam-alert" if label == "SPAM" else "ham-safe"
                 icon = "🚨" if label == "SPAM" else "✅"
