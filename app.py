@@ -88,11 +88,9 @@ st.markdown("""
     .main {
         background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
     }
-    
     .stApp {
         background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
     }
-    
     .metric-container {
         background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
         padding: 20px;
@@ -101,7 +99,6 @@ st.markdown("""
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         margin: 10px 0;
     }
-    
     .prediction-card {
         background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
         padding: 25px;
@@ -111,7 +108,6 @@ st.markdown("""
         text-align: center;
         margin: 20px 0;
     }
-    
     .ensemble-card {
         background: linear-gradient(145deg, #1a1a2a, #2d2d3d);
         padding: 20px;
@@ -119,19 +115,16 @@ st.markdown("""
         border: 2px solid #6366f1;
         margin: 15px 0;
     }
-    
     .spam-alert {
         background: linear-gradient(145deg, #2a1a1a, #3d2626);
         border: 2px solid #ff4444;
         color: #ff6b6b;
     }
-    
     .ham-safe {
         background: linear-gradient(145deg, #1a2a1a, #263d26);
         border: 2px solid #44ff44;
         color: #6bff6b;
     }
-    
     .analysis-header {
         background: linear-gradient(90deg, #333, #555);
         padding: 15px;
@@ -139,7 +132,6 @@ st.markdown("""
         margin: 20px 0;
         border-left: 4px solid #00d4aa;
     }
-    
     .feature-card {
         background: rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(10px);
@@ -148,7 +140,6 @@ st.markdown("""
         padding: 20px;
         margin: 10px 0;
     }
-    
     .model-info {
         background: linear-gradient(145deg, #252525, #3a3a3a);
         padding: 15px;
@@ -156,7 +147,6 @@ st.markdown("""
         border-left: 4px solid #00d4aa;
         margin: 15px 0;
     }
-    
     .ensemble-method {
         background: linear-gradient(145deg, #252545, #3a3a5a);
         padding: 12px;
@@ -164,7 +154,6 @@ st.markdown("""
         border-left: 4px solid #6366f1;
         margin: 8px 0;
     }
-    
     .method-comparison {
         background: rgba(255, 255, 255, 0.03);
         padding: 15px;
@@ -175,6 +164,126 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# --- Dark Mode Toggle ---
+if 'dark_mode' not in st.session_state:
+    st.session_state.dark_mode = False
+st.session_state.dark_mode = st.sidebar.checkbox("🌙 Enable Dark Mode", value=st.session_state.dark_mode, help="Toggle dark mode for the app")
+
+if st.session_state.get('dark_mode', False):
+    st.markdown("""
+    <style>
+        .main, .stApp {
+            background: #181f2f;
+        }
+        .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison {
+            background: #232a3d;
+            border-radius: 16px;
+            border: 1px solid #324a7c;
+            color: #f8fafc;
+            box-shadow: 0 2px 12px rgba(44, 62, 80, 0.08);
+        }
+        .spam-alert {
+            background: #2a3350;
+            border: 2px solid #ff4444;
+            color: #ff6b6b;
+        }
+        .ham-safe {
+            background: #233d2a;
+            border: 2px solid #44ff44;
+            color: #6bff6b;
+        }
+        .analysis-header {
+            background: #232a3d;
+            border-left: 4px solid #324a7c;
+            color: #f8fafc;
+        }
+        /* Input fields and dropdowns */
+        .stTextInput>div>input, .stTextArea>div>textarea, .stSelectbox>div>div>div {
+            background: #232a3d !important;
+            color: #f8fafc !important;
+            border: 1px solid #324a7c !important;
+        }
+        .stTextInput>div>input::placeholder, .stTextArea>div>textarea::placeholder {
+            color: #b3c7f7 !important;
+        }
+        /* Button styling */
+        .stButton>button {
+            background: #324a7c;
+            color: #f8fafc;
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+        }
+        .stButton>button:hover {
+            background: #415a9c;
+            color: #fff;
+        }
+        /* Label and text color for clarity */
+        label, .stMarkdown, .stRadio>div>label, .stSelectbox label, .stTextInput label {
+            color: #f8fafc !important;
+        }
+        /* Scrollbar styling for dark mode */
+        ::-webkit-scrollbar {
+            width: 8px;
+            background: #232a3d;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #324a7c;
+            border-radius: 8px;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+else:
+    st.markdown("""
+    <style>
+        .main, .stApp {
+            background: #f4f8ff;
+        }
+        .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison {
+            background: #e3eafc;
+            border-radius: 16px;
+            border: 1px solid #b3c7f7;
+            color: #232a3d;
+            box-shadow: 0 2px 12px rgba(44, 62, 80, 0.06);
+        }
+        .spam-alert {
+            background: #ffe3e3;
+            border: 2px solid #ff4444;
+            color: #ff6b6b;
+        }
+        .ham-safe {
+            background: #e3ffe3;
+            border: 2px solid #44ff44;
+            color: #6bff6b;
+        }
+        .analysis-header {
+            background: #e3eafc;
+            border-left: 4px solid #324a7c;
+            color: #232a3d;
+        }
+        /* Scrollbar styling for light mode */
+        ::-webkit-scrollbar {
+            width: 8px;
+            background: #e3eafc;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #324a7c;
+            border-radius: 8px;
+        }
+        /* Button styling */
+        .stButton>button {
+            background: #324a7c;
+            color: #e3eafc;
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+        }
+        .stButton>button:hover {
+            background: #415a9c;
+            color: #fff;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
 # --- Load Sample Messages (with fallback) ---
 try:
@@ -294,7 +403,7 @@ with st.sidebar:
         <h3 style="color: #00d4aa; margin: 0;">Analysis Mode</h3>
     </div>
     """, unsafe_allow_html=True)
-    st.session_state.dark_mode = st.checkbox("🌙 Enable Dark Mode", value=st.session_state.dark_mode, help="Toggle dark mode for the app")
+    st.session_state.dark_mode = st.checkbox("🌙 Enable Dark Mode", value=st.session_state.dark_mode, help="Toggle dark mode for the app", key="dark_mode_toggle")
 
     analysis_mode = st.radio(
         "Choose Analysis Mode",
@@ -1073,8 +1182,6 @@ def render_realtime_monitor():
                 file_name=f"spamlyser_dashboard_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
                 mime="application/json"
             )
-
-# Add this to your main app.py file after your existing analysis section:
 
 # --- ADD THE DASHBOARD SECTION ---
 if st.sidebar.button("📊 Open Dashboard", key="open_dashboard", help="Open the advanced analytics dashboard"):
