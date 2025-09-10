@@ -15,6 +15,7 @@ class PredictionResult:
     spam_probability: float
     details: str
     metadata: Dict[str, Any]
+    threat_type: str = None  # Can be "Phishing", "Scam/Fraud", "Unwanted Marketing", "Other", or None for HAM
 
 class EnsembleSpamClassifier:
     # Enhanced ensemble classifier that combines predictions from multiple spam detection models
@@ -420,13 +421,16 @@ class EnsembleSpamClassifier:
         
         result = method_map[method](predictions)
         
-        # Add timestamp
+            # Add timestamp
         result['metadata'] = result.get('metadata', {})
         result['metadata']['timestamp'] = datetime.now().isoformat()
         result['metadata']['input_models'] = list(predictions.keys())
         
+        # Add threat type if it's SPAM (to be populated by threat_analyzer later)
+        result['threat_type'] = None
+        
         return result
-    
+        
     def get_all_predictions(self, predictions: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
     
         methods = ["majority_voting", "weighted_average", "confidence_weighted", 
