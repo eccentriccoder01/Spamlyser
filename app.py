@@ -9,8 +9,7 @@ from datetime import datetime, timedelta
 # Assuming these files exist in the same directory
 from export_feature import export_results_button 
 from threat_analyzer import classify_threat_type, get_threat_specific_advice, THREAT_CATEGORIES
-from model_explainer import ModelExplainer
-from model_explainer import ModelExplainer
+from word_analyzer import WordAnalyzer
 # from ensemble_classifier_method import EnsembleSpamClassifier, ModelPerformanceTracker, PredictionResult
 # Dummy classes if you don't have the actual files for testing
 try:
@@ -1324,7 +1323,31 @@ def get_ensemble_predictions(message, models):
                 continue
     return predictions
 
-# --- Main Interface ---
+def create_predict_proba(classifier):
+    """
+    Creates a batch-processing prediction function for LIME.
+    `classifier` is a Hugging Face pipeline object.
+    """
+    def predict_proba_batch(texts: List[str]) -> np.ndarray:
+        # 1. Get predictions for the whole batch at once
+        # The pipeline is highly optimized for this!
+        predictions = classifier(texts, top_k=2) # Get probabilities for both classes
+
+        results = []
+        for pred_list in predictions:
+            # 2. Create a dictionary for easy lookup of scores by label
+            score_dict = {p['label'].upper(): p['score'] for p in pred_list}
+            
+            # 3. Get the score for SPAM, defaulting to 0.0 if not found
+            spam_score = score_dict.get('SPAM', 0.0)
+            
+            # 4. LIME expects probabilities for all classes. Order is [HAM, SPAM]
+            # The HAM score will be 1.0 - SPAM score
+            results.append([1.0 - spam_score, spam_score])
+            
+        return np.array(results)
+        
+    return predict_proba_batch# --- Main Interface ---
 col1, col2 = st.columns([2, 1])
 
 with col1:
@@ -1356,6 +1379,73 @@ with col1:
         analyse_btn = st.button("🔍 Analyse Message", type="primary", use_container_width=True)
     with col_b:
         clear_btn = st.button("🗑️ Clear", use_container_width=True)
+    
+    # Test word analysis button (always visible)
+    if st.button("🔍 Word Analysis", key="test_word_analysis", type="primary"):
+        st.markdown("### 🔍 Word Analysis")
+        
+        # Use the current message from the text area
+        test_message = user_sms if user_sms.strip() else "Congratulations! You won a free prize, click now!"
+        st.markdown(f"**Analyzing Message:** {test_message}")
+        
+        # Create word analyzer
+        analyzer = WordAnalyzer()
+        
+        # Analyze the text
+        with st.spinner("🔍 Analyzing message..."):
+            analysis = analyzer.analyze_text(test_message)
+        
+        # Show the highlighted text
+        st.markdown("#### 📝 Your Message with Word Analysis")
+        st.markdown("**🔴 Red words** = Spam indicators | **🟢 Green words** = Ham indicators | **🟠 Orange words** = Suspicious patterns")
+        
+        highlighted_html = analyzer.create_highlighted_html(analysis)
+        st.markdown(highlighted_html, unsafe_allow_html=True)
+        
+        # Show summary
+        summary = analyzer.get_explanation_summary(analysis)
+        
+        # Always count neutral words as ham for clearer UI in HAM messages
+        spam_count = len(summary['top_spam_words'])
+        ham_count = len(summary['top_ham_words'])
+        
+        # For HAM messages, all non-spam words are considered ham indicators
+        if analysis.get('predicted_class') == 'HAM':
+            neutral_words = [w for w in analysis['words'] if not w.get('is_spammy', False) and not w.get('is_hammy', False)]
+            ham_count += len(neutral_words)
+            
+            # Add neutral words to the top_ham_words list for visibility
+            for word in neutral_words:
+                if word['word'] not in [w['word'] for w in summary['top_ham_words']]:
+                    summary['top_ham_words'].append({
+                        'word': word['word'],
+                        'influence': -0.2,  # Give it a small negative influence (ham)
+                        'type': 'neutral-ham'
+                    })
+        
+        st.success(f"✅ Analysis complete! Found {spam_count} spam indicators and {ham_count} ham indicators.")
+        
+        # Show more detailed breakdown
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("**Spam Indicators:**")
+            if spam_count > 0:
+                for word in summary['top_spam_words']:
+                    influence = word.get('influence', 0.0)
+                    st.markdown(f"🔴 **{word['word']}** (Score: {influence:.2f})")
+            else:
+                st.info("No spam indicators found")
+                
+        with col2:
+            st.markdown("**Ham Indicators:**")
+            if ham_count > 0:
+                for word in summary['top_ham_words']:
+                    influence = word.get('influence', 0.0)
+                    # Make sure we use the absolute value for ham scores
+                    st.markdown(f"🟢 **{word['word']}** (Score: {abs(influence):.2f})")
+            else:
+                st.info("No ham indicators found")
+    
     if clear_btn:
         # Clear text area content
         st.session_state.user_sms_input_value=""
@@ -1381,6 +1471,11 @@ if analyse_btn and user_sms.strip():
                 result = classifier(cleaned_sms)[0]
                 label = result['label'].upper()
                 confidence = result['score']
+                
+                # Store prediction results in session state for explanation
+                st.session_state.user_sms = user_sms
+                st.session_state.current_prediction_label = label
+                st.session_state.current_prediction_confidence = confidence
                 
                 # Special case for DistilBERT - it sometimes misses obvious scams
                 if selected_model_name == "DistilBERT" and label == "HAM":
@@ -1453,109 +1548,6 @@ if analyse_btn and user_sms.strip():
                 if label == "SPAM" and threat_type:
                     st.markdown(threat_html, unsafe_allow_html=True)
                 
-                # Add model explainability section for single model predictions
-                if st.checkbox("🔍 Show Model Explanation", key="show_explanation_single"):
-                    st.markdown("### 🧠 Model Explanation")
-                    
-                    with st.spinner("Generating model explanation..."):
-                        # Create model explainer with a more reliable predict function
-                        def predict_proba(texts):
-                            try:
-                                results = []
-                                for text in texts:
-                                    try:
-                                        # Get prediction from classifier
-                                        result = classifier(text)[0]
-                                        
-                                        # Fix probability handling for HAM/SPAM
-                                        if result['label'] == 'HAM':
-                                            # For HAM, first probability is HAM (higher), second is SPAM (lower)
-                                            ham_prob = max(min(result['score'], 0.999), 0.001)  # Ensure probabilities are in range
-                                            spam_prob = 1 - ham_prob
-                                        else:  # SPAM
-                                            # For SPAM, first probability is HAM (lower), second is SPAM (higher)
-                                            spam_prob = max(min(result['score'], 0.999), 0.001)
-                                            ham_prob = 1 - spam_prob
-                                        
-                                        probs = [ham_prob, spam_prob]
-                                        results.append(probs)
-                                    except Exception as e:
-                                        st.warning(f"Error processing text: {str(e)}")
-                                        results.append([0.5, 0.5])  # Default to 50/50 on error
-                                
-                                return np.array(results)
-                            except Exception as e:
-                                st.error(f"Error in predict_proba: {str(e)}")
-                                # Return a default prediction
-                                return np.array([[0.5, 0.5] for _ in range(len(texts))])
-                        
-                        try:
-                            # Create explainer
-                            explainer = ModelExplainer(predict_proba, class_names=["HAM", "SPAM"])
-                            
-                            with st.status("Generating explanation...", expanded=True) as status:
-                                status.update(label="Analyzing text features...")
-                                explanation = explainer.explain_prediction(cleaned_sms)
-                                
-                                status.update(label="Visualizing results...")
-                                visualization = explainer.visualize_explanation(explanation)
-                                status.update(label="Complete!", state="complete")
-                            
-                            # Display feature importance
-                            st.markdown("#### Most Influential Words")
-                            
-                            # Check if we have features for both classes
-                            ham_features = visualization['feature_importance'].get("HAM", [])
-                            spam_features = visualization['feature_importance'].get("SPAM", [])
-                            
-                            if ham_features or spam_features:
-                                feature_cols = st.columns([1, 1])
-                                
-                                with feature_cols[0]:
-                                    st.markdown("##### Words Indicating HAM")
-                                    if ham_features:
-                                        for feat in ham_features[:5]:
-                                            color = "#4ecdc4" if feat.get('effect') == 'positive' else "#ff6b6b"
-                                            weight = feat.get('weight', 0)
-                                            st.markdown(f"""
-                                            <div style="padding: 8px; margin: 5px 0; background: rgba(78, 205, 196, 0.1); border-radius: 5px; border-left: 3px solid {color};">
-                                                <span style="font-weight: bold;">"{feat.get('feature', '')}"</span>
-                                                <span style="float: right; color: {color};">{weight:.3f}</span>
-                                            </div>
-                                            """, unsafe_allow_html=True)
-                                    else:
-                                        st.info("No significant HAM indicators found")
-                                        
-                                with feature_cols[1]:
-                                    st.markdown("##### Words Indicating SPAM")
-                                    if spam_features:
-                                        for feat in spam_features[:5]:
-                                            color = "#4ecdc4" if feat.get('effect') == 'positive' else "#ff6b6b"
-                                            weight = feat.get('weight', 0)
-                                            st.markdown(f"""
-                                            <div style="padding: 8px; margin: 5px 0; background: rgba(255, 107, 107, 0.1); border-radius: 5px; border-left: 3px solid {color};">
-                                                <span style="font-weight: bold;">"{feat.get('feature', '')}"</span>
-                                                <span style="float: right; color: {color};">{weight:.3f}</span>
-                                            </div>
-                                            """, unsafe_allow_html=True)
-                                    else:
-                                        st.info("No significant SPAM indicators found")
-                            else:
-                                st.info("No significant word features found for this message")
-                            
-                            # Display threat-specific explanation if applicable
-                            if threat_type:
-                                st.markdown(f"#### {THREAT_CATEGORIES[threat_type]['icon']} Why this is {threat_type}")
-                                threat_explanation = explainer.get_threat_explanation(cleaned_sms, threat_type)
-                                
-                                # Display matching keywords
-                                if threat_explanation.get('matching_keywords', []):
-                                    st.markdown("##### Detected Keywords:")
-                                    keywords_html = ", ".join([f"<span style='background-color: rgba(255,200,0,0.3); padding: 2px 5px; border-radius: 3px; margin: 0 2px;'>{k}</span>" for k in threat_explanation['matching_keywords']])
-                                    st.markdown(f"<div>{keywords_html}</div>", unsafe_allow_html=True)
-                        except Exception as e:
-                            st.error(f"Error generating explanation: {str(e)}")
-                            st.info("Explanation could not be generated. This may occur when using dummy models or when the model's output format is unexpected.")
     else: # Ensemble Analysis
         with st.spinner("🤖 Loading all models for ensemble analysis..."):
             models = {}
@@ -1627,113 +1619,6 @@ if analyse_btn and user_sms.strip():
                     if ensemble_result['label'] == "SPAM" and threat_type:
                         st.markdown(threat_html, unsafe_allow_html=True)
                     
-                    # Add model explainability section for ensemble predictions
-                    if st.checkbox("🔍 Show Model Explanation", key="show_explanation_ensemble"):
-                        st.markdown("### 🧠 Ensemble Explanation")
-                        
-                        # For ensemble predictions, we'll create a simpler explanation that combines
-                        # the individual model predictions with threat analysis
-                        st.markdown("#### Ensemble Decision Process")
-                        
-                        st.markdown(f"""
-                        <div style="padding: 15px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; margin: 10px 0;">
-                            <p><strong>Method:</strong> {ENSEMBLE_METHODS[selected_ensemble_method]['name']}</p>
-                            <p><strong>Description:</strong> {ENSEMBLE_METHODS[selected_ensemble_method]['description']}</p>
-                            <p><strong>Final Decision:</strong> {ensemble_result['label']} (Confidence: {ensemble_result['confidence']:.2%})</p>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
-                        # Display threat analysis if applicable
-                        if ensemble_result['label'] == "SPAM" and threat_type:
-                            st.markdown(f"#### {THREAT_CATEGORIES[threat_type]['icon']} Threat Analysis: {threat_type}")
-                            
-                            # Use a simpler approach for the threat description
-                            threat_color_hex = THREAT_CATEGORIES[threat_type]['color']
-                            threat_desc = THREAT_CATEGORIES[threat_type]['description']
-                            
-                            st.markdown(
-                                f'<div style="padding: 15px; background: {threat_color_hex}20; border-radius: 8px; margin: 10px 0;">'
-                                f'<p><strong>Description:</strong> {threat_desc}</p>'
-                                f'<p><strong>Confidence:</strong> {threat_confidence:.2%}</p>'
-                                f'</div>',
-                                unsafe_allow_html=True
-                            )
-                            
-                            st.markdown("##### Recommended Actions:")
-                            for i, advice in enumerate(THREAT_CATEGORIES[threat_type]['advice']):
-                                st.markdown(f"{i+1}. {advice}")
-                            
-                        # Add explainability for one of the models to show feature importance
-                        st.markdown("#### Feature Importance")
-                        st.info("Showing word importance from the most confident model.")
-                        
-                        # Find the most confident model
-                        most_confident_model = max(predictions.items(), key=lambda x: x[1]['score'])
-                        model_name = most_confident_model[0]
-                        model = models[model_name]
-                        
-                        with st.spinner(f"Generating explanation from {model_name}..."):
-                            try:
-                                # Create explainer for the most confident model
-                                def predict_proba(texts):
-                                    results = []
-                                    for text in texts:
-                                        result = model(text)[0]
-                                        # Fix probability handling for HAM/SPAM
-                                        if result['label'] == 'HAM':
-                                            # For HAM, first probability is HAM (higher), second is SPAM (lower)
-                                            ham_prob = result['score']
-                                            spam_prob = 1 - ham_prob
-                                            probs = [ham_prob, spam_prob]
-                                        else:  # SPAM
-                                            # For SPAM, first probability is HAM (lower), second is SPAM (higher)
-                                            spam_prob = result['score'] 
-                                            ham_prob = 1 - spam_prob
-                                            probs = [ham_prob, spam_prob]
-                                        results.append(probs)
-                                    return np.array(results)
-                                
-                                explainer = ModelExplainer(predict_proba, class_names=["HAM", "SPAM"])
-                                explanation = explainer.explain_prediction(user_sms)
-                                visualization = explainer.visualize_explanation(explanation)
-                                
-                                # Display both HAM and SPAM features for better explainability
-                                feature_cols = st.columns([1, 1])
-                                
-                                with feature_cols[0]:
-                                    st.markdown("##### Words Indicating HAM")
-                                    ham_features = visualization['feature_importance'].get("HAM", [])
-                                    if ham_features:
-                                        for feat in ham_features[:5]:
-                                            color = "#4ecdc4" if feat['effect'] == 'positive' else "#ff6b6b"
-                                            st.markdown(f"""
-                                            <div style="padding: 8px; margin: 5px 0; background: rgba(78, 205, 196, 0.1); 
-                                                     border-radius: 5px; border-left: 3px solid {color};">
-                                                <span style="font-weight: bold;">"{feat['feature']}"</span>
-                                                <span style="float: right; color: {color};">{feat['weight']:.3f}</span>
-                                            </div>
-                                            """, unsafe_allow_html=True)
-                                    else:
-                                        st.info("No significant HAM indicators found")
-                                
-                                with feature_cols[1]:
-                                    st.markdown("##### Words Indicating SPAM")
-                                    spam_features = visualization['feature_importance'].get("SPAM", [])
-                                    if spam_features:
-                                        for feat in spam_features[:5]:
-                                            color = "#4ecdc4" if feat['effect'] == 'positive' else "#ff6b6b"
-                                            st.markdown(f"""
-                                            <div style="padding: 8px; margin: 5px 0; background: rgba(255, 107, 107, 0.1); 
-                                                     border-radius: 5px; border-left: 3px solid {color};">
-                                                <span style="font-weight: bold;">"{feat['feature']}"</span>
-                                                <span style="float: right; color: {color};">{feat['weight']:.3f}</span>
-                                            </div>
-                                            """, unsafe_allow_html=True)
-                                    else:
-                                        st.info("No significant SPAM indicators found")
-                            except Exception as e:
-                                st.error(f"Error generating explanation: {str(e)}")
-                                st.info("Explanation could not be generated. This may occur when using dummy models.")
                     st.markdown("#### 🤖 Individual Model Predictions")
                     cols = st.columns(len(predictions))
                     for i, (model_name, pred) in enumerate(predictions.items()):
