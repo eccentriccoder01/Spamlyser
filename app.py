@@ -7,13 +7,13 @@ from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassifica
 from datetime import datetime, timedelta
 
 # Assuming these files exist in the same directory
-from export_feature import export_results_button 
-from threat_analyzer import classify_threat_type, get_threat_specific_advice, THREAT_CATEGORIES
-from word_analyzer import WordAnalyzer
+from models.export_feature import export_results_button 
+from models.threat_analyzer import classify_threat_type, get_threat_specific_advice, THREAT_CATEGORIES
+from models.word_analyzer import WordAnalyzer
 # from ensemble_classifier_method import EnsembleSpamClassifier, ModelPerformanceTracker, PredictionResult
 # Dummy classes if you don't have the actual files for testing
 try:
-    from ensemble_classifier_method import EnsembleSpamClassifier, ModelPerformanceTracker, PredictionResult
+    from models.ensemble_classifier_method import EnsembleSpamClassifier, ModelPerformanceTracker, PredictionResult
 except ImportError:
     st.warning("`ensemble_classifier_method.py` not found. Using dummy classes. Please provide the actual file for full functionality.")
     class PredictionResult:
@@ -1460,7 +1460,7 @@ with col1:
 
 if analyse_btn and user_sms.strip():
     if analysis_mode == "Single Model":
-        from smart_preprocess import preprocess_message
+        from models.smart_preprocess import preprocess_message
         preprocessed = preprocess_message(user_sms)
         cleaned_sms = preprocessed["cleaned"]
         suspicious_features = preprocessed["suspicious"]
