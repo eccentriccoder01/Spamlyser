@@ -4,12 +4,77 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
+feature/voice-to-sms
 import json
 from datetime import datetime
 import torch
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
 from collections import defaultdict
 from io import StringIO
+
+from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
+from datetime import datetime, timedelta
+
+# Assuming these files exist in the same directory
+from models.export_feature import export_results_button 
+from models.threat_analyzer import classify_threat_type, get_threat_specific_advice, THREAT_CATEGORIES
+from models.word_analyzer import WordAnalyzer
+# from ensemble_classifier_method import EnsembleSpamClassifier, ModelPerformanceTracker, PredictionResult
+# Dummy classes if you don't have the actual files for testing
+try:
+    from models.ensemble_classifier_method import EnsembleSpamClassifier, ModelPerformanceTracker, PredictionResult
+except ImportError:
+    st.warning("`ensemble_classifier_method.py` not found. Using dummy classes. Please provide the actual file for full functionality.")
+    class PredictionResult:
+        def __init__(self, label, score, spam_probability=None):
+            self.label = label
+            self.score = score
+            self.spam_probability = spam_probability
+    class ModelPerformanceTracker:
+        def __init__(self):
+            self.stats = {}
+        def update_performance(self, model_name, correct): pass
+        def get_all_stats(self): return {}
+        def save_to_file(self, filename): pass
+    class EnsembleSpamClassifier:
+        def __init__(self, performance_tracker):
+            self.performance_tracker = performance_tracker
+            self.default_weights = {"DistilBERT": 0.25, "BERT": 0.25, "RoBERTa": 0.25, "ALBERT": 0.25}
+            self.model_weights = self.default_weights.copy()
+        def update_model_weights(self, weights): self.model_weights.update(weights)
+        def get_model_weights(self): return self.model_weights
+        def get_ensemble_prediction(self, predictions, method):
+            # Dummy implementation for ensemble prediction
+            if not predictions:
+                return {'label': 'UNKNOWN', 'confidence': 0.0, 'spam_probability': 0.0, 'method': method, 'details': 'No model predictions'}
+            
+            # Simple majority voting for dummy
+            spam_votes = sum(1 for p in predictions.values() if p['label'] == 'SPAM')
+            ham_votes = sum(1 for p in predictions.values() if p['label'] == 'HAM')
+            
+            if spam_votes > ham_votes:
+                label = 'SPAM'
+                score = sum(p['score'] for p in predictions.values() if p['label'] == 'SPAM') / spam_votes if spam_votes else 0
+                spam_prob = score # Simplified
+            elif ham_votes > spam_votes:
+                label = 'HAM'
+                score = sum(p['score'] for p in predictions.values() if p['label'] == 'HAM') / ham_votes if ham_votes else 0
+                spam_prob = 1 - score # Simplified
+            else: # Tie or no clear majority, default to HAM for safety or SPAM for caution
+                label = 'HAM' 
+                score = 0.5
+                spam_prob = 0.5
+            return {'label': label, 'confidence': score, 'spam_probability': spam_prob, 'method': method, 'details': f'Dummy {method} applied'}
+        
+        def get_all_predictions(self, predictions):
+            # Dummy method to return results for all ensemble methods
+            dummy_results = {}
+            for method_key in ["majority_voting", "weighted_average", "confidence_weighted", "adaptive_threshold", "meta_ensemble"]:
+                dummy_results[method_key] = self.get_ensemble_prediction(predictions, method_key)
+            return dummy_results
+        
+# Core Python imports
+
 import time
 import re
 
@@ -1315,10 +1380,23 @@ if st.session_state.get('show_dashboard', False):
         st.session_state.show_dashboard = False
         st.rerun()  # Rerun to reset the state
 
-def get_risk_indicators(message, prediction):
+def get_risk_indicators(message, prediction, threat_type=None):
     indicators = []
     spam_keywords = ['free', 'win', 'winner', 'congratulations', 'urgent', 'limited', 'offer', 'click', 'call now']
     found_keywords = [word for word in spam_keywords if word.lower() in message.lower()]
+    
+    if prediction == "SPAM":
+        # Add threat-specific indicators and advice
+        if threat_type and threat_type in THREAT_CATEGORIES:
+            threat_info = THREAT_CATEGORIES[threat_type]
+            indicators.append(f"{threat_info['icon']} {threat_type} detected: {threat_info['description']}")
+            
+            # Add threat-specific advice
+            threat_advice = get_threat_specific_advice(threat_type)
+            for advice in threat_advice:
+                indicators.append(f"💡 {advice}")
+    
+    # General indicators (for all messages)
     if found_keywords:
         indicators.append(f"⚠️ Spam keywords detected: {', '.join(found_keywords)}")
     if len(message) > 0:
@@ -1348,7 +1426,31 @@ def get_ensemble_predictions(message, models):
                 continue
     return predictions
 
-# --- Main Interface ---
+def create_predict_proba(classifier):
+    """
+    Creates a batch-processing prediction function for LIME.
+    `classifier` is a Hugging Face pipeline object.
+    """
+    def predict_proba_batch(texts: List[str]) -> np.ndarray:
+        # 1. Get predictions for the whole batch at once
+        # The pipeline is highly optimized for this!
+        predictions = classifier(texts, top_k=2) # Get probabilities for both classes
+
+        results = []
+        for pred_list in predictions:
+            # 2. Create a dictionary for easy lookup of scores by label
+            score_dict = {p['label'].upper(): p['score'] for p in pred_list}
+            
+            # 3. Get the score for SPAM, defaulting to 0.0 if not found
+            spam_score = score_dict.get('SPAM', 0.0)
+            
+            # 4. LIME expects probabilities for all classes. Order is [HAM, SPAM]
+            # The HAM score will be 1.0 - SPAM score
+            results.append([1.0 - spam_score, spam_score])
+            
+        return np.array(results)
+        
+    return predict_proba_batch# --- Main Interface ---
 col1, col2 = st.columns([2, 1])
 
 with col1:
@@ -1407,6 +1509,73 @@ with col1:
         analyse_btn = st.button("🔍 Analyse Message", type="primary", use_container_width=True)
     with col_b:
         clear_btn = st.button("🗑️ Clear", use_container_width=True)
+    
+    # Test word analysis button (always visible)
+    if st.button("🔍 Word Analysis", key="test_word_analysis", type="primary"):
+        st.markdown("### 🔍 Word Analysis")
+        
+        # Use the current message from the text area
+        test_message = user_sms if user_sms.strip() else "Congratulations! You won a free prize, click now!"
+        st.markdown(f"**Analyzing Message:** {test_message}")
+        
+        # Create word analyzer
+        analyzer = WordAnalyzer()
+        
+        # Analyze the text
+        with st.spinner("🔍 Analyzing message..."):
+            analysis = analyzer.analyze_text(test_message)
+        
+        # Show the highlighted text
+        st.markdown("#### 📝 Your Message with Word Analysis")
+        st.markdown("**🔴 Red words** = Spam indicators | **🟢 Green words** = Ham indicators | **🟠 Orange words** = Suspicious patterns")
+        
+        highlighted_html = analyzer.create_highlighted_html(analysis)
+        st.markdown(highlighted_html, unsafe_allow_html=True)
+        
+        # Show summary
+        summary = analyzer.get_explanation_summary(analysis)
+        
+        # Always count neutral words as ham for clearer UI in HAM messages
+        spam_count = len(summary['top_spam_words'])
+        ham_count = len(summary['top_ham_words'])
+        
+        # For HAM messages, all non-spam words are considered ham indicators
+        if analysis.get('predicted_class') == 'HAM':
+            neutral_words = [w for w in analysis['words'] if not w.get('is_spammy', False) and not w.get('is_hammy', False)]
+            ham_count += len(neutral_words)
+            
+            # Add neutral words to the top_ham_words list for visibility
+            for word in neutral_words:
+                if word['word'] not in [w['word'] for w in summary['top_ham_words']]:
+                    summary['top_ham_words'].append({
+                        'word': word['word'],
+                        'influence': -0.2,  # Give it a small negative influence (ham)
+                        'type': 'neutral-ham'
+                    })
+        
+        st.success(f"✅ Analysis complete! Found {spam_count} spam indicators and {ham_count} ham indicators.")
+        
+        # Show more detailed breakdown
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("**Spam Indicators:**")
+            if spam_count > 0:
+                for word in summary['top_spam_words']:
+                    influence = word.get('influence', 0.0)
+                    st.markdown(f"🔴 **{word['word']}** (Score: {influence:.2f})")
+            else:
+                st.info("No spam indicators found")
+                
+        with col2:
+            st.markdown("**Ham Indicators:**")
+            if ham_count > 0:
+                for word in summary['top_ham_words']:
+                    influence = word.get('influence', 0.0)
+                    # Make sure we use the absolute value for ham scores
+                    st.markdown(f"🟢 **{word['word']}** (Score: {abs(influence):.2f})")
+            else:
+                st.info("No ham indicators found")
+    
     if clear_btn:
         # Clear text area content
         st.session_state.user_sms_input_value=""
@@ -1421,7 +1590,7 @@ with col1:
 
 if analyse_btn and user_sms.strip():
     if analysis_mode == "Single Model":
-        from smart_preprocess import preprocess_message
+        from models.smart_preprocess import preprocess_message
         preprocessed = preprocess_message(user_sms)
         cleaned_sms = preprocessed["cleaned"]
         suspicious_features = preprocessed["suspicious"]
@@ -1432,10 +1601,44 @@ if analyse_btn and user_sms.strip():
                 result = classifier(cleaned_sms)[0]
                 label = result['label'].upper()
                 confidence = result['score']
+feature/voice-to-sms
                 # Safely update model statistics with proper error handling
                 if selected_model_name not in st.session_state.model_stats:
                     st.session_state.model_stats[selected_model_name] = {'spam': 0, 'ham': 0, 'total': 0}
 
+
+                
+                # Store prediction results in session state for explanation
+                st.session_state.user_sms = user_sms
+                st.session_state.current_prediction_label = label
+                st.session_state.current_prediction_confidence = confidence
+                
+                # Special case for DistilBERT - it sometimes misses obvious scams
+                if selected_model_name == "DistilBERT" and label == "HAM":
+                    text_lower = cleaned_sms.lower()
+                    # Check for common money scam patterns
+                    if any(pattern in text_lower for pattern in [
+                            "won", "$", "cash", "prize", "claim", "click yes", 
+                            "lottery", "winner", "congratulation"
+                        ]):
+                        # Check for combination patterns that are strong indicators of scams
+                        if (("won" in text_lower or "win" in text_lower) and 
+                            ("$" in text_lower or "cash" in text_lower or "prize" in text_lower)):
+                            # Override the classification for this clear scam case
+                            label = "SPAM"
+                            confidence = max(confidence, 0.85)  # Boost confidence
+                            st.info("💡 Scam pattern detected and corrected")
+                
+                # If SPAM, classify the threat type
+                threat_type = None
+                threat_confidence = 0.0
+                threat_metadata = {}
+                if label == "SPAM":
+                    threat_type, threat_confidence, threat_metadata = classify_threat_type(
+                        cleaned_sms, confidence
+                    )
+                
+master
                 st.session_state.model_stats[selected_model_name][label.lower()] += 1
                 st.session_state.model_stats[selected_model_name]['total'] += 1
                 st.session_state.classification_history.append({
@@ -1445,14 +1648,29 @@ if analyse_btn and user_sms.strip():
                     'confidence': confidence,
                     'model': selected_model_name,
                     'preprocessed': cleaned_sms,
-                    'suspicious_features': suspicious_features
+                    'suspicious_features': suspicious_features,
+                    'threat_type': threat_type,
+                    'threat_confidence': threat_confidence
                 })
                 features = analyse_message_features(cleaned_sms)
-                risk_indicators = get_risk_indicators(cleaned_sms, label)
+                risk_indicators = get_risk_indicators(cleaned_sms, label, threat_type)
                 st.markdown("### 🎯 Classification Results")
                 card_class = "spam-alert" if label == "SPAM" else "ham-safe"
                 icon = "🚨" if label == "SPAM" else "✅"
-                st.markdown(f"""
+                # Create prediction card with threat info if applicable
+                threat_html = ""
+                if label == "SPAM" and threat_type:
+                    # Create the threat info section directly without using an f-string template
+                    threat_info = THREAT_CATEGORIES.get(threat_type, {})
+                    threat_icon = threat_info.get('icon', '⚠️')
+                    threat_color = threat_info.get('color', '#ff6b6b')
+                    threat_description = threat_info.get('description', 'Suspicious message')
+                    
+                    # Use st.markdown to create a separate HTML element for threat info
+                    threat_html = f'<div style="margin-top: 15px; padding: 10px; border-radius: 10px; background: rgba(0,0,0,0.1);"><h4 style="margin: 0; color: {threat_color};">{threat_icon} {threat_type}</h4><p style="margin: 5px 0 0 0; opacity: 0.9;">{threat_description} (Confidence: {threat_confidence:.1%})</p></div>'
+                    
+                # Use st.markdown with proper escaping and unsafe_allow_html=True
+                model_info_html = f"""
                 <div class="prediction-card {card_class}">
                     <h2 style="margin: 0 0 15px 0;">{icon} {label}</h2>
                     <h3 style="margin: 0;">Confidence: {confidence:.2%}</h3>
@@ -1460,7 +1678,13 @@ if analyse_btn and user_sms.strip():
                         Model: {selected_model_name} | Analysed: {datetime.now().strftime('%H:%M:%S')}
                     </p>
                 </div>
-                """, unsafe_allow_html=True)
+                """
+                st.markdown(model_info_html, unsafe_allow_html=True)
+                
+                # Display threat information separately if it exists
+                if label == "SPAM" and threat_type:
+                    st.markdown(threat_html, unsafe_allow_html=True)
+                
     else: # Ensemble Analysis
         with st.spinner("🤖 Loading all models for ensemble analysis..."):
             models = {}
@@ -1473,20 +1697,49 @@ if analyse_btn and user_sms.strip():
                     ensemble_result = st.session_state.ensemble_classifier.get_ensemble_prediction(
                         predictions, selected_ensemble_method
                     )
+                    
+                    # If SPAM, classify the threat type
+                    threat_type = None
+                    threat_confidence = 0.0
+                    threat_metadata = {}
+                    if ensemble_result['label'] == "SPAM":
+                        threat_type, threat_confidence, threat_metadata = classify_threat_type(
+                            user_sms, ensemble_result['spam_probability']
+                        )
+                        # Add threat info to ensemble result
+                        ensemble_result['threat_type'] = threat_type
+                        ensemble_result['threat_confidence'] = threat_confidence
+                        ensemble_result['metadata']['threat'] = threat_metadata
+                    
                     st.session_state.ensemble_history.append({
                         'timestamp': datetime.now(),
                         'message': user_sms[:100] + "..." if len(user_sms) > 100 else user_sms, # Increased snippet length
                         'prediction': ensemble_result['label'],
                         'confidence': ensemble_result['confidence'],
                         'method': selected_ensemble_method,
-                        'spam_probability': ensemble_result['spam_probability']
+                        'spam_probability': ensemble_result['spam_probability'],
+                        'threat_type': threat_type,
+                        'threat_confidence': threat_confidence
                     })
                     features = analyse_message_features(user_sms)
-                    risk_indicators = get_risk_indicators(user_sms, ensemble_result['label'])
+                    risk_indicators = get_risk_indicators(user_sms, ensemble_result['label'], threat_type)
                     st.markdown("### 🎯 Ensemble Classification Results")
                     card_class = "spam-alert" if ensemble_result['label'] == "SPAM" else "ham-safe"
                     icon = "🚨" if ensemble_result['label'] == "SPAM" else "✅"
-                    st.markdown(f"""
+                    # Create prediction card with threat info if applicable
+                    threat_html = ""
+                    if ensemble_result['label'] == "SPAM" and threat_type:
+                        # Create the threat info section directly without using an f-string template
+                        threat_info = THREAT_CATEGORIES.get(threat_type, {})
+                        threat_icon = threat_info.get('icon', '⚠️')
+                        threat_color = threat_info.get('color', '#ff6b6b')
+                        threat_description = threat_info.get('description', 'Suspicious message')
+                        
+                        # Use a single-line string to avoid formatting issues
+                        threat_html = f'<div style="margin-top: 15px; padding: 10px; border-radius: 10px; background: rgba(0,0,0,0.1);"><h4 style="margin: 0; color: {threat_color};">{threat_icon} {threat_type}</h4><p style="margin: 5px 0 0 0; opacity: 0.9;">{threat_description} (Confidence: {threat_confidence:.1%})</p></div>'
+                    
+                    # Use st.markdown with proper escaping and unsafe_allow_html=True
+                    ensemble_info_html = f"""
                     <div class="prediction-card {card_class} ensemble-card">
                         <h2 style="margin: 0 0 15px 0;">{icon} {ensemble_result['label']}</h2>
                         <h3 style="margin: 0;">Confidence: {ensemble_result['confidence']:.2%}</h3>
@@ -1496,7 +1749,13 @@ if analyse_btn and user_sms.strip():
                             Analysed: {datetime.now().strftime('%H:%M:%S')}
                         </p>
                     </div>
-                    """, unsafe_allow_html=True)
+                    """
+                    st.markdown(ensemble_info_html, unsafe_allow_html=True)
+                    
+                    # Display threat information separately if it exists
+                    if ensemble_result['label'] == "SPAM" and threat_type:
+                        st.markdown(threat_html, unsafe_allow_html=True)
+                    
                     st.markdown("#### 🤖 Individual Model Predictions")
                     cols = st.columns(len(predictions))
                     for i, (model_name, pred) in enumerate(predictions.items()):

@@ -1,0 +1,19 @@
+label,message,threat_type
+SPAM,URGENT: Your bank account has been compromised. Click here to verify your details: http://fakebank.com/verify,Phishing
+SPAM,Your Bank account is set to LOCKED. Please verify at http://secur1tybank.info to recover access,Phishing
+SPAM,Amazon: Your account has been locked due to suspicious activity. Click here to update your information: http://amaz0n-verify.net,Phishing
+SPAM,Apple Security: Unauthorized login attempt detected on your iCloud. Verify your identity here: https://icloud-verify.co,Phishing
+HAM,Hi Sarah! Can you send me the presentation for tomorrow's meeting?,
+HAM,Your pizza delivery is on the way and should arrive in 20 minutes.,
+SPAM,Congratulations! You've won £1,000,000 in the UK lottery! Call +44-555-1234 to claim your prize now!,Scam/Fraud
+SPAM,WINNER: You have been selected for a $500 Walmart gift card! Claim within 24hrs: http://claim-prize.info,Scam/Fraud
+SPAM,URGENT: Your inheritance of $5.3M is ready for transfer. Reply with your bank details to process.,Scam/Fraud
+HAM,The dentist appointment has been rescheduled to Friday at 2pm. Please confirm if this works for you.,
+SPAM,50% OFF EVERYTHING! Shop our biggest sale of the year at SuperStore. Shop now: http://superstore-sales.com,Unwanted Marketing
+SPAM,Get the iPhone 14 for FREE when you switch to our network today! Limited time offer. Reply YES for info.,Unwanted Marketing
+SPAM,Your prescription is ready for pickup at Med-Express Pharmacy. 20% discount on all vitamins this week!,Unwanted Marketing
+HAM,The documents you requested are attached. Let me know if you need anything else.,
+SPAM,Your package delivery failed. Track your shipment and reschedule: http://tinyurl.com/pkg-track,Other
+SPAM,Warning: Your computer has been infected with a virus. Call our tech support: 1-800-555-6543,Other
+HAM,Meeting at 3pm in Conference Room B. Bring your project notes.,
+HAM,Your flight AA1234 has been delayed. New departure time: 11:45am.,
