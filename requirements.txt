@@ -24,6 +24,21 @@ python-dotenv>=1.0.0,<2.0.0
 pytest>=7.4.0,<8.0.0
 pytest-cov>=4.1.0,<5.0.0
 
-#UI
-streamlit
-fpdf
+# UI Components
+streamlit>=1.30.0
+fpdf2>=2.7.0
+
+# Speech Recognition
+SpeechRecognition>=3.10.0
+PyAudio>=0.2.13
+pocketsphinx>=5.0.0
+
+# Type Checking
+mypy>=1.5.0
+types-requests>=2.31.0
+types-setuptools>=68.0.0
+types-protobuf>=4.24.0
+typing-extensions>=4.7.0
+pandas-stubs>=2.0.0
+types-tqdm>=4.65.0
+types-PyYAML>=6.0.0

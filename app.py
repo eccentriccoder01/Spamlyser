@@ -1,8 +1,17 @@
+from typing import Dict, Any, Optional, List, Union, TypedDict, Callable
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
+feature/voice-to-sms
+import json
+from datetime import datetime
+import torch
+from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
+from collections import defaultdict
+from io import StringIO
+
 from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
 from datetime import datetime, timedelta
 
@@ -65,15 +74,40 @@ except ImportError:
             return dummy_results
         
 # Core Python imports
+
 import time
 import re
-from datetime import datetime
-from pathlib import Path
-import numpy as np
-from typing import Dict, List, Tuple, Any, Optional
-from io import StringIO
-import torch
-from collections import defaultdict # Added for easier analytics data aggregation
+
+# Custom type definitions
+class MethodStats(TypedDict):
+    count: int
+    spam: int
+    confidences: List[float]
+
+class ModelStats(TypedDict):
+    spam: int
+    ham: int
+    total: int
+
+# Session state type definition
+class SpamlyserSessionState:
+    """Type-safe session state container for Spamlyser"""
+    def __init__(self):
+        self.classification_history: List[Dict[str, Any]] = []
+        self.ensemble_history: List[Dict[str, Any]] = []
+        self.model_stats: Dict[str, ModelStats] = {}
+        self.ensemble_tracker = None
+        self.ensemble_classifier = None
+        self.loaded_models: Dict[str, Any] = {}
+
+# Import app core and ensemble functionality
+import ensemble_classifier_method as ecm
+from ensemble_classifier_method import ModelPerformanceTracker, EnsembleSpamClassifier
+
+# Import other local modules
+from export_feature import export_results_button
+from speech_handler import SpeechHandler
+from speech_to_text import SpeechToText
 
 # --- Streamlit Page Configuration ---
 st.set_page_config(
@@ -196,20 +230,16 @@ except FileNotFoundError:
         ]
     })
 
-# --- Session State Initialization ---
-if 'classification_history' not in st.session_state:
-    st.session_state.classification_history = []
-if 'model_stats' not in st.session_state:
-    st.session_state.model_stats = {model: {'spam': 0, 'ham': 0, 'total': 0} for model in ["DistilBERT", "BERT", "RoBERTa", "ALBERT"]}
-if 'ensemble_tracker' not in st.session_state:
-    st.session_state.ensemble_tracker = ModelPerformanceTracker()
-if 'ensemble_classifier' not in st.session_state:
-    st.session_state.ensemble_classifier = EnsembleSpamClassifier(performance_tracker=st.session_state.ensemble_tracker)
-if 'ensemble_history' not in st.session_state:
-    st.session_state.ensemble_history = []
-if 'loaded_models' not in st.session_state:
-    st.session_state.loaded_models = {model_name: None for model_name in ["DistilBERT", "BERT", "RoBERTa", "ALBERT"]}
-
+# Custom type for session state
+class SessionState:
+    def __init__(self):
+        self.classification_history: List[Dict[str, Any]] = []
+        self.model_stats: Dict[str, ModelStats] = {}
+        self.ensemble_tracker: ModelPerformanceTracker = ModelPerformanceTracker()
+        self.ensemble_classifier: EnsembleSpamClassifier = EnsembleSpamClassifier(performance_tracker=self.ensemble_tracker)
+        self.ensemble_history: List[Dict[str, Any]] = []
+        self.loaded_models: Dict[str, Any] = {}
+        self.speech_handler: SpeechHandler = SpeechHandler()
 
 # --- Model Configurations ---
 MODEL_OPTIONS = {
@@ -272,6 +302,33 @@ ENSEMBLE_METHODS = {
     }
 }
 
+# --- Session State Initialization ---
+def init_session_state():
+    """Initialize session state with proper typing"""
+    if 'classification_history' not in st.session_state:
+        st.session_state.classification_history = []
+    if 'ensemble_history' not in st.session_state:
+        st.session_state.ensemble_history = []
+    if 'model_stats' not in st.session_state:
+        st.session_state.model_stats = {
+            model: {'spam': 0, 'ham': 0, 'total': 0}
+            for model in MODEL_OPTIONS.keys()
+        }
+    if 'ensemble_tracker' not in st.session_state:
+        st.session_state.ensemble_tracker = ecm.ModelPerformanceTracker()
+    if 'ensemble_classifier' not in st.session_state:
+        st.session_state.ensemble_classifier = ecm.EnsembleSpamClassifier(
+            performance_tracker=st.session_state.ensemble_tracker
+        )
+    if 'loaded_models' not in st.session_state:
+        st.session_state.loaded_models = {
+            model_name: None for model_name in MODEL_OPTIONS.keys()
+        }
+    if 'speech_handler' not in st.session_state:
+        st.session_state.speech_handler = SpeechHandler()
+
+init_session_state()
+
 # --- Header ---
 st.markdown("""
 <div style="text-align: center; padding: 20px 0; background: linear-gradient(90deg, #1a1a1a, #2d2d2d); border-radius: 15px; margin-bottom: 30px; border: 1px solid #404040;">
@@ -287,9 +344,18 @@ st.markdown("""
 # --- Sidebar ---
 with st.sidebar:
 
-    # --- Dark Mode Toggle ---
+    # --- Initialize Session State ---
     if 'dark_mode' not in st.session_state:
         st.session_state.dark_mode = False
+        st.session_state.classification_history = []
+        st.session_state.ensemble_history = []
+        st.session_state.model_stats = {}
+        tracker = ecm.ModelPerformanceTracker()
+        st.session_state.ensemble_tracker = tracker
+        st.session_state.ensemble_classifier = ecm.EnsembleSpamClassifier(
+            performance_tracker=tracker
+        )
+        st.session_state.loaded_models = {}
     st.markdown("""
     <div style="text-align: center; padding: 20px; background: linear-gradient(145deg, #1e1e1e, #2a2a2a); border-radius: 15px; margin-bottom: 20px;">
         <h3 style="color: #00d4aa; margin: 0;">Analysis Mode</h3>
@@ -358,36 +424,78 @@ with st.sidebar:
 
     # Sidebar Overall Stats
     st.markdown("### 📊 Overall Statistics")
-    total_single_predictions = sum(st.session_state.model_stats[model]['total'] for model in MODEL_OPTIONS)
-    total_ensemble_predictions = len(st.session_state.ensemble_history)
-    total_predictions_overall = total_single_predictions + total_ensemble_predictions
 
-    st.markdown(f"""
-    <div class="metric-container">
-        <p style="color: #00d4aa; font-size: 1.2rem; margin-bottom: 5px;">Total Predictions</p>
-        <h3 style="color: #eee; margin-top: 0;">{total_predictions_overall}</h3>
-    </div>
-    """, unsafe_allow_html=True)
+    # Safely calculate statistics with proper error handling
+    try:
+        # Ensure session state is properly initialized
+        if not hasattr(st.session_state, 'model_stats'):
+            st.session_state.model_stats = {model: {'spam': 0, 'ham': 0, 'total': 0} for model in MODEL_OPTIONS.keys()}
+        if not hasattr(st.session_state, 'ensemble_history'):
+            st.session_state.ensemble_history = []
 
-    overall_spam_count = sum(st.session_state.model_stats[model]['spam'] for model in MODEL_OPTIONS) + \
-                         sum(1 for entry in st.session_state.ensemble_history if entry['prediction'] == 'SPAM')
-    overall_ham_count = sum(st.session_state.model_stats[model]['ham'] for model in MODEL_OPTIONS) + \
-                        sum(1 for entry in st.session_state.ensemble_history if entry['prediction'] == 'HAM')
-    col_spam, col_ham = st.columns(2)
-    with col_spam:
+        total_single_predictions = sum(
+            st.session_state.model_stats.get(model, {}).get('total', 0)
+            for model in MODEL_OPTIONS.keys()
+        )
+        total_ensemble_predictions = len(st.session_state.ensemble_history)
+        total_predictions_overall = total_single_predictions + total_ensemble_predictions
+
         st.markdown(f"""
-        <div class="metric-container spam-alert" style="padding: 15px;">
-            <p style="color: #ff6b6b; font-size: 1rem; margin-bottom: 5px;">Spam Count</p>
-            <h4 style="color: #ff6b6b; margin-top: 0;">{overall_spam_count}</h4>
+        <div class="metric-container">
+            <p style="color: #00d4aa; font-size: 1.2rem; margin-bottom: 5px;">Total Predictions</p>
+            <h3 style="color: #eee; margin-top: 0;">{total_predictions_overall}</h3>
         </div>
         """, unsafe_allow_html=True)
-    with col_ham:
-        st.markdown(f"""
-        <div class="metric-container ham-safe" style="padding: 15px;">
-            <p style="color: #6bff6b; font-size: 1rem; margin-bottom: 5px;">Ham Count</p>
-            <h4 style="color: #6bff6b; margin-top: 0;">{overall_ham_count}</h4>
+
+        overall_spam_count = sum(
+            st.session_state.model_stats.get(model, {}).get('spam', 0)
+            for model in MODEL_OPTIONS.keys()
+        ) + sum(1 for entry in st.session_state.ensemble_history if entry['prediction'] == 'SPAM')
+
+        overall_ham_count = sum(
+            st.session_state.model_stats.get(model, {}).get('ham', 0)
+            for model in MODEL_OPTIONS.keys()
+        ) + sum(1 for entry in st.session_state.ensemble_history if entry['prediction'] == 'HAM')
+
+        col_spam, col_ham = st.columns(2)
+        with col_spam:
+            st.markdown(f"""
+            <div class="metric-container spam-alert" style="padding: 15px;">
+                <p style="color: #ff6b6b; font-size: 1rem; margin-bottom: 5px;">Spam Count</p>
+                <h4 style="color: #ff6b6b; margin-top: 0;">{overall_spam_count}</h4>
+            </div>
+            """, unsafe_allow_html=True)
+        with col_ham:
+            st.markdown(f"""
+            <div class="metric-container ham-safe" style="padding: 15px;">
+                <p style="color: #6bff6b; font-size: 1rem; margin-bottom: 5px;">Ham Count</p>
+                <h4 style="color: #6bff6b; margin-top: 0;">{overall_ham_count}</h4>
+            </div>
+            """, unsafe_allow_html=True)
+    except (AttributeError, KeyError, TypeError):
+        # Handle case where session state is not properly initialized
+        st.markdown("""
+        <div class="metric-container">
+            <p style="color: #00d4aa; font-size: 1.2rem; margin-bottom: 5px;">Total Predictions</p>
+            <h3 style="color: #eee; margin-top: 0;">0</h3>
         </div>
         """, unsafe_allow_html=True)
+
+        col_spam, col_ham = st.columns(2)
+        with col_spam:
+            st.markdown("""
+            <div class="metric-container spam-alert" style="padding: 15px;">
+                <p style="color: #ff6b6b; font-size: 1rem; margin-bottom: 5px;">Spam Count</p>
+                <h4 style="color: #ff6b6b; margin-top: 0;">0</h4>
+            </div>
+            """, unsafe_allow_html=True)
+        with col_ham:
+            st.markdown("""
+            <div class="metric-container ham-safe" style="padding: 15px;">
+                <p style="color: #6bff6b; font-size: 1rem; margin-bottom: 5px;">Ham Count</p>
+                <h4 style="color: #6bff6b; margin-top: 0;">0</h4>
+            </div>
+            """, unsafe_allow_html=True)
 
 
 # --- Model Loading Helpers ---
@@ -417,8 +525,8 @@ def _load_model_cached(model_id):
         if tokenizer is None or model is None:
             return None
         pipe = pipeline(
-            "text-classification", 
-            model=model, 
+            "text-classification",
+            model=model,
             tokenizer=tokenizer,
             device=0 if torch.cuda.is_available() else -1
         )
@@ -427,34 +535,22 @@ def _load_model_cached(model_id):
         st.error(f"❌ Error creating pipeline for {model_id}: {str(e)}")
         return None
 
+
 def load_model_if_needed(model_name, _progress_callback=None):
-    if st.session_state.loaded_models[model_name] is None:
+    """Load a model if not already loaded, with optional progress callback."""
+    if model_name not in st.session_state.loaded_models or st.session_state.loaded_models[model_name] is None:
+        if _progress_callback:
+            _progress_callback(f"Loading {model_name} model...")
+
         model_id = MODEL_OPTIONS[model_name]["id"]
-        status_container = st.empty()
-        def update_status(message):
-            if status_container:
-                status_container.info(message)
-            if _progress_callback:
-                _progress_callback(message)
-        try:
-            update_status(f"Starting to load {model_name}...")
-            update_status(f"🔄 Loading tokenizer for {model_name}...")
-            update_status(f"🤖 Loading {model_name} model... (This may take a few minutes)")
-            model = _load_model_cached(model_id)
-            if model is not None:
-                update_status(f"✅ Successfully loaded {model_name}")
-                st.session_state.loaded_models[model_name] = model
-            else:
-                update_status(f"❌ Failed to load {model_name}")
-                return None
-            time.sleep(1)
-        except Exception as e:
-            update_status(f"❌ Error loading {model_name}: {str(e)}")
-            return None
-        finally:
-            time.sleep(1)
-            status_container.empty()
+        st.session_state.loaded_models[model_name] = _load_model_cached(model_id)
+
+        if _progress_callback:
+            _progress_callback(f"✅ {model_name} model loaded successfully!")
+
     return st.session_state.loaded_models[model_name]
+
+
 
 def get_loaded_models():
     models = {}
@@ -946,14 +1042,21 @@ def render_ensemble_dashboard():
     st.markdown("### 🧠 Ensemble Method Analytics")
     
     # Analyze ensemble history
-    method_stats = defaultdict(lambda: {'count': 0, 'spam': 0, 'confidences': []})
+    method_stats: Dict[str, MethodStats] = {}
+    for method in ENSEMBLE_METHODS.keys():
+        method_stats[method] = MethodStats(
+            count=0,
+            spam=0,
+            confidences=[]
+        )
     
     for item in st.session_state.ensemble_history:
         method = item['method']
-        method_stats[method]['count'] += 1
-        method_stats[method]['confidences'].append(item['confidence'])
-        if item['prediction'] == 'SPAM':
-            method_stats[method]['spam'] += 1
+        if method in method_stats:
+            method_stats[method]['count'] += 1
+            method_stats[method]['confidences'].append(item['confidence'])
+            if item['prediction'] == 'SPAM':
+                method_stats[method]['spam'] += 1
     
     if method_stats:
         col1, col2 = st.columns(2)
@@ -1255,7 +1358,7 @@ def render_realtime_monitor():
                 'total_messages': len(st.session_state.classification_history) + len(st.session_state.ensemble_history)
             }
             
-            json_data = st.json.dumps(dashboard_data, indent=2, default=str)
+            json_data = json.dumps(dashboard_data, indent=2, default=str)
             
             st.download_button(
                 label="📥 Download Dashboard Data (JSON)",
@@ -1363,13 +1466,40 @@ with col1:
 
     # Set initial value of text_area based on sample_selector or previous user input
     user_sms_initial_value = selected_message if selected_message else st.session_state.get('user_sms_input_value', "")
-    user_sms = st.text_area(
-        "Enter SMS message to analyse",
-        value=user_sms_initial_value,
-        height=120,
-        placeholder="Type or paste your SMS message here...",
-        help="Enter the SMS message you want to classify as spam or ham (legitimate)"
-    )
+    col_text, col_record = st.columns([4, 1])
+
+    with col_text:
+        user_sms = st.text_area(
+            "Enter SMS message to analyse",
+            value=user_sms_initial_value,
+            height=120,
+            placeholder="Type or paste your SMS message here...",
+            help="Enter the SMS message you want to classify as spam or ham (legitimate)",
+            key="sms_input"
+        )
+    
+    with col_record:
+        if st.button("🎤 Record Voice", type="primary", key="record_btn"):
+            with st.spinner("🎤 Listening... Speak clearly"):
+                try:
+                    success, result = st.session_state.speech_handler.listen_and_transcribe()
+                    if success:
+                        # Get existing text and append new text
+                        current_text = user_sms  # Use the widget value directly
+                        if current_text and current_text.strip():
+                            new_text = f"{current_text.strip()} {result}"
+                        else:
+                            new_text = result
+                        # Update session state for persistence
+                        st.session_state.user_sms_input_value = new_text
+                        st.success("✅ Speech recognized!")
+                        st.rerun()
+                    else:
+                        st.error(f"❌ {result}")
+                except Exception as e:
+                    st.error(f"Error: {str(e)}")
+                    time.sleep(2)
+
     # Store current text_area value in session state for persistence
     st.session_state.user_sms_input_value = user_sms
     
@@ -1471,6 +1601,12 @@ if analyse_btn and user_sms.strip():
                 result = classifier(cleaned_sms)[0]
                 label = result['label'].upper()
                 confidence = result['score']
+feature/voice-to-sms
+                # Safely update model statistics with proper error handling
+                if selected_model_name not in st.session_state.model_stats:
+                    st.session_state.model_stats[selected_model_name] = {'spam': 0, 'ham': 0, 'total': 0}
+
+
                 
                 # Store prediction results in session state for explanation
                 st.session_state.user_sms = user_sms
@@ -1502,6 +1638,7 @@ if analyse_btn and user_sms.strip():
                         cleaned_sms, confidence
                     )
                 
+master
                 st.session_state.model_stats[selected_model_name][label.lower()] += 1
                 st.session_state.model_stats[selected_model_name]['total'] += 1
                 st.session_state.classification_history.append({
@@ -1709,7 +1846,7 @@ with col2:
         st.markdown("#### 📊 Single Model Performance")
         
         # Check if there's any data for any model
-        if any(st.session_state.model_stats[model]['total'] > 0 for model in MODEL_OPTIONS):
+        if any(st.session_state.model_stats.get(model, {}).get('total', 0) > 0 for model in MODEL_OPTIONS.keys()):
             # Pie Chart for Spam/Ham Distribution of the SELECTED model
             current_model_stats = st.session_state.model_stats[selected_model_name]
             if current_model_stats['total'] > 0:
@@ -2169,4 +2306,3 @@ st.markdown("""
     </div>
 </div>
 """, unsafe_allow_html=True)
-
