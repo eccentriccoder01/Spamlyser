@@ -37,7 +37,7 @@ except ImportError:
         def get_ensemble_prediction(self, predictions, method):
             # Dummy implementation for ensemble prediction
             if not predictions:
-                return {'label': 'UNKNOWN', 'confidence': 0.0, 'spam_probability': 0.0, 'method': method, 'details': 'No model predictions'}
+                return {'label': 'UNKNOWN', 'confidence': 0.0, 'spam_probability': 0.0, 'method': method, 'details': 'No model predictions', 'metadata': {}}
             
             # Simple majority voting for dummy
             spam_votes = sum(1 for p in predictions.values() if p['label'] == 'SPAM')
@@ -55,7 +55,7 @@ except ImportError:
                 label = 'HAM' 
                 score = 0.5
                 spam_prob = 0.5
-            return {'label': label, 'confidence': score, 'spam_probability': spam_prob, 'method': method, 'details': f'Dummy {method} applied'}
+            return {'label': label, 'confidence': score, 'spam_probability': spam_prob, 'method': method, 'details': f'Dummy {method} applied', 'metadata': {}}
         
         def get_all_predictions(self, predictions):
             # Dummy method to return results for all ensemble methods
@@ -427,60 +427,68 @@ def _load_model_cached(model_id):
         st.error(f"❌ Error creating pipeline for {model_id}: {str(e)}")
         return None
 
-def load_model_if_needed(model_name, _progress_callback=None):
-    if st.session_state.loaded_models[model_name] is None:
+def load_model_if_needed(model_name):
+    """
+    Loads a model and its tokenizer if it hasn't been loaded yet.
+    Displays status messages during the loading process.
+    """
+    if st.session_state.loaded_models.get(model_name) is None:
         model_id = MODEL_OPTIONS[model_name]["id"]
         status_container = st.empty()
-        def update_status(message):
-            if status_container:
-                status_container.info(message)
-            if _progress_callback:
-                _progress_callback(message)
+        
         try:
-            update_status(f"Starting to load {model_name}...")
-            update_status(f"🔄 Loading tokenizer for {model_name}...")
-            update_status(f"🤖 Loading {model_name} model... (This may take a few minutes)")
-            model = _load_model_cached(model_id)
-            if model is not None:
-                update_status(f"✅ Successfully loaded {model_name}")
-                st.session_state.loaded_models[model_name] = model
+            status_container.info(f"🔄 Loading {model_name}... This may take a moment.")
+            
+            # Use the cached function to load the pipeline
+            model_pipeline = _load_model_cached(model_id)
+            
+            if model_pipeline is not None:
+                st.session_state.loaded_models[model_name] = model_pipeline
+                status_container.success(f"✅ Successfully loaded {model_name}!")
+                time.sleep(1.5) # Give user time to see the success message
             else:
-                update_status(f"❌ Failed to load {model_name}")
+                status_container.error(f"❌ Failed to load {model_name}. Please check the console for errors.")
                 return None
-            time.sleep(1)
         except Exception as e:
-            update_status(f"❌ Error loading {model_name}: {str(e)}")
+            status_container.error(f"❌ An unexpected error occurred while loading {model_name}: {str(e)}")
             return None
         finally:
-            time.sleep(1)
+            # Clear the status message after loading
             status_container.empty()
+            
     return st.session_state.loaded_models[model_name]
 
 def get_loaded_models():
+    """
+    Loads all models defined in MODEL_OPTIONS, showing a collective progress bar.
+    """
     models = {}
+    total_models = len(MODEL_OPTIONS)
+    
+    # Check if all models are already loaded to avoid showing the bar unnecessarily
+    if all(st.session_state.loaded_models.get(name) for name in MODEL_OPTIONS):
+        return st.session_state.loaded_models
+
     progress_bar = st.progress(0)
     status_text = st.empty()
-    total_models = len(MODEL_OPTIONS)
-    def update_progress(progress, message=""):
-        progress_bar.progress(progress)
-        if message:
-            status_text.info(message)
+
     for i, (name, model_info) in enumerate(MODEL_OPTIONS.items()):
-        update_progress(
-            (i / total_models) * 0.9,
-            f"Loading {name} model ({i+1}/{total_models})..."
-        )
-        models[name] = load_model_if_needed(
-            name, 
-            _progress_callback=lambda msg: update_progress(
-                (i / total_models) * 0.9, 
-                f"{name}: {msg}"
-            )
-        )
-    update_progress(1.0, "✅ All models loaded successfully!")
-    time.sleep(1)
+        # Update progress and status text for the current model
+        progress_value = (i + 1) / total_models
+        status_text.info(f"Loading model {i+1}/{total_models}: {name}...")
+        
+        # Load the model if it's not already in the session state
+        loaded_model = load_model_if_needed(name)
+        if loaded_model:
+            models[name] = loaded_model
+        
+        progress_bar.progress(progress_value)
+
+    status_text.success("✅ All required models are loaded and ready!")
+    time.sleep(2)  # Display success message briefly
     progress_bar.empty()
     status_text.empty()
+    
     return models
 
 load_all_models = get_loaded_models
@@ -638,22 +646,21 @@ def render_spamlyser_dashboard():
     """, unsafe_allow_html=True)
 
     # Dashboard tabs
-    # Dashboard tabs
     dashboard_tabs = st.tabs(["🎯 Overview", "🤖 Model Performance", "🧠 Ensemble Analytics", "📊 Detailed Stats", "⚡ Real-time Monitor"])
 
-    with dashboard_tabs[0]:  # Overview Tab
+    with dashboard_tabs[0]: # Overview Tab
         render_overview_dashboard()
     
-    with dashboard_tabs[1]:  # Model Performance Tab
+    with dashboard_tabs[1]: # Model Performance Tab
         render_model_performance_dashboard()
     
-    with dashboard_tabs[2]:  # Ensemble Analytics Tab
+    with dashboard_tabs[2]: # Ensemble Analytics Tab
         render_ensemble_dashboard()
     
-    with dashboard_tabs[3]:  # Detailed Stats Tab
+    with dashboard_tabs[3]: # Detailed Stats Tab
         render_detailed_stats_dashboard()
     
-    with dashboard_tabs[4]:  # Real-time Monitor Tab
+    with dashboard_tabs[4]: # Real-time Monitor Tab
         render_realtime_monitor()
 
 def render_overview_dashboard():
@@ -809,7 +816,7 @@ def render_overview_dashboard():
             # Recent activity timeline
             if len(recent_items) >= 5:
                 timeline_data = []
-                for i, item in enumerate(recent_items[-10:]):  # Last 10 items
+                for i, item in enumerate(recent_items[-10:]): # Last 10 items
                     timeline_data.append({
                         'Index': i+1,
                         'Prediction': 1 if item['prediction'] == 'SPAM' else 0,
@@ -980,7 +987,7 @@ def render_ensemble_dashboard():
             fig_methods.add_trace(go.Scatter(
                 name='Avg Confidence',
                 x=methods,
-                y=[conf * max(method_counts) for conf in avg_confidences],  # Scale for visibility
+                y=[conf * max(method_counts) for conf in avg_confidences], # Scale for visibility
                 yaxis='y2',
                 mode='lines+markers',
                 marker_color='#ff6b6b',
@@ -1213,7 +1220,7 @@ def render_realtime_monitor():
     
     with status_col4:
         # Memory usage (mock)
-        memory_usage = 67  # Mock percentage
+        memory_usage = 67 # Mock percentage
         status_color = "#4ecdc4" if memory_usage < 80 else "#ff8800" if memory_usage < 90 else "#ff6b6b"
         
         st.markdown(f"""
@@ -1255,7 +1262,7 @@ def render_realtime_monitor():
                 'total_messages': len(st.session_state.classification_history) + len(st.session_state.ensemble_history)
             }
             
-            json_data = st.json.dumps(dashboard_data, indent=2, default=str)
+            json_data = pd.io.json.dumps(dashboard_data, indent=2, default=str)
             
             st.download_button(
                 label="📥 Download Dashboard Data (JSON)",
@@ -1275,7 +1282,7 @@ if st.session_state.get('show_dashboard', False):
     
     if st.button("❌ Close Dashboard", key="close_dashboard"):
         st.session_state.show_dashboard = False
-        st.rerun()  # Rerun to reset the state
+        st.rerun() # Rerun to reset the state
 
 def get_risk_indicators(message, prediction, threat_type=None):
     indicators = []
@@ -1325,13 +1332,19 @@ def get_ensemble_predictions(message, models):
 
 def create_predict_proba(classifier):
     """
-    Creates a batch-processing prediction function for LIME.
+    Creates a batch-processing prediction function for LIME, optimized for Hugging Face pipelines.
     `classifier` is a Hugging Face pipeline object.
     """
     def predict_proba_batch(texts: List[str]) -> np.ndarray:
-        # 1. Get predictions for the whole batch at once
+        # 1. Get predictions for the whole batch at once.
         # The pipeline is highly optimized for this!
-        predictions = classifier(texts, top_k=2) # Get probabilities for both classes
+        try:
+            # Request probabilities for both classes to ensure consistent output
+            predictions = classifier(texts, top_k=2) 
+        except Exception as e:
+            st.error(f"Error during model prediction in LIME backend: {e}")
+            # Return a neutral probability array in case of error
+            return np.full((len(texts), 2), 0.5)
 
         results = []
         for pred_list in predictions:
@@ -1341,13 +1354,16 @@ def create_predict_proba(classifier):
             # 3. Get the score for SPAM, defaulting to 0.0 if not found
             spam_score = score_dict.get('SPAM', 0.0)
             
-            # 4. LIME expects probabilities for all classes. Order is [HAM, SPAM]
-            # The HAM score will be 1.0 - SPAM score
-            results.append([1.0 - spam_score, spam_score])
+            # 4. LIME expects probabilities for all classes. We will use the order [HAM, SPAM].
+            # The HAM score will be 1.0 - SPAM score.
+            ham_score = 1.0 - spam_score
+            results.append([ham_score, spam_score])
             
         return np.array(results)
         
-    return predict_proba_batch# --- Main Interface ---
+    return predict_proba_batch
+    
+# --- Main Interface ---
 col1, col2 = st.columns([2, 1])
 
 with col1:
@@ -1419,15 +1435,15 @@ with col1:
                 if word['word'] not in [w['word'] for w in summary['top_ham_words']]:
                     summary['top_ham_words'].append({
                         'word': word['word'],
-                        'influence': -0.2,  # Give it a small negative influence (ham)
+                        'influence': -0.2, # Give it a small negative influence (ham)
                         'type': 'neutral-ham'
                     })
         
         st.success(f"✅ Analysis complete! Found {spam_count} spam indicators and {ham_count} ham indicators.")
         
         # Show more detailed breakdown
-        col1, col2 = st.columns(2)
-        with col1:
+        col1_detail, col2_detail = st.columns(2)
+        with col1_detail:
             st.markdown("**Spam Indicators:**")
             if spam_count > 0:
                 for word in summary['top_spam_words']:
@@ -1436,7 +1452,7 @@ with col1:
             else:
                 st.info("No spam indicators found")
                 
-        with col2:
+        with col2_detail:
             st.markdown("**Ham Indicators:**")
             if ham_count > 0:
                 for word in summary['top_ham_words']:
@@ -1453,7 +1469,6 @@ with col1:
         if "sample_selector" in st.session_state:
             st.session_state.pop("sample_selector")
         
-
         st.rerun() # Rerun to update the UI with cleared values
 
 
@@ -1490,7 +1505,7 @@ if analyse_btn and user_sms.strip():
                             ("$" in text_lower or "cash" in text_lower or "prize" in text_lower)):
                             # Override the classification for this clear scam case
                             label = "SPAM"
-                            confidence = max(confidence, 0.85)  # Boost confidence
+                            confidence = max(confidence, 0.85) # Boost confidence
                             st.info("💡 Scam pattern detected and corrected")
                 
                 # If SPAM, classify the threat type
@@ -1531,7 +1546,7 @@ if analyse_btn and user_sms.strip():
                     
                     # Use st.markdown to create a separate HTML element for threat info
                     threat_html = f'<div style="margin-top: 15px; padding: 10px; border-radius: 10px; background: rgba(0,0,0,0.1);"><h4 style="margin: 0; color: {threat_color};">{threat_icon} {threat_type}</h4><p style="margin: 5px 0 0 0; opacity: 0.9;">{threat_description} (Confidence: {threat_confidence:.1%})</p></div>'
-                    
+                
                 # Use st.markdown with proper escaping and unsafe_allow_html=True
                 model_info_html = f"""
                 <div class="prediction-card {card_class}">
@@ -1656,7 +1671,7 @@ if analyse_btn and user_sms.strip():
                         st.markdown("##### Model Contributions:")
                         for contrib in ensemble_result['model_contributions']:
                             st.write(f"- {contrib['model']}: Weight {contrib['weight']:.3f}, "
-                                   f"Contribution: {contrib['contribution']:.3f}")
+                                     f"Contribution: {contrib['contribution']:.3f}")
                     if st.checkbox("🔍 Show All Ensemble Methods Comparison"):
                         st.markdown("#### 🎯 All Methods Comparison")
                         all_results = st.session_state.ensemble_classifier.get_all_predictions(predictions)
@@ -1936,7 +1951,7 @@ def classify_csv(file, ensemble_mode, selected_models_for_bulk, selected_ensembl
                 else:
                     classifier = models_to_use.get(selected_models_for_bulk)
                     if classifier:
-                        preds = classifier(batch_messages)  # 🚀 batch inference
+                        preds = classifier(batch_messages) # 🚀 batch inference
                         batch_results = [
                             {'message': msg, 'prediction': p['label'].upper(), 'confidence': p['score']}
                             for msg, p in zip(batch_messages, preds)
@@ -2169,4 +2184,3 @@ st.markdown("""
     </div>
 </div>
 """, unsafe_allow_html=True)
-
