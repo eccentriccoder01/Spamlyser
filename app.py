@@ -2027,8 +2027,7 @@ if analysis_mode == "Ensemble Analysis":
             """, unsafe_allow_html=True)
             st.rerun()
 
-if analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history:
-    st.markdown("---")
+if analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history and len(st.session_state.ensemble_history) > 0:    st.markdown("---")
     st.markdown("## 📊 Ensemble Method Performance Comparison")
 
     # Create comparison chart of different methods
