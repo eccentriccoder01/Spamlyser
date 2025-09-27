@@ -2027,14 +2027,13 @@ if analysis_mode == "Ensemble Analysis":
             """, unsafe_allow_html=True)
             st.rerun()
 
-if analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history and len(st.session_state.ensemble_history) > 0:    st.markdown("---")
+if analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history and len(st.session_state.ensemble_history) > 0:
+    st.markdown("---")
     st.markdown("## 📊 Ensemble Method Performance Comparison")
-
-    # Create comparison chart of different methods
     method_performance = defaultdict(list)
     for entry in st.session_state.ensemble_history:
         method_performance[entry['method']].append(entry['confidence'])
-
+    
     if len(method_performance) > 1:
         comparison_data = []
         for method, confidences in method_performance.items():
@@ -2084,19 +2083,14 @@ if analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history an
             height=400,
             margin=dict(t=50, b=0, l=0, r=0)
         )
-        
-        # Apply dark theme for better visibility
-        fig.update_layout(template='plotly_dark')
         st.plotly_chart(fig, use_container_width=True)
-
-        # Show detailed comparison table
-        st.dataframe(df_comparison, use_container_width=True)
     else:
         st.info("Not enough data to compare ensemble methods. Try more predictions with different methods.")
+
 # --- Footer ---
 st.markdown("""
 <div style="text-align: center; padding: 20px; background: rgba(255,255,255,0.02); border-radius: 10px; margin-top: 30px;">
-    <p style="color: #888; margin: 0;">
+    <p style="margin: 0; color: #888;">
         🛡️ <strong>Spamlyser Pro - Ensemble Edition</strong> | Advanced Multi-Model SMS Threat Detection<br>
         Powered by Custom-Trained Transformer Models & Ensemble Learning<br>
         Developed by <a href="https://eccentriccoder01.github.io/Me" target="_blank" style="color: #1f77b4; text-decoration: none; font-weight: 600;">MrEccentric</a>
@@ -2108,5 +2102,3 @@ st.markdown("""
     </div>
 </div>
 """, unsafe_allow_html=True)
-
-
