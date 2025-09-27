@@ -287,21 +287,24 @@ st.markdown("""
 # --- Sidebar ---
 with st.sidebar:
 
-    # --- Dark Mode Toggle ---
-    if 'dark_mode' not in st.session_state:
-        st.session_state.dark_mode = False
-    st.markdown("""
-    <div style="text-align: center; padding: 20px; background: linear-gradient(145deg, #1e1e1e, #2a2a2a); border-radius: 15px; margin-bottom: 20px;">
-        <h3 style="color: #00d4aa; margin: 0;">Analysis Mode</h3>
-    </div>
-    """, unsafe_allow_html=True)
-    st.session_state.dark_mode = st.checkbox("🌙 Enable Dark Mode", value=st.session_state.dark_mode, help="Toggle dark mode for the app")
-
-    analysis_mode = st.radio(
-        "Choose Analysis Mode",
-        ["Single Model", "Ensemble Analysis"],
-        help="Single Model: Use one model at a time\nEnsemble: Use all models together"
-    )
+    # --- NEW EXPANDER FOR CONTROLS ---
+    with st.expander("⚙️ Analysis Controls", expanded=True):
+        
+        # Dark Mode Toggle (Keep this one outside, but close)
+        if 'dark_mode' not in st.session_state:
+            st.session_state.dark_mode = False
+        
+        # [REMOVED] st.markdown (the colored Analysis Mode header)
+        
+        st.session_state.dark_mode = st.checkbox("🌙 Enable Dark Mode", 
+                                                value=st.session_state.dark_mode, 
+                                                help="Toggle dark mode for the app")
+        
+        analysis_mode = st.radio(
+            "Choose Analysis Mode",
+            ["Single Model", "Ensemble Analysis"],
+            help="Single Model: Use one model at a time\nEnsemble: Use all models together"
+        )
 
     if analysis_mode == "Single Model":
         selected_model_name = st.selectbox(
@@ -353,41 +356,6 @@ with st.sidebar:
         if selected_ensemble_method == "adaptive_threshold":
             st.markdown("#### 🎛️ Threshold Settings")
             base_threshold = st.slider("Base Threshold", 0.1, 0.9, 0.5, 0.05)
-
-    st.markdown("---")
-
-    # Sidebar Overall Stats
-    st.markdown("### 📊 Overall Statistics")
-    total_single_predictions = sum(st.session_state.model_stats[model]['total'] for model in MODEL_OPTIONS)
-    total_ensemble_predictions = len(st.session_state.ensemble_history)
-    total_predictions_overall = total_single_predictions + total_ensemble_predictions
-
-    st.markdown(f"""
-    <div class="metric-container">
-        <p style="color: #00d4aa; font-size: 1.2rem; margin-bottom: 5px;">Total Predictions</p>
-        <h3 style="color: #eee; margin-top: 0;">{total_predictions_overall}</h3>
-    </div>
-    """, unsafe_allow_html=True)
-
-    overall_spam_count = sum(st.session_state.model_stats[model]['spam'] for model in MODEL_OPTIONS) + \
-                         sum(1 for entry in st.session_state.ensemble_history if entry['prediction'] == 'SPAM')
-    overall_ham_count = sum(st.session_state.model_stats[model]['ham'] for model in MODEL_OPTIONS) + \
-                        sum(1 for entry in st.session_state.ensemble_history if entry['prediction'] == 'HAM')
-    col_spam, col_ham = st.columns(2)
-    with col_spam:
-        st.markdown(f"""
-        <div class="metric-container spam-alert" style="padding: 15px;">
-            <p style="color: #ff6b6b; font-size: 1rem; margin-bottom: 5px;">Spam Count</p>
-            <h4 style="color: #ff6b6b; margin-top: 0;">{overall_spam_count}</h4>
-        </div>
-        """, unsafe_allow_html=True)
-    with col_ham:
-        st.markdown(f"""
-        <div class="metric-container ham-safe" style="padding: 15px;">
-            <p style="color: #6bff6b; font-size: 1rem; margin-bottom: 5px;">Ham Count</p>
-            <h4 style="color: #6bff6b; margin-top: 0;">{overall_ham_count}</h4>
-        </div>
-        """, unsafe_allow_html=True)
 
 
 # --- Model Loading Helpers ---
@@ -2154,6 +2122,41 @@ if analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history:
         st.dataframe(df_comparison, use_container_width=True)
     else:
         st.info("Not enough data to compare ensemble methods. Try more predictions with different methods.")
+st.markdown("---")
+
+
+
+    # Sidebar Overall Stats
+
+st.markdown("### 📊 Overall Statistics")
+
+total_single_predictions = sum(st.session_state.model_stats[model]['total'] for model in MODEL_OPTIONS)
+
+total_ensemble_predictions = len(st.session_state.ensemble_history)
+
+total_predictions_overall = total_single_predictions + total_ensemble_predictions
+
+
+
+st.markdown(f"""<div class="metric-container"><p style="color: #00d4aa; font-size: 1.2rem; margin-bottom: 5px;">Total Predictions</p><h3 style="color: #eee; margin-top: 0;">{total_predictions_overall}</h3></div>""", unsafe_allow_html=True)
+
+
+
+overall_spam_count = sum(st.session_state.model_stats[model]['spam'] for model in MODEL_OPTIONS) + \
+sum(1 for entry in st.session_state.ensemble_history if entry['prediction'] == 'SPAM')
+
+overall_ham_count = sum(st.session_state.model_stats[model]['ham'] for model in MODEL_OPTIONS) + \
+sum(1 for entry in st.session_state.ensemble_history if entry['prediction'] == 'HAM')
+
+col_spam, col_ham = st.columns(2)
+
+with col_spam:
+
+    st.markdown(f"""<div class="metric-container spam-alert" style="padding: 15px;"><p style="color: #ff6b6b; font-size: 1rem; margin-bottom: 5px;">Spam Count</p><h4 style="color: #ff6b6b; margin-top: 0;">{overall_spam_count}</h4></div>""", unsafe_allow_html=True)
+
+with col_ham:
+
+    st.markdown(f"""<div class="metric-container ham-safe" style="padding: 15px;"><p style="color: #6bff6b; font-size: 1rem; margin-bottom: 5px;">Ham Count</p><h4 style="color: #6bff6b; margin-top: 0;">{overall_ham_count}</h4></div>""", unsafe_allow_html=True)
 # --- Footer ---
 st.markdown("""
 <div style="text-align: center; padding: 20px; background: rgba(255,255,255,0.02); border-radius: 10px; margin-top: 30px;">
