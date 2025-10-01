@@ -86,92 +86,170 @@ st.set_page_config(
 # --- Custom CSS for Styling ---
 st.markdown("""
 <style>
+    /* Theme-aware base styles */
+    :root {
+        --bg-gradient-start: #f5f7fa;
+        --bg-gradient-end: #eef2f5;
+        --card-bg: #ffffff;
+        --card-border: #e0e0e0;
+        --card-shadow: rgba(0, 0, 0, 0.1);
+        --text-primary: #333333;
+        --text-secondary: #666666;
+        --accent-color: #00d4aa;
+        --spam-color: #ff4444;
+        --ham-color: #44bb44;
+    }
+    
+    /* Dark theme overrides */
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --bg-gradient-start: #0f0f0f;
+            --bg-gradient-end: #1a1a1a;
+            --card-bg: #1e1e1e;
+            --card-border: #404040;
+            --card-shadow: rgba(0, 0, 0, 0.3);
+            --text-primary: #ffffff;
+            --text-secondary: #bbbbbb;
+        }
+    }
+    
     .main {
-        background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+        background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+        color: var(--text-primary);
     }
     
     .stApp {
-        background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+        background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
     }
     
-    .metric-container {
-        background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+    /* Card Styles */
+    .metric-container, .prediction-card, .ensemble-card, .feature-card, 
+    .model-info, .ensemble-method, .method-comparison {
         padding: 20px;
-        border-radius: 15px;
-        border: 1px solid #333;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        margin: 10px 0;
+        border-radius: 12px;
+        margin: 15px 0;
+        transition: all 0.3s ease;
+        color: var(--text-primary);
+    }
+
+    /* Light theme card styles */
+    .metric-container {
+        background: linear-gradient(145deg, #f0f2f6, #ffffff);
+        border: 1px solid var(--card-border);
+        box-shadow: 0 4px 12px var(--card-shadow);
     }
     
     .prediction-card {
-        background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
-        padding: 25px;
-        border-radius: 20px;
-        border: 1px solid #404040;
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        box-shadow: 0 6px 16px var(--card-shadow);
         text-align: center;
-        margin: 20px 0;
+        padding: 25px;
     }
     
     .ensemble-card {
-        background: linear-gradient(145deg, #1a1a2a, #2d2d3d);
-        padding: 20px;
-        border-radius: 15px;
+        background: linear-gradient(145deg, #f0f0ff, #ffffff);
         border: 2px solid #6366f1;
-        margin: 15px 0;
     }
     
     .spam-alert {
-        background: linear-gradient(145deg, #2a1a1a, #3d2626);
-        border: 2px solid #ff4444;
-        color: #ff6b6b;
+        background: linear-gradient(145deg, #fff0f0, #ffffff);
+        border: 2px solid var(--spam-color);
+        color: var(--spam-color);
     }
     
     .ham-safe {
-        background: linear-gradient(145deg, #1a2a1a, #263d26);
-        border: 2px solid #44ff44;
-        color: #6bff6b;
+        background: linear-gradient(145deg, #f0fff0, #ffffff);
+        border: 2px solid var(--ham-color);
+        color: var(--ham-color);
     }
     
     .analysis-header {
-        background: linear-gradient(90deg, #333, #555);
+        background: linear-gradient(90deg, #f0f0f0, #e0e0e0);
         padding: 15px;
         border-radius: 10px;
         margin: 20px 0;
-        border-left: 4px solid #00d4aa;
+        border-left: 4px solid var(--accent-color);
+        color: var(--text-primary);
     }
     
     .feature-card {
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.8);
         backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 15px;
-        padding: 20px;
-        margin: 10px 0;
+        border: 1px solid var(--card-border);
     }
     
     .model-info {
-        background: linear-gradient(145deg, #252525, #3a3a3a);
-        padding: 15px;
-        border-radius: 12px;
-        border-left: 4px solid #00d4aa;
-        margin: 15px 0;
+        background: linear-gradient(145deg, #f0f0f0, #ffffff);
+        border-left: 4px solid var(--accent-color);
     }
     
     .ensemble-method {
-        background: linear-gradient(145deg, #252545, #3a3a5a);
-        padding: 12px;
-        border-radius: 10px;
+        background: linear-gradient(145deg, #f0f0ff, #ffffff);
         border-left: 4px solid #6366f1;
-        margin: 8px 0;
     }
     
     .method-comparison {
-        background: rgba(255, 255, 255, 0.03);
-        padding: 15px;
-        border-radius: 10px;
-        margin: 10px 0;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid var(--card-border);
+    }
+    
+    /* Dark theme overrides */
+    @media (prefers-color-scheme: dark) {
+        .metric-container {
+            background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+            border: 1px solid #333;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .prediction-card {
+            background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
+            border: 1px solid #404040;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .ensemble-card {
+            background: linear-gradient(145deg, #1a1a2a, #2d2d3d);
+            border: 2px solid #6366f1;
+        }
+        
+        .spam-alert {
+            background: linear-gradient(145deg, #2a1a1a, #3d2626);
+            border: 2px solid #ff4444;
+            color: #ff6b6b;
+        }
+        
+        .ham-safe {
+            background: linear-gradient(145deg, #1a2a1a, #263d26);
+            border: 2px solid #44ff44;
+            color: #6bff6b;
+        }
+        
+        .analysis-header {
+            background: linear-gradient(90deg, #333, #555);
+            border-left: 4px solid #00d4aa;
+            color: #ffffff;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .model-info {
+            background: linear-gradient(145deg, #252525, #3a3a3a);
+            border-left: 4px solid #00d4aa;
+        }
+        
+        .ensemble-method {
+            background: linear-gradient(145deg, #252545, #3a3a5a);
+            border-left: 4px solid #6366f1;
+        }
+        
+        .method-comparison {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -356,6 +434,42 @@ with st.sidebar:
         if selected_ensemble_method == "adaptive_threshold":
             st.markdown("#### 🎛️ Threshold Settings")
             base_threshold = st.slider("Base Threshold", 0.1, 0.9, 0.5, 0.05)
+
+    st.markdown("---")
+
+    # Sidebar Overall Stats
+    st.markdown("### 📊 Overall Statistics")
+    total_single_predictions = sum(st.session_state.model_stats[model]['total'] for model in MODEL_OPTIONS)
+    total_ensemble_predictions = len(st.session_state.ensemble_history)
+    total_predictions_overall = total_single_predictions + total_ensemble_predictions
+
+    st.markdown(f"""
+    <div class="metric-container" style="background: rgba(30, 30, 30, 0.9); border: 1px solid #444;">
+        <p style="color: #00d4aa; font-size: 1.1rem; margin-bottom: 5px; font-weight: 500;">Total Predictions</p>
+        <h3 style="color: #f0f0f0; margin: 10px 0; font-size: 1.8rem;">{total_predictions_overall}</h3>
+    </div>
+    """, unsafe_allow_html=True)
+
+    overall_spam_count = sum(st.session_state.model_stats[model]['spam'] for model in MODEL_OPTIONS) + \
+                         sum(1 for entry in st.session_state.ensemble_history if entry['prediction'] == 'SPAM')
+    overall_ham_count = sum(st.session_state.model_stats[model]['ham'] for model in MODEL_OPTIONS) + \
+                        sum(1 for entry in st.session_state.ensemble_history if entry['prediction'] == 'HAM')
+
+    col_spam, col_ham = st.columns(2)
+    with col_spam:
+        st.markdown(f"""
+        <div class="metric-container spam-alert" style="padding: 15px;">
+            <p style="color: #ff6b6b; font-size: 1rem; margin-bottom: 5px;">Spam Count</p>
+            <h4 style="color: #ff6b6b; margin-top: 0;">{overall_spam_count}</h4>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_ham:
+        st.markdown(f"""
+        <div class="metric-container ham-safe" style="padding: 15px;">
+            <p style="color: #6bff6b; font-size: 1rem; margin-bottom: 5px;">Ham Count</p>
+            <h4 style="color: #6bff6b; margin-top: 0;">{overall_ham_count}</h4>
+        </div>
+        """, unsafe_allow_html=True)
 
 
 # --- Model Loading Helpers ---
@@ -676,9 +790,9 @@ def render_overview_dashboard():
         spam_rate = (total_spam / total_messages * 100) if total_messages > 0 else 0
 
         st.markdown(f"""
-        <div class="metric-container" style="border: 2px solid #ff4444;">
-            <h2 style="color: #ff6b6b;">🚨 {total_spam}</h2>
-            <p>SPAM Detected</p>
+        <div class="metric-container" style="background: rgba(30, 30, 30, 0.9); border: 1px solid #ff4444; padding: 15px; border-radius: 8px;">
+            <p style="color: #ff6b6b; font-size: 1.1rem; margin-bottom: 5px; font-weight: 500;">Spam Count</p>
+            <h3 style="color: #ff6b6b; margin: 10px 0; font-size: 1.8rem;">{total_spam}</h3>
             <small style="color: #ff9999;">{spam_rate:.1f}% detection rate</small>
         </div>
         """, unsafe_allow_html=True)
@@ -689,9 +803,9 @@ def render_overview_dashboard():
         ham_rate = (total_ham / total_messages * 100) if total_messages > 0 else 0
 
         st.markdown(f"""
-        <div class="metric-container" style="border: 2px solid #44ff44;">
-            <h2 style="color: #4ecdc4;">✅ {total_ham}</h2>
-            <p>HAM (Safe)</p>
+        <div class="metric-container" style="background: rgba(30, 30, 30, 0.9); border: 1px solid #44ff44; padding: 15px; border-radius: 8px;">
+            <p style="color: #4ecdc4; font-size: 1.1rem; margin-bottom: 5px; font-weight: 500;">Ham Count</p>
+            <h3 style="color: #4ecdc4; margin: 10px 0; font-size: 1.8rem;">{total_ham}</h3>
             <small style="color: #99ff99;">{ham_rate:.1f}% legitimate</small>
         </div>
         """, unsafe_allow_html=True)
@@ -818,7 +932,7 @@ def render_overview_dashboard():
                     height=300,
                     paper_bgcolor='rgba(0,0,0,0)',
                     plot_bgcolor='rgba(0,0,0,0)',
-                    font=dict(color='white'),
+                    font=dict(color='#1a73e8'),  # Changed to blue for better visibility
                     showlegend=True
                 )
                 
@@ -1038,7 +1152,7 @@ def render_detailed_stats_dashboard():
             yaxis_title="Frequency",
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='white'),
+            font=dict(color='#1a73e8'),  # Changed to blue for better visibility
             height=350
         )
         
@@ -1076,7 +1190,7 @@ def render_detailed_stats_dashboard():
                 yaxis_title="Estimated Accuracy %",
                 paper_bgcolor='rgba(0,0,0,0)',
                 plot_bgcolor='rgba(0,0,0,0)',
-                font=dict(color='white'),
+                font=dict(color='#1a73e8'),  # Changed to blue for better visibility
                 height=350
             )
             
@@ -1327,15 +1441,18 @@ with col1:
 
     # Message input with sample selector
     sample_messages = [""] + sample_df["message"].tolist()
-    selected_message = st.selectbox("Choose a sample message (or type your own below): ", sample_messages, key="sample_selector")
+    st.markdown("<div style='color: #3b82f6; margin-bottom: 0.5rem; font-weight: 500;'>Choose a sample message (or type your own below):</div>", unsafe_allow_html=True)
+    selected_message = st.selectbox("", sample_messages, key="sample_selector", label_visibility="collapsed")
 
     # Set initial value of text_area based on sample_selector or previous user input
     user_sms_initial_value = selected_message if selected_message else st.session_state.get('user_sms_input_value', "")
+    st.markdown("<div style='color: #3b82f6; margin-top: 1rem; margin-bottom: 0.5rem; font-weight: 500;'>Enter SMS message to analyse</div>", unsafe_allow_html=True)
     user_sms = st.text_area(
-        "Enter SMS message to analyse",
+        "",
         value=user_sms_initial_value,
         height=120,
         placeholder="Type or paste your SMS message here...",
+        label_visibility="collapsed",
         help="Enter the SMS message you want to classify as spam or ham (legitimate)"
     )
     # Store current text_area value in session state for persistence
@@ -1484,8 +1601,14 @@ if analyse_btn and user_sms.strip():
                     'threat_confidence': threat_confidence
                 })
                 features = analyse_message_features(cleaned_sms)
+fix/ui-enhancements
+                risk_indicators = get_risk_indicators(cleaned_sms, label)
+                
+                st.markdown("### 🎯 <span style='color: #00d4aa;'>Classification Results</span>", unsafe_allow_html=True)
+
                 risk_indicators = get_risk_indicators(cleaned_sms, label, threat_type)
                 st.markdown("### 🎯 Classification Results")
+ master
                 card_class = "spam-alert" if label == "SPAM" else "ham-safe"
                 icon = "🚨" if label == "SPAM" else "✅"
                 # Create prediction card with threat info if applicable
@@ -1646,7 +1769,7 @@ if analyse_btn and user_sms.strip():
     if 'features' in locals(): # Only show features if analysis was successful
         col_detail1, col_detail2 = st.columns(2)
         with col_detail1:
-            st.markdown("#### 📋 Message Features")
+            st.markdown("#### 📋 <span style='color: #00d4aa;'>Message Features</span>", unsafe_allow_html=True)
             st.markdown(f"""
             <div class="feature-card">
                 <strong>Length:</strong> {features['length']} characters<br>
@@ -1657,13 +1780,12 @@ if analyse_btn and user_sms.strip():
             </div>
             """, unsafe_allow_html=True)
         with col_detail2:
-            st.markdown("#### ⚠️ Risk Indicators")
+            st.markdown("#### ⚠️ <span style='color: #00d4aa;'>Risk Indicators</span>", unsafe_allow_html=True)
             if risk_indicators:
                 for indicator in risk_indicators:
                     st.markdown(f"- {indicator}")
             else:
-                st.markdown("✅ No significant risk indicators detected")
-
+                st.markdown("<span style='color: #4ecdc4;'>✅ No significant risk indicators detected</span>", unsafe_allow_html=True)
 with col2:
     st.markdown("""
     <div class="analysis-header">
@@ -1674,7 +1796,11 @@ with col2:
     # Analytics Section - Visuals
     
     if analysis_mode == "Single Model":
-        st.markdown("#### 📊 Single Model Performance")
+        st.markdown("""
+        <h4 style='color: #3b82f6; margin-bottom: 1rem; font-weight: 600;'>
+            📊 Single Model Performance
+        </h4>
+        """, unsafe_allow_html=True)
         
         # Check if there's any data for any model
         if any(st.session_state.model_stats[model]['total'] > 0 for model in MODEL_OPTIONS):
@@ -1695,7 +1821,7 @@ with col2:
                 fig_pie_single.update_layout(
                     paper_bgcolor='rgba(0,0,0,0)',
                     plot_bgcolor='rgba(0,0,0,0)',
-                    font=dict(color='white'),
+                    font=dict(color='#1a73e8'),  # Changed to blue for better visibility
                     height=300,
                     margin=dict(t=50, b=0, l=0, r=0) # Adjust margins
                 )
@@ -1720,7 +1846,7 @@ with col2:
                     yaxis_title="Confidence",
                     paper_bgcolor='rgba(0,0,0,0)',
                     plot_bgcolor='rgba(0,0,0,0)',
-                    font=dict(color='white'),
+                    font=dict(color='#1a73e8'),  # Changed to blue for better visibility
                     height=250,
                     margin=dict(t=50, b=0, l=0, r=0)
                 )
@@ -1746,7 +1872,7 @@ with col2:
                 fig_model_usage.update_layout(
                     paper_bgcolor='rgba(0,0,0,0)',
                     plot_bgcolor='rgba(0,0,0,0)',
-                    font=dict(color='white'),
+                    font=dict(color='#1a73e8'),  # Changed to blue for better visibility
                     height=300,
                     margin=dict(t=50, b=0, l=0, r=0)
                 )
@@ -1754,15 +1880,23 @@ with col2:
             else:
                 st.info("No overall model usage data yet.")
         else:
-            st.info("Run an analysis in 'Single Model' mode to see analytics.")
+            st.markdown("""
+            <div style='background: var(--card-bg); 
+                        border-left: 4px solid #00d4aa; 
+                        color: var(--text-primary);
+                        padding: 1rem;
+                        border-radius: 4px;
+                        margin: 1rem 0;'>
+                ℹ️ Run an analysis in 'Single Model' mode to see analytics.
+            </div>
+            """, unsafe_allow_html=True)
 
-    else: # Ensemble Analysis
+    else:  # Ensemble Analysis
         st.markdown("#### 📊 Ensemble Performance")
         if st.session_state.ensemble_history:
             df_ensemble_history = pd.DataFrame(st.session_state.ensemble_history)
 
             # Pie Chart for Spam/Ham Distribution (Ensemble)
-
             st.markdown("#### 🧠 Ensemble Spam/Ham Distribution")
 
             # Display vote pie chart
@@ -1788,7 +1922,7 @@ with col2:
                 fig_model_votes.update_layout(
                     paper_bgcolor='rgba(0,0,0,0)',
                     plot_bgcolor='rgba(0,0,0,0)',
-                    font=dict(color='white'),
+                    font=dict(color='#1a73e8'),  # Changed to blue for better visibility
                     height=300,
                     margin=dict(t=50, b=0, l=0, r=0)
                 )
@@ -1810,7 +1944,7 @@ with col2:
                 yaxis_title="Confidence",
                 paper_bgcolor='rgba(0,0,0,0)',
                 plot_bgcolor='rgba(0,0,0,0)',
-                font=dict(color='white'),
+                font=dict(color='#1a73e8'),  # Changed to blue for better visibility
                 height=250,
                 margin=dict(t=50, b=0, l=0, r=0)
             )
@@ -1833,7 +1967,7 @@ with col2:
             fig_method_usage.update_layout(
                 paper_bgcolor='rgba(0,0,0,0)',
                 plot_bgcolor='rgba(0,0,0,0)',
-                font=dict(color='white'),
+                font=dict(color='#1a73e8'),  # Changed to blue for better visibility
                 height=300,
                 margin=dict(t=50, b=0, l=0, r=0)
             )
@@ -1844,13 +1978,10 @@ with col2:
 
 
 # --- Bulk CSV Classification Section (Drag & Drop) ---
-st.subheader("📂 Drag & Drop CSV for Bulk Classification")
+st.markdown("### 📂 <span style='color: #00d4aa;'>Drag & Drop CSV for Bulk Classification</span>", unsafe_allow_html=True)
 
-uploaded_csv = st.file_uploader(
-    "Upload a CSV file with a 'message' column:",
-    type=["csv"],
-    accept_multiple_files=False
-)
+st.markdown("<div style='color: #00d4aa; margin-bottom: 5px;'>Upload a CSV file with a 'message' column:</div>", unsafe_allow_html=True)
+uploaded_csv = st.file_uploader("", type=["csv"], accept_multiple_files=False)
 
 def classify_csv(file, ensemble_mode, selected_models_for_bulk, selected_ensemble_method_for_bulk, batch_size=100):
     try:
@@ -1969,7 +2100,7 @@ if uploaded_csv is not None:
 st.markdown("---") # Add a separator
 
 if analysis_mode == "Single Model" and st.session_state.classification_history:
-    st.markdown("#### 🕒 Recent Single Model Classifications")
+    st.markdown("#### 🕒 <span style='color: #00d4aa;'>Recent Single Model Classifications</span>", unsafe_allow_html=True)
     recent = st.session_state.classification_history[-5:] # Show last 5
     
     for item in reversed(recent):
@@ -2023,69 +2154,89 @@ elif analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history:
             showlegend=False,
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='white'),
+            font=dict(color='#1a73e8'),  # Changed to blue for better visibility
             margin=dict(t=50, b=0, l=0, r=0)
         )
         st.plotly_chart(fig, use_container_width=True)
 # --- Advanced Features Section ---
 if analysis_mode == "Ensemble Analysis":
-    st.markdown("## 🔧 Advanced Ensemble Settings")
+    st.markdown("""
+    <h2 style='color: #1a73e8; border-bottom: 2px solid #1a73e8; padding: 15px; background: rgba(255, 255, 255, 0.95); border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px;'>
+        <span style='color: #202124; font-weight: 700;'>🔧 Advanced Ensemble Settings</span>
+    </h2>
+    """, unsafe_allow_html=True)
 
     col_advanced1, col_advanced2 = st.columns(2)
 
     with col_advanced1:
-        st.markdown("### 📊 Model Performance Tracking")
+        st.markdown("""
+        <div style='background: rgba(255, 255, 255, 0.95); padding: 15px; border-radius: 8px; border-left: 4px solid #1a73e8; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px;'>
+            <h3 style='color: #1a73e8; margin: 0 0 15px 0; font-weight: 600;'>📊 Model Performance Tracking</h3>
+        """, unsafe_allow_html=True)
 
         if st.button("📈 View Model Performance Stats"):
             tracker_stats = st.session_state.ensemble_tracker.get_all_stats()
             if any(stats for stats in tracker_stats.values()):
                 for model_name, stats in tracker_stats.items():
                     if stats:
-                        st.markdown(f"#### {MODEL_OPTIONS[model_name]['icon']} {model_name}")
-                        st.write(f"- **Accuracy:** {stats.get('accuracy', 'N/A'):.2%}")
-                        st.write(f"- **Total Predictions:** {stats.get('total_predictions', 0)}")
-                        st.write(f"- **Trend:** {stats.get('performance_trend', 'N/A')}")
-                        st.write(f"- **Current Weight:** {stats.get('current_weight', 0):.3f}")
-                        st.markdown("---")
-            else:
-                st.info("No performance data available yet. Make some predictions to see stats!")
+                        st.markdown(f"""
+            <div style='background: rgba(30, 30, 30, 0.9); padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #3b82f6;'>
+                <h4 style='color: #3b82f6; margin: 0 0 10px 0;'>{MODEL_OPTIONS[model_name]['icon']} {model_name}</h4>
+                <p style='color: #e0e0e0; margin: 5px 0;'><strong>Accuracy:</strong> {stats.get('accuracy', 'N/A'):.2%}</p>
+                <p style='color: #e0e0e0; margin: 5px 0;'><strong>Total Predictions:</strong> {stats.get('total_predictions', 0)}</p>
+                <p style='color: #e0e0e0; margin: 5px 0;'><strong>Trend:</strong> {stats.get('performance_trend', 'N/A')}</p>
+                <p style='color: #e0e0e0; margin: 5px 0;'><strong>Current Weight:</strong> {stats.get('current_weight', 0):.3f}</p>
+        """, unsafe_allow_html=True)
 
         if st.button("💾 Export Performance Data"):
             try:
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 filename = f"spamlyser_performance_{timestamp}.json"
                 st.session_state.ensemble_tracker.save_to_file(filename)
-                st.success(f"Performance data exported to {filename}")
+                st.markdown(f"""
+        <div style='background: rgba(30, 30, 30, 0.9); color: #4caf50; padding: 12px; border-radius: 8px; border-left: 4px solid #4caf50;'>
+            ✅ Performance data exported to {filename}
+        </div>
+        """, unsafe_allow_html=True)
             except Exception as e:
-                st.error(f"Error exporting data: {str(e)}")
+                st.markdown(f"""
+            <div style='background: rgba(30, 30, 30, 0.9); color: #f44336; padding: 12px; border-radius: 8px; border-left: 4px solid #f44336;'>
+                ❌ Error exporting data: {str(e)}
+            </div>
+            """, unsafe_allow_html=True)
 
     with col_advanced2:
-        st.markdown("### ⚙️ Ensemble Configuration")
+        st.markdown("""
+        <div style='background: rgba(255, 255, 255, 0.95); padding: 15px; border-radius: 8px; border-left: 4px solid #1a73e8; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px;'>
+            <h3 style='color: #1a73e8; margin: 0 0 15px 0; font-weight: 600;'>⚙️ Ensemble Configuration</h3>
+        """, unsafe_allow_html=True)
 
         # Display current weights
         current_weights = st.session_state.ensemble_classifier.get_model_weights()
-        st.markdown("#### Current Model Weights:")
+        st.markdown("<h4 style='color: #1a73e8; margin: 15px 0 10px 0; font-size: 1.1em;'>Current Model Weights:</h4>", unsafe_allow_html=True)
         for model, weight in current_weights.items():
-            st.write(f"- {MODEL_OPTIONS[model]['icon']} {model}: {weight:.3f}")
+            st.markdown(f"<p style='color: #202124; margin: 8px 0; font-size: 0.95em;'>{MODEL_OPTIONS[model]['icon']} <strong style='color: #1a73e8;'>{model}:</strong> <span style='color: #1a73e8; font-weight: 500;'>{weight:.3f}</span></p>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
         # Reset to default weights
-        if st.button("🔄 Reset to Default Weights"):
+        if st.button("🔄 Reset to Default Weights", key="reset_weights_btn"):
             st.session_state.ensemble_classifier.update_model_weights(
                 st.session_state.ensemble_classifier.default_weights
             )
-            st.success("Weights reset to default values!")
+            st.markdown(f"""
+            <div style='background: rgba(46, 125, 50, 0.15); color: {"#0d652d" if st.session_state.theme == "light" else "#fff"}; padding: 12px; border-radius: 6px; margin: 12px 0; border-left: 4px solid {"#0d652d" if st.session_state.theme == "light" else "#fff"}; font-weight: 500;'>
+                ✅ Weights reset to default values!
+            </div>
+            """, unsafe_allow_html=True)
             st.rerun()
 
-# --- Real-time Ensemble Method Performance Comparison (Always visible if data exists) ---
-if analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history:
+if analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history and len(st.session_state.ensemble_history) > 0:
     st.markdown("---")
     st.markdown("## 📊 Ensemble Method Performance Comparison")
-
-    # Create comparison chart of different methods
     method_performance = defaultdict(list)
     for entry in st.session_state.ensemble_history:
         method_performance[entry['method']].append(entry['confidence'])
-
+    
     if len(method_performance) > 1:
         comparison_data = []
         for method, confidences in method_performance.items():
@@ -2111,56 +2262,38 @@ if analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history:
         fig.update_layout(
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='white'),
+            font=dict(color='#00d4aa', size=12),
+            title_font=dict(size=18, color='#00d4aa'),
+            xaxis=dict(
+                title='Method',
+                title_font=dict(size=14, color='#00d4aa'),
+                tickfont=dict(size=12, color='#00d4aa'),
+                showgrid=False,
+                linecolor='#00d4aa',
+                linewidth=1
+            ),
+            yaxis=dict(
+                title='Average Confidence',
+                title_font=dict(size=14, color='#00d4aa'),
+                tickfont=dict(size=12, color='#00d4aa'),
+                gridcolor='rgba(0,212,170,0.1)'
+            ),
+            coloraxis_colorbar=dict(
+                title='Confidence',
+                title_font=dict(color='#00d4aa'),
+                tickfont=dict(color='#00d4aa')
+            ),
             height=400,
             margin=dict(t=50, b=0, l=0, r=0)
         )
-
         st.plotly_chart(fig, use_container_width=True)
-
-        # Show detailed comparison table
-        st.dataframe(df_comparison, use_container_width=True)
     else:
         st.info("Not enough data to compare ensemble methods. Try more predictions with different methods.")
-st.markdown("---")
 
-
-
-    # Sidebar Overall Stats
-
-st.markdown("### 📊 Overall Statistics")
-
-total_single_predictions = sum(st.session_state.model_stats[model]['total'] for model in MODEL_OPTIONS)
-
-total_ensemble_predictions = len(st.session_state.ensemble_history)
-
-total_predictions_overall = total_single_predictions + total_ensemble_predictions
-
-
-
-st.markdown(f"""<div class="metric-container"><p style="color: #00d4aa; font-size: 1.2rem; margin-bottom: 5px;">Total Predictions</p><h3 style="color: #eee; margin-top: 0;">{total_predictions_overall}</h3></div>""", unsafe_allow_html=True)
-
-
-
-overall_spam_count = sum(st.session_state.model_stats[model]['spam'] for model in MODEL_OPTIONS) + \
-sum(1 for entry in st.session_state.ensemble_history if entry['prediction'] == 'SPAM')
-
-overall_ham_count = sum(st.session_state.model_stats[model]['ham'] for model in MODEL_OPTIONS) + \
-sum(1 for entry in st.session_state.ensemble_history if entry['prediction'] == 'HAM')
-
-col_spam, col_ham = st.columns(2)
-
-with col_spam:
-
-    st.markdown(f"""<div class="metric-container spam-alert" style="padding: 15px;"><p style="color: #ff6b6b; font-size: 1rem; margin-bottom: 5px;">Spam Count</p><h4 style="color: #ff6b6b; margin-top: 0;">{overall_spam_count}</h4></div>""", unsafe_allow_html=True)
-
-with col_ham:
-
-    st.markdown(f"""<div class="metric-container ham-safe" style="padding: 15px;"><p style="color: #6bff6b; font-size: 1rem; margin-bottom: 5px;">Ham Count</p><h4 style="color: #6bff6b; margin-top: 0;">{overall_ham_count}</h4></div>""", unsafe_allow_html=True)
 # --- Footer ---
 st.markdown("""
 <div style="text-align: center; padding: 20px; background: rgba(255,255,255,0.02); border-radius: 10px; margin-top: 30px;">
-    <p style="color: #888; margin: 0;">
+    <p style="margin: 0; color: #888;">
         🛡️ <strong>Spamlyser Pro - Ensemble Edition</strong> | Advanced Multi-Model SMS Threat Detection<br>
         Powered by Custom-Trained Transformer Models & Ensemble Learning<br>
         Developed by <a href="https://eccentriccoder01.github.io/Me" target="_blank" style="color: #1f77b4; text-decoration: none; font-weight: 600;">MrEccentric</a>
@@ -2172,4 +2305,3 @@ st.markdown("""
     </div>
 </div>
 """, unsafe_allow_html=True)
-
