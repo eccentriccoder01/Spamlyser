@@ -127,7 +127,7 @@ Experience Spamlyser live here:
 * Session-based spam/ham distribution pie charts
 * Model-wise classification count tracking
 
-### � Recent Additions (GSSoC 2025)
+### ✨ Recent Additions (GSSoC 2025)
 
 * Responsive dark mode toggle in sidebar for professional UI
 * Unified blue theme for both dark and light modes
