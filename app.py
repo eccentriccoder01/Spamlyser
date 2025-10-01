@@ -1601,14 +1601,12 @@ if analyse_btn and user_sms.strip():
                     'threat_confidence': threat_confidence
                 })
                 features = analyse_message_features(cleaned_sms)
-fix/ui-enhancements
                 risk_indicators = get_risk_indicators(cleaned_sms, label)
                 
                 st.markdown("### 🎯 <span style='color: #00d4aa;'>Classification Results</span>", unsafe_allow_html=True)
 
                 risk_indicators = get_risk_indicators(cleaned_sms, label, threat_type)
                 st.markdown("### 🎯 Classification Results")
- master
                 card_class = "spam-alert" if label == "SPAM" else "ham-safe"
                 icon = "🚨" if label == "SPAM" else "✅"
                 # Create prediction card with threat info if applicable
