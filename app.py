@@ -365,21 +365,24 @@ st.markdown("""
 # --- Sidebar ---
 with st.sidebar:
 
-    # --- Dark Mode Toggle ---
-    if 'dark_mode' not in st.session_state:
-        st.session_state.dark_mode = False
-    st.markdown("""
-    <div style="text-align: center; padding: 20px; background: linear-gradient(145deg, #1e1e1e, #2a2a2a); border-radius: 15px; margin-bottom: 20px;">
-        <h3 style="color: #00d4aa; margin: 0;">Analysis Mode</h3>
-    </div>
-    """, unsafe_allow_html=True)
-    st.session_state.dark_mode = st.checkbox("🌙 Enable Dark Mode", value=st.session_state.dark_mode, help="Toggle dark mode for the app")
-
-    analysis_mode = st.radio(
-        "Choose Analysis Mode",
-        ["Single Model", "Ensemble Analysis"],
-        help="Single Model: Use one model at a time\nEnsemble: Use all models together"
-    )
+    # --- NEW EXPANDER FOR CONTROLS ---
+    with st.expander("⚙️ Analysis Controls", expanded=True):
+        
+        # Dark Mode Toggle (Keep this one outside, but close)
+        if 'dark_mode' not in st.session_state:
+            st.session_state.dark_mode = False
+        
+        # [REMOVED] st.markdown (the colored Analysis Mode header)
+        
+        st.session_state.dark_mode = st.checkbox("🌙 Enable Dark Mode", 
+                                                value=st.session_state.dark_mode, 
+                                                help="Toggle dark mode for the app")
+        
+        analysis_mode = st.radio(
+            "Choose Analysis Mode",
+            ["Single Model", "Ensemble Analysis"],
+            help="Single Model: Use one model at a time\nEnsemble: Use all models together"
+        )
 
     if analysis_mode == "Single Model":
         selected_model_name = st.selectbox(
@@ -451,6 +454,7 @@ with st.sidebar:
                          sum(1 for entry in st.session_state.ensemble_history if entry['prediction'] == 'SPAM')
     overall_ham_count = sum(st.session_state.model_stats[model]['ham'] for model in MODEL_OPTIONS) + \
                         sum(1 for entry in st.session_state.ensemble_history if entry['prediction'] == 'HAM')
+
     col_spam, col_ham = st.columns(2)
     with col_spam:
         st.markdown(f"""
