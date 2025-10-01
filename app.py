@@ -1601,14 +1601,10 @@ if analyse_btn and user_sms.strip():
                     'threat_confidence': threat_confidence
                 })
                 features = analyse_message_features(cleaned_sms)
-fix/ui-enhancements
-                risk_indicators = get_risk_indicators(cleaned_sms, label)
                 
-                st.markdown("### 🎯 <span style='color: #00d4aa;'>Classification Results</span>", unsafe_allow_html=True)
-
                 risk_indicators = get_risk_indicators(cleaned_sms, label, threat_type)
                 st.markdown("### 🎯 Classification Results")
- master
+                
                 card_class = "spam-alert" if label == "SPAM" else "ham-safe"
                 icon = "🚨" if label == "SPAM" else "✅"
                 # Create prediction card with threat info if applicable
@@ -2290,18 +2286,91 @@ if analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history an
     else:
         st.info("Not enough data to compare ensemble methods. Try more predictions with different methods.")
 
-# --- Footer ---
+# --- Simple & Clean Footer ---
+# Beautiful gradient separator
 st.markdown("""
-<div style="text-align: center; padding: 20px; background: rgba(255,255,255,0.02); border-radius: 10px; margin-top: 30px;">
-    <p style="margin: 0; color: #888;">
-        🛡️ <strong>Spamlyser Pro - Ensemble Edition</strong> | Advanced Multi-Model SMS Threat Detection<br>
-        Powered by Custom-Trained Transformer Models & Ensemble Learning<br>
-        Developed by <a href="https://eccentriccoder01.github.io/Me" target="_blank" style="color: #1f77b4; text-decoration: none; font-weight: 600;">MrEccentric</a>
-    </p>
-    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
-        <small style="color: #666;">
-            🎯 Features: Single Model Analysis | 🤖 Ensemble Methods | 📊 Performance Tracking | ⚖️ Adaptive Weights
-        </small>
-    </div>
-</div>
+<div style="
+    height: 4px; 
+    background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57); 
+    border-radius: 10px; 
+    margin: 40px 0 30px 0;
+    box-shadow: 0 2px 10px rgba(78, 205, 196, 0.3);
+"></div>
 """, unsafe_allow_html=True)
+
+# Simple navigation header
+st.markdown('<h3 style="text-align: center; color: #4ecdc4;">🔗 Quick Navigation</h3>', unsafe_allow_html=True)
+st.markdown('<p style="text-align: center; color: #888; font-size: 0.9rem;">Explore different sections of Spamlyser Pro</p>', unsafe_allow_html=True)
+
+# Simple link styling
+st.markdown("""
+<style>
+.nav-link {
+    display: block;
+    padding: 10px 15px;
+    margin: 5px;
+    border-radius: 8px;
+    text-decoration: none;
+    background: rgba(78, 205, 196, 0.1);
+    border: 1px solid rgba(78, 205, 196, 0.3);
+    text-align: center;
+    color: #4ecdc4;
+}
+.nav-link:hover {
+    background: rgba(78, 205, 196, 0.2);
+    color: #ffffff;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# Create beautiful navigation links in columns
+col1, col2, col3, col4, col5 = st.columns(5)
+
+with col1:
+    st.markdown('<a href="#home" class="nav-link">🏠 Home</a>', unsafe_allow_html=True)
+    st.markdown('<a href="#about" class="nav-link">ℹ️ About</a>', unsafe_allow_html=True)
+
+with col2:
+    st.markdown('<a href="#features" class="nav-link">⚡ Features</a>', unsafe_allow_html=True)
+    st.markdown('<a href="#analytics" class="nav-link">📊 Analytics</a>', unsafe_allow_html=True)
+
+with col3:
+    st.markdown('<a href="#models" class="nav-link">🤖 Models</a>', unsafe_allow_html=True)
+    st.markdown('<a href="#help" class="nav-link">❓ Help</a>', unsafe_allow_html=True)
+
+with col4:
+    st.markdown('<a href="#contact" class="nav-link">📞 Contact</a>', unsafe_allow_html=True)
+    st.markdown('<a href="#docs" class="nav-link">📚 Docs</a>', unsafe_allow_html=True)
+
+with col5:
+    st.markdown('<a href="#api" class="nav-link">🔌 API</a>', unsafe_allow_html=True)
+    st.markdown('<a href="#settings" class="nav-link">⚙️ Settings</a>', unsafe_allow_html=True)
+
+# Beautiful Footer Info Section
+# Clean and simple footer info
+st.markdown("---")
+
+# Main footer title
+st.markdown('<h2 style="text-align: center; color: #4ecdc4;">🛡️ Spamlyser Pro</h2>', unsafe_allow_html=True)
+st.markdown('<p style="text-align: center; color: #45b7d1; font-size: 1.1rem;"><strong>Advanced AI-Powered SMS Threat Detection System</strong></p>', unsafe_allow_html=True)
+
+# Feature highlights in columns
+col_f1, col_f2, col_f3 = st.columns(3)
+with col_f1:
+    st.markdown('<div style="text-align: center; color: #96ceb4;"><h4>🌟 Multi-Model Analysis</h4></div>', unsafe_allow_html=True)
+with col_f2:
+    st.markdown('<div style="text-align: center; color: #feca57;"><h4>🤖 Ensemble Learning</h4></div>', unsafe_allow_html=True)
+with col_f3:
+    st.markdown('<div style="text-align: center; color: #ff6b6b;"><h4>⚡ Real-time Detection</h4></div>', unsafe_allow_html=True)
+
+st.markdown("---")
+
+# Copyright info
+st.markdown(
+    '<div style="text-align: center; color: #888; padding: 20px;">'
+    '<p>© 2024 Spamlyser Pro | Built with ❤️ using Streamlit & Python</p>'
+    '<p><span style="color: #4ecdc4;">🔒 Protecting Your Digital Communications</span> | '
+    '<span style="color: #feca57;">⭐ Advanced Threat Intelligence</span></p>'
+    '</div>', 
+    unsafe_allow_html=True
+)
