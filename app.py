@@ -1880,7 +1880,7 @@ def show_contact_page():
                 <strong style="color: #667eea;">support@spamlyser.ai</strong>
             </div>
             <div style="background: #f8f9ff; padding: 6px; border-radius: 6px; margin: 4px 0; font-size: 0.8rem;">
-                <strong style="color: #667eea;">kavlin.dev@gmail.com</strong>
+                <strong style="color: #667eea;">sagnik@gmail.com</strong>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -1907,13 +1907,13 @@ def show_contact_page():
             </p>
             <div style="margin: 8px 0;">
                 <div style="background: #f0fffe; padding: 5px; border-radius: 6px; margin: 3px 0; font-size: 0.75rem;">
-                    <strong style="color: #4ecdc4;">🐙 GitHub: Kavlin-Kaur</strong>
+                    <strong style="color: #4ecdc4;">🐙 GitHub: Sagnik-Dey</strong>
                 </div>
                 <div style="background: #f0fffe; padding: 5px; border-radius: 6px; margin: 3px 0; font-size: 0.75rem;">
-                    <strong style="color: #4ecdc4;">💼 LinkedIn: @kavlin-kaur</strong>
+                    <strong style="color: #4ecdc4;">💼 LinkedIn: @sagnik-dey</strong>
                 </div>
                 <div style="background: #f0fffe; padding: 5px; border-radius: 6px; margin: 3px 0; font-size: 0.75rem;">
-                    <strong style="color: #4ecdc4;">� kavlin.dev@gmail.com</strong>
+                    <strong style="color: #4ecdc4;">� sagnik@gmail.com</strong>
                 </div>
             </div>
         </div>
@@ -1937,10 +1937,10 @@ def show_contact_page():
             <div style="color: #ff6b6b; font-size: 2.2rem; margin-bottom: 10px;">👩‍💻</div>
             <h4 style="color: #ff6b6b; margin: 0 0 10px 0; font-size: 1.2rem;">Developer Info</h4>
             <p style="color: #333; line-height: 1.4; margin: 0 0 12px 0; font-size: 0.85rem;">
-                Created by Kavlin Kaur
+                Created by Sagnik
             </p>
             <div style="background: #fff5f5; padding: 5px; border-radius: 6px; margin: 3px 0; font-size: 0.75rem;">
-                <strong style="color: #ff6b6b;">👩‍� Developer: Kavlin Kaur</strong>
+                <strong style="color: #ff6b6b;">👩‍� Developer: Sagnik</strong>
             </div>
             <div style="background: #fff5f5; padding: 5px; border-radius: 6px; margin: 3px 0; font-size: 0.75rem;">
                 <strong style="color: #ff6b6b;">� AI/ML Engineer</strong>
@@ -2057,7 +2057,7 @@ def show_contact_page():
             <div style="font-size: 2.2rem; margin-bottom: 8px;">👩‍💻</div>
             <h4 style="margin: 0 0 8px 0; font-size: 1.2rem;">Lead Developer</h4>
             <p style="opacity: 0.9; margin: 0; font-size: 0.85rem; line-height: 1.4;">
-                <strong>Kavlin Kaur</strong><br/>
+                <strong>Sagnik</strong><br/>
                 AI/ML Engineer developing advanced spam detection systems using transformer models.
             </p>
         </div>
@@ -2189,6 +2189,534 @@ def show_contact_page():
     
     with action_col2:
         if st.button("⚡ Try SMS Analyzer", use_container_width=True):
+            navigate_to('analyzer')
+    
+    with action_col3:
+        if st.button("🏠 Back to Home", use_container_width=True):
+            navigate_to('home')
+    
+    # Add bottom padding for proper spacing
+    st.markdown("<div style='margin-bottom: 30px;'></div>", unsafe_allow_html=True)
+
+def show_api_page():
+    """Beautiful and comprehensive API documentation page"""
+    
+    # Add top padding for proper spacing
+    st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
+    
+    # Hero Section
+    st.markdown("""
+    <div style="
+        text-align: center; 
+        padding: 40px 20px; 
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+        border-radius: 20px; 
+        margin-bottom: 40px; 
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        color: white;
+    ">
+        <h1 style="
+            font-size: 4rem; 
+            margin: 0 0 20px 0; 
+            text-shadow: 0 0 30px rgba(255,255,255,0.3);
+            font-weight: 700;
+        ">
+            🔌 API Documentation
+        </h1>
+        <h2 style="
+            font-size: 1.8rem; 
+            margin: 0 0 30px 0; 
+            opacity: 0.9;
+            font-weight: 400;
+        ">
+            Integrate Spamlyser AI into Your Applications
+        </h2>
+        <p style="
+            font-size: 1.2rem; 
+            margin: 0; 
+            opacity: 0.8;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        ">
+            Powerful REST API endpoints for real-time SMS threat detection with comprehensive documentation and examples.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # API Overview Cards
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("""
+        <div style="
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #667eea;
+            text-align: center;
+            height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        ">
+            <div style="color: #667eea; font-size: 2.2rem; margin-bottom: 10px;">⚡</div>
+            <h4 style="color: #667eea; margin: 0 0 10px 0; font-size: 1.2rem;">Fast & Reliable</h4>
+            <p style="color: #333; line-height: 1.4; margin: 0 0 12px 0; font-size: 0.85rem;">
+                Lightning-fast API responses under 50ms
+            </p>
+            <div style="background: #f8f9ff; padding: 6px; border-radius: 6px; margin: 4px 0; font-size: 0.8rem;">
+                <strong style="color: #667eea;">99.9% Uptime SLA</strong>
+            </div>
+            <div style="background: #f8f9ff; padding: 6px; border-radius: 6px; margin: 4px 0; font-size: 0.8rem;">
+                <strong style="color: #667eea;">< 50ms Response Time</strong>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style="
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #4ecdc4;
+            text-align: center;
+            height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        ">
+            <div style="color: #4ecdc4; font-size: 2.2rem; margin-bottom: 10px;">🔒</div>
+            <h4 style="color: #4ecdc4; margin: 0 0 10px 0; font-size: 1.2rem;">Secure & Private</h4>
+            <p style="color: #333; line-height: 1.4; margin: 0 0 12px 0; font-size: 0.85rem;">
+                Enterprise-grade security and privacy
+            </p>
+            <div style="background: #f0fffe; padding: 6px; border-radius: 6px; margin: 4px 0; font-size: 0.8rem;">
+                <strong style="color: #4ecdc4;">🔐 API Key Authentication</strong>
+            </div>
+            <div style="background: #f0fffe; padding: 6px; border-radius: 6px; margin: 4px 0; font-size: 0.8rem;">
+                <strong style="color: #4ecdc4;">🛡️ HTTPS Encryption</strong>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div style="
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #ff6b6b;
+            text-align: center;
+            height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        ">
+            <div style="color: #ff6b6b; font-size: 2.2rem; margin-bottom: 10px;">📊</div>
+            <h4 style="color: #ff6b6b; margin: 0 0 10px 0; font-size: 1.2rem;">Comprehensive</h4>
+            <p style="color: #333; line-height: 1.4; margin: 0 0 12px 0; font-size: 0.85rem;">
+                Complete analysis and detailed insights
+            </p>
+            <div style="background: #fff5f5; padding: 6px; border-radius: 6px; margin: 4px 0; font-size: 0.8rem;">
+                <strong style="color: #ff6b6b;">📈 Confidence Scores</strong>
+            </div>
+            <div style="background: #fff5f5; padding: 6px; border-radius: 6px; margin: 4px 0; font-size: 0.8rem;">
+                <strong style="color: #ff6b6b;">🎯 Threat Classification</strong>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # API Endpoints Documentation
+    st.markdown("### 🚀 API Endpoints")
+    st.markdown("Explore our powerful API endpoints for SMS threat detection")
+    st.markdown("")  # Add some space
+    
+    # Single Message Analysis Endpoint
+    with st.expander("🔍 **POST /api/v1/analyze** - Single Message Analysis", expanded=False):
+        st.markdown("""
+        **Analyze a single SMS message for threats and spam detection.**
+        
+        **Request:**
+        ```bash
+        curl -X POST "https://api.spamlyser.ai/v1/analyze" \\
+        -H "Authorization: Bearer YOUR_API_KEY" \\
+        -H "Content-Type: application/json" \\
+        -d '{
+          "message": "WINNER! You have won $1000! Click here to claim: http://suspicious-link.com",
+          "model": "ensemble",
+          "include_confidence": true
+        }'
+        ```
+        
+        **Response:**
+        ```json
+        {
+          "status": "success",
+          "data": {
+            "message_id": "msg_123456789",
+            "classification": "SPAM",
+            "threat_type": "phishing",
+            "confidence_score": 0.95,
+            "spam_probability": 0.97,
+            "model_used": "ensemble",
+            "analysis": {
+              "suspicious_links": ["http://suspicious-link.com"],
+              "risk_factors": ["monetary_claims", "urgency_language", "suspicious_url"],
+              "recommended_action": "block"
+            },
+            "processed_at": "2025-10-02T10:30:00Z"
+          }
+        }
+        ```
+        """)
+    
+    # Batch Analysis Endpoint
+    with st.expander("📦 **POST /api/v1/batch** - Batch Message Analysis"):
+        st.markdown("""
+        **Analyze multiple SMS messages in a single request.**
+        
+        **Request:**
+        ```bash
+        curl -X POST "https://api.spamlyser.ai/v1/batch" \\
+        -H "Authorization: Bearer YOUR_API_KEY" \\
+        -H "Content-Type: application/json" \\
+        -d '{
+          "messages": [
+            {"id": "msg1", "text": "Hi mom, I'll be home late today"},
+            {"id": "msg2", "text": "FREE MONEY! Click now to claim your prize!"},
+            {"id": "msg3", "text": "Your appointment is confirmed for 3 PM tomorrow"}
+          ],
+          "model": "distilbert",
+          "batch_size": 100
+        }'
+        ```
+        
+        **Response:**
+        ```json
+        {
+          "status": "success",
+          "data": {
+            "batch_id": "batch_987654321",
+            "total_processed": 3,
+            "results": [
+              {
+                "message_id": "msg1",
+                "classification": "HAM",
+                "confidence_score": 0.98,
+                "spam_probability": 0.02
+              },
+              {
+                "message_id": "msg2", 
+                "classification": "SPAM",
+                "confidence_score": 0.99,
+                "spam_probability": 0.99
+              },
+              {
+                "message_id": "msg3",
+                "classification": "HAM", 
+                "confidence_score": 0.96,
+                "spam_probability": 0.04
+              }
+            ],
+            "processing_time_ms": 45
+          }
+        }
+        ```
+        """)
+    
+    # Model Information Endpoint
+    with st.expander("🤖 **GET /api/v1/models** - Available Models"):
+        st.markdown("""
+        **Get information about available AI models.**
+        
+        **Request:**
+        ```bash
+        curl -X GET "https://api.spamlyser.ai/v1/models" \\
+        -H "Authorization: Bearer YOUR_API_KEY"
+        ```
+        
+        **Response:**
+        ```json
+        {
+          "status": "success",
+          "data": {
+            "models": [
+              {
+                "name": "distilbert",
+                "display_name": "DistilBERT",
+                "description": "Lightweight & Fast",
+                "accuracy": 0.958,
+                "avg_response_time_ms": 48,
+                "recommended_for": ["real_time", "mobile", "high_throughput"]
+              },
+              {
+                "name": "bert", 
+                "display_name": "BERT",
+                "description": "Balanced Performance",
+                "accuracy": 0.972,
+                "avg_response_time_ms": 120,
+                "recommended_for": ["accuracy", "detailed_analysis"]
+              },
+              {
+                "name": "ensemble",
+                "display_name": "Ensemble Method",
+                "description": "Best Overall Performance", 
+                "accuracy": 0.985,
+                "avg_response_time_ms": 200,
+                "recommended_for": ["maximum_accuracy", "production"]
+              }
+            ]
+          }
+        }
+        ```
+        """)
+    
+    # Authentication & Rate Limits
+    st.markdown("### 🔐 Authentication & Limits")
+    st.markdown("")
+    
+    auth_col1, auth_col2 = st.columns(2)
+    
+    with auth_col1:
+        st.info("🔑 **API Authentication**")
+        st.markdown("""
+        **Authentication Details:**
+        - **Method:** Bearer Token Authentication
+        - **Header:** `Authorization: Bearer YOUR_API_KEY`
+        - **Get API Key:** Register at developer portal
+        - **Security:** Keys are encrypted and rotatable
+        
+        **Example:**
+        ```bash
+        curl -H "Authorization: Bearer sk_test_123..."
+        ```
+        """)
+    
+    with auth_col2:
+        st.success("📊 **Rate Limits**")
+        st.markdown("""
+        **Pricing Tiers:**
+        - **Free Tier:** 1,000 requests/month
+        - **Pro Tier:** 50,000 requests/month  
+        - **Enterprise:** Unlimited requests
+        - **Rate Limit:** 100 requests/minute
+        
+        **Response Headers:**
+        ```
+        X-RateLimit-Remaining: 95
+        X-RateLimit-Reset: 1696248000
+        ```
+        """)
+    
+    # SDK and Integration Examples
+    st.markdown("### 🛠️ SDK & Integration Examples")
+    st.markdown("")
+    
+    # Programming Language Examples
+    lang_tab1, lang_tab2, lang_tab3 = st.columns(3)
+    
+    with lang_tab1:
+        with st.expander("🐍 **Python SDK**", expanded=False):
+            st.code("""
+# Install: pip install spamlyser-sdk
+from spamlyser import SpamlyserClient
+
+# Initialize client
+client = SpamlyserClient(api_key="your_api_key")
+
+# Analyze single message
+result = client.analyze_message(
+    message="Suspicious SMS content here",
+    model="ensemble"
+)
+
+print(f"Classification: {result.classification}")
+print(f"Confidence: {result.confidence_score}")
+print(f"Threat Type: {result.threat_type}")
+
+# Batch analysis
+messages = ["msg1", "msg2", "msg3"]
+batch_results = client.analyze_batch(messages)
+            """, language="python")
+    
+    with lang_tab2:
+        with st.expander("📱 **JavaScript/Node.js**", expanded=False):
+            st.code("""
+// Install: npm install spamlyser-js
+const SpamlyserClient = require('spamlyser-js');
+
+const client = new SpamlyserClient({
+  apiKey: 'your_api_key'
+});
+
+// Analyze message
+const analyzeMessage = async (message) => {
+  try {
+    const result = await client.analyze({
+      message: message,
+      model: 'distilbert'
+    });
+    
+    console.log('Classification:', result.classification);
+    console.log('Confidence:', result.confidence_score);
+    return result;
+  } catch (error) {
+    console.error('Analysis failed:', error);
+  }
+};
+
+analyzeMessage("Check this suspicious SMS");
+            """, language="javascript")
+    
+    with lang_tab3:
+        with st.expander("☕ **Java SDK**", expanded=False):
+            st.code("""
+// Add to pom.xml: <dependency>spamlyser-java</dependency>
+import com.spamlyser.SpamlyserClient;
+import com.spamlyser.models.AnalysisResult;
+
+public class SpamDetection {
+    private SpamlyserClient client;
+    
+    public SpamDetection(String apiKey) {
+        this.client = new SpamlyserClient(apiKey);
+    }
+    
+    public void analyzeMessage(String message) {
+        try {
+            AnalysisResult result = client.analyze()
+                .message(message)
+                .model("bert")
+                .execute();
+                
+            System.out.println("Classification: " + 
+                result.getClassification());
+            System.out.println("Confidence: " + 
+                result.getConfidenceScore());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+            """, language="java")
+    
+    # Quick Start Guide
+    st.markdown("### 🚀 Quick Start Guide")
+    st.markdown("")
+    
+    step_col1, step_col2, step_col3 = st.columns(3)
+    
+    with step_col1:
+        st.markdown("""
+        <div style="
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            color: white;
+            text-align: center;
+            height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        ">
+            <div style="font-size: 2.2rem; margin-bottom: 8px;">1️⃣</div>
+            <h4 style="margin: 0 0 8px 0; font-size: 1.2rem;">Get API Key</h4>
+            <p style="opacity: 0.9; margin: 0; font-size: 0.85rem; line-height: 1.4;">
+                Sign up and get your free API key from the developer portal.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with step_col2:
+        st.markdown("""
+        <div style="
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            color: white;
+            text-align: center;
+            height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        ">
+            <div style="font-size: 2.2rem; margin-bottom: 8px;">2️⃣</div>
+            <h4 style="margin: 0 0 8px 0; font-size: 1.2rem;">Make Request</h4>
+            <p style="opacity: 0.9; margin: 0; font-size: 0.85rem; line-height: 1.4;">
+                Send your first API request using curl, SDK, or any HTTP client.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with step_col3:
+        st.markdown("""
+        <div style="
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            color: white;
+            text-align: center;
+            height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        ">
+            <div style="font-size: 2.2rem; margin-bottom: 8px;">3️⃣</div>
+            <h4 style="margin: 0 0 8px 0; font-size: 1.2rem;">Integrate</h4>
+            <p style="opacity: 0.9; margin: 0; font-size: 0.85rem; line-height: 1.4;">
+                Integrate spam detection into your app and start protecting users.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # API Status and Support
+    st.markdown("### 📊 API Status & Support")
+    st.markdown("")
+    
+    status_col1, status_col2 = st.columns(2)
+    
+    with status_col1:
+        st.success("🟢 **System Status**")
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            st.metric("API Uptime", "99.99%")
+            st.metric("Avg Response", "42ms")
+        with col2:
+            st.metric("Status", "🟢 Operational")
+    
+    with status_col2:
+        st.error("🆘 **Developer Support**")
+        st.markdown("""
+        **Available Resources:**
+        - **Documentation:** Complete API guides
+        - **SDKs:** Python, JavaScript, Java, PHP
+        - **Support:** 24/7 developer assistance  
+        - **Community:** Discord & Stack Overflow
+        """)
+    
+    # Action Buttons
+    st.markdown("### 🎯 Get Started")
+    st.markdown("")
+    
+    action_col1, action_col2, action_col3 = st.columns(3)
+    
+    with action_col1:
+        if st.button("🔑 Get API Key", use_container_width=True):
+            st.info("Visit our developer portal to get your free API key!")
+    
+    with action_col2:
+        if st.button("📱 Try Interactive Demo", use_container_width=True):
             navigate_to('analyzer')
     
     with action_col3:
@@ -2341,7 +2869,7 @@ def main():
     elif st.session_state.current_page == 'docs':
         show_placeholder_page('docs', '📚')
     elif st.session_state.current_page == 'api':
-        show_placeholder_page('api', '🔌')
+        show_api_page()
     elif st.session_state.current_page == 'settings':
         show_placeholder_page('settings', '⚙️')
     else:
@@ -4409,7 +4937,7 @@ elif st.session_state.current_page == 'contact':
 elif st.session_state.current_page == 'docs':
     show_placeholder_page('docs', '📚')
 elif st.session_state.current_page == 'api':
-    show_placeholder_page('api', '🔌')
+    show_api_page()
 elif st.session_state.current_page == 'settings':
     show_placeholder_page('settings', '⚙️')
 else:
