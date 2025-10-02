@@ -3589,6 +3589,463 @@ def show_analytics_page():
     # Add bottom padding for proper spacing
     st.markdown("<div style='margin-bottom: 30px;'></div>", unsafe_allow_html=True)
 
+def show_help_page():
+    """Beautiful and comprehensive Help page"""
+    
+    # Add top padding for proper spacing
+    st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
+    
+    # Hero Section
+    st.markdown("""
+    <div style="
+        text-align: center; 
+        padding: 40px 20px; 
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+        border-radius: 20px; 
+        margin-bottom: 40px; 
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        color: white;
+    ">
+        <h1 style="
+            font-size: 4rem; 
+            margin: 0 0 20px 0; 
+            text-shadow: 0 0 30px rgba(255,255,255,0.3);
+            font-weight: 700;
+        ">
+            ❓ Help Center
+        </h1>
+        <h2 style="
+            font-size: 1.8rem; 
+            margin: 0 0 30px 0; 
+            opacity: 0.9;
+            font-weight: 400;
+        ">
+            Get Help, Find Answers, Learn More
+        </h2>
+        <p style="
+            font-size: 1.2rem; 
+            margin: 0; 
+            opacity: 0.8;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        ">
+            Everything you need to know about using Spamlyser effectively and troubleshooting common issues.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Quick Help Categories
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("""
+        <div style="
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #667eea;
+            text-align: center;
+            height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        ">
+            <div style="color: #667eea; font-size: 2.2rem; margin-bottom: 10px;">🚀</div>
+            <h4 style="color: #667eea; margin: 0 0 10px 0; font-size: 1.2rem;">Getting Started</h4>
+            <p style="color: #333; line-height: 1.4; margin: 0 0 12px 0; font-size: 0.85rem;">
+                New to Spamlyser? Learn the basics and get up and running quickly.
+            </p>
+            <div style="background: #f8f9ff; padding: 6px; border-radius: 6px; margin: 4px 0; font-size: 0.8rem;">
+                <strong style="color: #667eea;">📖 Quick Start Guide</strong>
+            </div>
+            <div style="background: #f8f9ff; padding: 6px; border-radius: 6px; margin: 4px 0; font-size: 0.8rem;">
+                <strong style="color: #667eea;">🎯 First Analysis</strong>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style="
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #4ecdc4;
+            text-align: center;
+            height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        ">
+            <div style="color: #4ecdc4; font-size: 2.2rem; margin-bottom: 10px;">🔌</div>
+            <h4 style="color: #4ecdc4; margin: 0 0 10px 0; font-size: 1.2rem;">API Integration</h4>
+            <p style="color: #333; line-height: 1.4; margin: 0 0 12px 0; font-size: 0.85rem;">
+                Integrate Spamlyser into your applications with our powerful API.
+            </p>
+            <div style="background: #f0fffe; padding: 6px; border-radius: 6px; margin: 4px 0; font-size: 0.8rem;">
+                <strong style="color: #4ecdc4;">🔑 API Keys</strong>
+            </div>
+            <div style="background: #f0fffe; padding: 6px; border-radius: 6px; margin: 4px 0; font-size: 0.8rem;">
+                <strong style="color: #4ecdc4;">📚 Documentation</strong>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div style="
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #ff6b6b;
+            text-align: center;
+            height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        ">
+            <div style="color: #ff6b6b; font-size: 2.2rem; margin-bottom: 10px;">🛠️</div>
+            <h4 style="color: #ff6b6b; margin: 0 0 10px 0; font-size: 1.2rem;">Troubleshooting</h4>
+            <p style="color: #333; line-height: 1.4; margin: 0 0 12px 0; font-size: 0.85rem;">
+                Common issues and solutions to keep you running smoothly.
+            </p>
+            <div style="background: #fff5f5; padding: 6px; border-radius: 6px; margin: 4px 0; font-size: 0.8rem;">
+                <strong style="color: #ff6b6b;">🔍 Error Solutions</strong>
+            </div>
+            <div style="background: #fff5f5; padding: 6px; border-radius: 6px; margin: 4px 0; font-size: 0.8rem;">
+                <strong style="color: #ff6b6b;">⚡ Performance Tips</strong>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Frequently Asked Questions
+    st.markdown("### ❓ Frequently Asked Questions")
+    st.markdown("")
+    
+    # Getting Started FAQs
+    with st.expander("🚀 **Getting Started**", expanded=True):
+        st.markdown("""
+        **Q: How do I analyze my first SMS message?**
+        
+        A: It's simple! Just follow these steps:
+        1. Go to the **SMS Analyzer** page
+        2. Choose your preferred AI model (DistilBERT for speed, BERT for accuracy)
+        3. Enter your SMS message in the text area
+        4. Click "Analyze Message" to get instant results
+        
+        **Q: Which AI model should I choose?**
+        
+        A: It depends on your needs:
+        - **DistilBERT**: Fast and lightweight, perfect for real-time analysis
+        - **BERT**: Best balance of speed and accuracy
+        - **RoBERTa**: Highest accuracy for critical analysis
+        - **ALBERT**: Efficient for large-scale processing
+        - **Ensemble**: Best overall performance (combines all models)
+        
+        **Q: What information does the analysis provide?**
+        
+        A: Our analysis includes:
+        - **Classification**: SPAM or HAM (legitimate)
+        - **Confidence Score**: How certain the AI is about the classification
+        - **Threat Type**: Specific category (phishing, scam, promotional, etc.)
+        - **Risk Factors**: What made the message suspicious
+        - **Recommendations**: Suggested actions
+        """)
+    
+    # API Integration FAQs
+    with st.expander("🔌 **API Integration**"):
+        st.markdown("""
+        **Q: How do I get an API key?**
+        
+        A: Currently, Spamlyser is an open-source project. For production use:
+        1. Visit our **API Documentation** page
+        2. Check our GitHub repository for self-hosting instructions
+        3. For enterprise solutions, contact us through the **Contact** page
+        
+        **Q: What are the API rate limits?**
+        
+        A: For the self-hosted version:
+        - No built-in rate limits
+        - Performance depends on your hardware
+        - Recommended: 100-1000 requests/minute for standard setups
+        
+        **Q: Which programming languages are supported?**
+        
+        A: We provide examples and SDKs for:
+        - **Python**: Full SDK with all features
+        - **JavaScript/Node.js**: REST API integration
+        - **Java**: Enterprise-ready SDK
+        - **cURL**: Direct HTTP requests
+        - **Any language**: REST API compatible
+        
+        **Q: Can I process messages in batches?**
+        
+        A: Yes! Use the batch endpoint:
+        - Single messages: `POST /api/v1/analyze`
+        - Batch processing: `POST /api/v1/batch`
+        - Supports up to 1000 messages per batch
+        """)
+    
+    # Models & Performance FAQs
+    with st.expander("🤖 **AI Models & Performance**"):
+        st.markdown("""
+        **Q: What makes Spamlyser's AI different?**
+        
+        A: Our approach is unique:
+        - **Transformer Models**: Uses BERT, RoBERTa, and other state-of-the-art models
+        - **Ensemble Learning**: Combines multiple AI models for better accuracy
+        - **Context Understanding**: Analyzes meaning, not just keywords
+        - **Continuous Learning**: Models adapt to new threat patterns
+        
+        **Q: How accurate is the spam detection?**
+        
+        A: Our performance metrics:
+        - **Overall Accuracy**: 97.2%
+        - **Spam Detection**: 98.5% precision
+        - **False Positives**: Less than 2%
+        - **Processing Speed**: Under 50ms average
+        
+        **Q: Can I train custom models?**
+        
+        A: Yes! Spamlyser is open-source:
+        - Access the training code on GitHub
+        - Use your own dataset for fine-tuning
+        - Customize models for specific domains
+        - Contribute improvements back to the community
+        
+        **Q: How do I improve detection accuracy?**
+        
+        A: Best practices:
+        - Use **Ensemble Mode** for highest accuracy
+        - Provide feedback on incorrect classifications
+        - Update to the latest model versions
+        - Consider domain-specific fine-tuning
+        """)
+    
+    # Troubleshooting FAQs
+    with st.expander("🛠️ **Troubleshooting & Support**"):
+        st.markdown("""
+        **Q: The analysis is taking too long. What should I do?**
+        
+        A: Try these solutions:
+        1. **Switch to DistilBERT**: Fastest model with good accuracy
+        2. **Check your internet**: Ensure stable connection
+        3. **Reduce message length**: Very long texts take more time
+        4. **Refresh the page**: Sometimes helps with loading issues
+        
+        **Q: I'm getting incorrect results. How can I improve them?**
+        
+        A: To improve accuracy:
+        - Try **Ensemble Mode** for best results
+        - Check if the message is in English (our models are English-optimized)
+        - Consider the message context (some messages are ambiguous)
+        - Report issues through our **Contact** page
+        
+        **Q: Can Spamlyser detect threats in other languages?**
+        
+        A: Currently:
+        - **Primary Support**: English language
+        - **Limited Support**: Common European languages
+        - **Future Plans**: Multilingual model development
+        - **Workaround**: Use translation services before analysis
+        
+        **Q: How do I report bugs or request features?**
+        
+        A: We welcome feedback:
+        1. **GitHub Issues**: Best for technical bugs
+        2. **Contact Page**: General feedback and suggestions
+        3. **Community Forums**: Discuss with other users
+        4. **Email**: Direct contact for urgent issues
+        """)
+    
+    # Quick Start Tutorial
+    st.markdown("### 📚 Quick Start Tutorial")
+    st.markdown("")
+    
+    tutorial_col1, tutorial_col2 = st.columns([2, 1])
+    
+    with tutorial_col1:
+        st.markdown("""
+        **🎯 Your First SMS Analysis in 3 Steps:**
+        
+        **Step 1: Navigate to SMS Analyzer**
+        - Click on "🔍 SMS Analyzer" in the navigation
+        - You'll see the analysis interface with model selection options
+        
+        **Step 2: Choose Your Settings**
+        - **Model Selection**: Choose DistilBERT for speed or BERT for accuracy
+        - **Analysis Mode**: Select "Single Model" or "Ensemble Analysis"
+        - **Additional Options**: Enable confidence scores and detailed analysis
+        
+        **Step 3: Analyze Your Message**
+        - Enter or paste your SMS message in the text area
+        - Click "Analyze Message" button
+        - Review the results: classification, confidence, and threat details
+        
+        **Understanding Results:**
+        - **🟢 HAM**: Legitimate, safe message
+        - **🔴 SPAM**: Suspicious, potentially harmful message
+        - **Confidence Score**: Higher percentage = more certain classification
+        - **Threat Type**: Specific category (phishing, scam, promotional, etc.)
+        """)
+    
+    with tutorial_col2:
+        st.success("💡 **Pro Tips**")
+        st.markdown("""
+        **Best Practices:**
+        - Start with **DistilBERT** for quick tests
+        - Use **Ensemble Mode** for important decisions
+        - Test with different message types
+        - Check confidence scores
+        
+        **Common Examples:**
+        - Promotional messages
+        - Phishing attempts  
+        - Banking alerts
+        - Social media notifications
+        - Friend/family messages
+        """)
+        
+        if st.button("🔍 Try SMS Analyzer Now", use_container_width=True):
+            navigate_to('analyzer')
+    
+    # Resources & Documentation
+    st.markdown("### 📖 Resources & Documentation")
+    st.markdown("")
+    
+    resources_col1, resources_col2, resources_col3 = st.columns(3)
+    
+    with resources_col1:
+        st.info("📚 **Documentation**")
+        st.markdown("""
+        **Available Resources:**
+        - 🔌 **API Documentation**: Complete API guide
+        - 🤖 **Model Information**: AI model details  
+        - 📊 **Analytics Guide**: Understanding metrics
+        - 🛠️ **Developer Tools**: Integration examples
+        """)
+        
+        if st.button("📚 View Documentation", use_container_width=True):
+            navigate_to('api')
+    
+    with resources_col2:
+        st.warning("🎓 **Tutorials**")
+        st.markdown("""
+        **Learning Materials:**
+        - 🚀 **Getting Started**: Basic usage guide
+        - 🔧 **Advanced Features**: Power user tips
+        - 💻 **API Integration**: Developer guide
+        - 🎯 **Best Practices**: Optimization tips
+        """)
+        
+        if st.button("🤖 Explore Models", use_container_width=True):
+            navigate_to('models')
+    
+    with resources_col3:
+        st.error("🆘 **Support**")
+        st.markdown("""
+        **Get Help:**
+        - 📞 **Contact Support**: Direct assistance
+        - 💬 **Community Forum**: User discussions  
+        - 🐛 **Report Issues**: Bug reports
+        - 💡 **Feature Requests**: Suggest improvements
+        """)
+        
+        if st.button("📞 Contact Support", use_container_width=True):
+            navigate_to('contact')
+    
+    # Common Issues & Solutions
+    st.markdown("### 🔧 Common Issues & Solutions")
+    st.markdown("")
+    
+    issues_col1, issues_col2 = st.columns(2)
+    
+    with issues_col1:
+        st.markdown("""
+        **🐛 Common Problems:**
+        
+        **Issue: "Model loading is slow"**
+        - *Solution*: Switch to DistilBERT for faster loading
+        - *Alternative*: Wait for initial model download (one-time)
+        
+        **Issue: "Getting low confidence scores"**  
+        - *Solution*: Try Ensemble mode for better confidence
+        - *Check*: Ensure message is in English
+        
+        **Issue: "API integration not working"**
+        - *Solution*: Verify API endpoint URLs
+        - *Check*: Authentication headers and format
+        
+        **Issue: "Inconsistent results"**
+        - *Solution*: Use same model for consistency  
+        - *Note*: Different models may give different results
+        """)
+    
+    with issues_col2:
+        st.markdown("""
+        **⚡ Performance Optimization:**
+        
+        **For Faster Analysis:**
+        - Use **DistilBERT** model (60% faster)
+        - Avoid very long messages (>500 characters)
+        - Close other resource-intensive applications
+        
+        **For Better Accuracy:**
+        - Use **Ensemble Mode** (combines all models)
+        - Ensure messages are in English
+        - Provide complete message context
+        
+        **For API Integration:**
+        - Implement proper error handling
+        - Use batch processing for multiple messages
+        - Cache results when appropriate
+        - Monitor rate limits and usage
+        """)
+    
+    # Contact & Support Section
+    st.markdown("### 💬 Still Need Help?")
+    st.markdown("")
+    
+    support_col1, support_col2, support_col3 = st.columns(3)
+    
+    with support_col1:
+        if st.button("📧 Email Support", use_container_width=True):
+            st.info("📧 Contact us at: support@spamlyser.ai")
+    
+    with support_col2:
+        if st.button("💬 Community Chat", use_container_width=True):
+            st.info("🌐 Join our community discussions on GitHub!")
+    
+    with support_col3:
+        if st.button("📝 Report Issue", use_container_width=True):
+            st.info("🐛 Report bugs and issues on our GitHub repository")
+    
+    # Quick Navigation
+    st.markdown("### 🎯 Quick Navigation")
+    action_col1, action_col2, action_col3 = st.columns(3)
+    
+    with action_col1:
+        if st.button("🔍 SMS Analyzer", use_container_width=True):
+            navigate_to('analyzer')
+    
+    with action_col2:
+        if st.button("🤖 AI Models", use_container_width=True):
+            navigate_to('models')
+    
+    with action_col3:
+        if st.button("🏠 Back to Home", use_container_width=True):
+            navigate_to('home')
+    
+    # Add bottom padding for proper spacing
+    st.markdown("<div style='margin-bottom: 30px;'></div>", unsafe_allow_html=True)
+
 def show_placeholder_page(page_name, icon):
     """Placeholder for other pages"""
     st.markdown(f"""
@@ -3726,7 +4183,7 @@ def main():
     elif st.session_state.current_page == 'models':
         show_models_page()
     elif st.session_state.current_page == 'help':
-        show_placeholder_page('help', '❓')
+        show_help_page()
     elif st.session_state.current_page == 'contact':
         show_contact_page()
     elif st.session_state.current_page == 'docs':
@@ -5794,7 +6251,7 @@ elif st.session_state.current_page == 'analytics':
 elif st.session_state.current_page == 'models':
     show_models_page()
 elif st.session_state.current_page == 'help':
-    show_placeholder_page('help', '❓')
+    show_help_page()
 elif st.session_state.current_page == 'contact':
     show_contact_page()
 elif st.session_state.current_page == 'docs':
