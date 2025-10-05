@@ -3,13 +3,24 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
-from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassification
 from datetime import datetime, timedelta
 
-# Assuming these files exist in the same directory
-from models.export_feature import export_results_button 
-from models.threat_analyzer import classify_threat_type, get_threat_specific_advice, THREAT_CATEGORIES
-from models.word_analyzer import WordAnalyzer
+# Initialize models and check availability
+try:
+    from models.model_init import MODEL_STATUS
+    if not MODEL_STATUS:
+        st.warning("⚠️ Some AI models may not be fully available. Basic functionality will still work, but advanced features may be limited.")
+except ImportError:
+    st.warning("⚠️ Model initialization module not found. Some features may be limited.")
+
+# Import required model components with error handling
+try:
+    from models.export_feature import export_results_button 
+    from models.threat_analyzer import classify_threat_type, get_threat_specific_advice, THREAT_CATEGORIES
+    from models.word_analyzer import WordAnalyzer
+except ImportError as e:
+    st.error(f"Error importing model components: {str(e)}")
+    st.info("Please ensure all required model files are present in the models directory.")
 # from ensemble_classifier_method import EnsembleSpamClassifier, ModelPerformanceTracker, PredictionResult
 # Dummy classes if you don't have the actual files for testing
 try:
@@ -526,7 +537,6 @@ def show_home_page():
 
 def show_analyzer_page():
     """Main SMS analyzer functionality"""
-    # This will contain the current main app functionality
     st.markdown("""
     <div style="text-align: center; padding: 20px 0; background: linear-gradient(90deg, #1a1a1a, #2d2d2d); border-radius: 15px; margin-bottom: 30px; border: 1px solid #404040;">
         <h1 style="color: #00d4aa; font-size: 3rem; margin: 0; text-shadow: 0 0 20px rgba(0, 212, 170, 0.3);">
@@ -537,6 +547,358 @@ def show_analyzer_page():
         </p>
     </div>
     """, unsafe_allow_html=True)
+    
+    # Analysis Mode Selection
+    st.markdown("### 🔍 Choose Analysis Mode")
+    analysis_mode = st.radio(
+        "Select how you want to analyze messages:",
+        ["Single Message Analysis", "Batch Processing (CSV)"],
+        help="Choose between analyzing a single message or processing multiple messages from a CSV file"
+    )
+    
+    if analysis_mode == "Single Message":
+        st.markdown("### 📝 Single Message Analysis")
+        # Existing single message analysis code will go here
+    else:
+        st.markdown("### 📊 Batch Message Analysis")
+        st.markdown("""
+        Upload a CSV file containing multiple messages for analysis. The file should have the following format:
+        - Required column: `message` (The SMS text to analyze)
+        - Optional columns: `id`, `sender`, `timestamp`
+        """)
+        
+        # File upload section with progress bar
+        uploaded_file = st.file_uploader(
+            "Choose a CSV file",
+            type=["csv"],
+            help="Upload a CSV file containing messages to analyze. Max file size: 200MB"
+        )
+        
+        if uploaded_file is not None:
+            try:
+                import pandas as pd
+                
+                # Create containers for progress tracking
+                progress_container = st.container()
+                with progress_container:
+                    st.markdown("### ⚡ Processing Status")
+                    progress_cols = st.columns([2, 1, 1])
+                    with progress_cols[0]:
+                        progress_bar = st.progress(0)
+                        status_text = st.empty()
+                    with progress_cols[1]:
+                        speed_metric = st.empty()
+                    with progress_cols[2]:
+                        time_metric = st.empty()
+                    
+                    # Add detailed metrics containers
+                    detail_cols = st.columns(4)
+                    processed_metric = detail_cols[0].empty()
+                    spam_metric = detail_cols[1].empty()
+                    ham_metric = detail_cols[2].empty()
+                    confidence_metric = detail_cols[3].empty()
+                
+                # Read and validate CSV
+                    df = pd.read_csv(uploaded_file)
+                    if 'message' not in df.columns:
+                        st.error("❌ Error: CSV file must contain a 'message' column!")
+                        return
+                        
+                    # Create a callback for updating detailed metrics
+                    start_time = datetime.now()
+                    processed_count = 0
+                    spam_count = 0
+                    ham_count = 0
+                    total_confidence = 0
+                    
+                    def update_metrics(progress):
+                        nonlocal processed_count, spam_count, ham_count, total_confidence
+                        
+                        # Update progress and status
+                        progress_bar.progress(progress)
+                        processed_count = int(progress * len(df))
+                        status_text.markdown(f"✨ Processing message {processed_count} of {len(df)}...")
+                        
+                        # Calculate processing speed and time
+                        elapsed_time = (datetime.now() - start_time).total_seconds()
+                        if elapsed_time > 0:
+                            speed = processed_count / elapsed_time
+                            speed_metric.metric("Speed", f"{speed:.1f} msg/s")
+                            
+                            # Estimate remaining time
+                            if progress > 0:
+                                total_time = elapsed_time / progress
+                                remaining_time = total_time - elapsed_time
+                                time_metric.metric("Remaining", f"{remaining_time:.1f}s")
+                        
+                        # Update detailed metrics
+                        processed_metric.metric("Processed", f"{processed_count}/{len(df)}")
+                        if processed_count > 0:
+                            spam_metric.metric("Spam", f"{spam_count} ({spam_count/processed_count*100:.1f}%)")
+                            ham_metric.metric("Ham", f"{ham_count} ({ham_count/processed_count*100:.1f}%)")
+                            confidence_metric.metric("Avg Confidence", f"{(total_confidence/processed_count):.2%}")                # Show file statistics
+                st.info(f"📊 File Statistics:\n- Total messages: {len(df)}\n- File size: {uploaded_file.size/1024:.1f} KB")
+                
+                # Batch processing options
+                col1, col2 = st.columns(2)
+                with col1:
+                    batch_size = st.number_input(
+                        "Batch Size",
+                        min_value=10,
+                        max_value=1000,
+                        value=100,
+                        step=10,
+                        help="Number of messages to process in each batch"
+                    )
+                with col2:
+                    report_format = st.selectbox(
+                        "Report Format",
+                        ["CSV", "Excel"],
+                        help="Choose the format for the analysis report"
+                    )
+                
+                # Process button
+                if st.button("🚀 Start Batch Processing", type="primary", use_container_width=True):
+                    import time
+                    
+                    # Initialize processing
+                    total_messages = len(df)
+                    processed = 0
+                    results = []
+                    
+                    status_text.text("⚡ Initializing batch processing...")
+                    time.sleep(1)  # Simulate initialization
+                    
+                    # Initialize batch processor
+                    from models.batch_processor import BatchProcessor
+                    processor = BatchProcessor()
+                    
+                    # Process all messages
+                    def update_progress(progress):
+                        nonlocal processed_count, spam_count, ham_count, total_confidence
+                        current_stats = processor.batch_stats
+                        
+                        # Update counts
+                        processed_count = current_stats['processed_messages']
+                        spam_count = current_stats['spam_detected']
+                        ham_count = current_stats['ham_detected']
+                        total_confidence = current_stats['avg_confidence'] * processed_count
+                        
+                        # Update all metrics
+                        update_metrics(progress)
+                    
+                    messages = df['message'].tolist()
+                    results, stats = processor.process_batch(
+                        messages=messages,
+                        batch_size=batch_size,
+                        progress_callback=update_progress
+                    )
+                    
+                    # Generate detailed report using the batch processor
+                    results_df = processor.generate_report(results, format=report_format.lower())
+                    
+                    # Add timestamp to filename
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    
+                    # Generate downloadable report with summary statistics
+                    if report_format == "CSV":
+                        # Add summary statistics as comments at the top of CSV
+                        summary = f"""# Spamlyser Pro - Batch Analysis Report
+# Generated: {timestamp}
+# Total Messages: {stats['total_messages']}
+# Spam Messages: {stats['spam_detected']} ({stats['spam_detected']/stats['total_messages']*100:.1f}%)
+# Ham Messages: {stats['ham_detected']} ({stats['ham_detected']/stats['total_messages']*100:.1f}%)
+# Average Confidence: {stats['avg_confidence']:.2%}
+# Processing Time: {stats['processing_time']:.2f} seconds
+# Messages/Second: {stats['messages_per_second']:.1f}
+#
+"""
+                        report = summary + results_df.to_csv(index=False)
+                        filename = f"spamlyser_analysis_report_{timestamp}.csv"
+                        mime = "text/csv"
+                    else:  # Excel
+                        from io import BytesIO
+                        import xlsxwriter
+                        
+                        output = BytesIO()
+                        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                            # Write main results
+                            results_df.to_excel(writer, sheet_name='Analysis Results', index=False)
+                            
+                            # Create summary sheet
+                            summary_df = pd.DataFrame([
+                                ['Total Messages', stats['total_messages']],
+                                ['Spam Messages', f"{stats['spam_detected']} ({stats['spam_detected']/stats['total_messages']*100:.1f}%)"],
+                                ['Ham Messages', f"{stats['ham_detected']} ({stats['ham_detected']/stats['total_messages']*100:.1f}%)"],
+                                ['Average Confidence', f"{stats['avg_confidence']:.2%}"],
+                                ['Processing Time', f"{stats['processing_time']:.2f} seconds"],
+                                ['Messages/Second', f"{stats['messages_per_second']:.1f}"],
+                                ['Generated', datetime.now().strftime("%Y-%m-%d %H:%M:%S")]
+                            ], columns=['Metric', 'Value'])
+                            
+                            summary_df.to_excel(writer, sheet_name='Summary', index=False)
+                            
+                            # Get workbook and add formats
+                            workbook = writer.book
+                            header_format = workbook.add_format({
+                                'bold': True,
+                                'bg_color': '#667eea',
+                                'font_color': 'white'
+                            })
+                            
+                            # Format Analysis Results sheet
+                            worksheet = writer.sheets['Analysis Results']
+                            for col_num, value in enumerate(results_df.columns.values):
+                                worksheet.write(0, col_num, value, header_format)
+                                worksheet.set_column(col_num, col_num, 15)
+                            
+                            # Format Summary sheet
+                            worksheet = writer.sheets['Summary']
+                            worksheet.set_column('A:A', 20)
+                            worksheet.set_column('B:B', 40)
+                            for col_num, value in enumerate(summary_df.columns.values):
+                                worksheet.write(0, col_num, value, header_format)
+                        
+                        report = output.getvalue()
+                        filename = f"spamlyser_analysis_report_{timestamp}.xlsx"
+                        mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    
+                    # Show completion message and download button
+                    st.success("✅ Batch processing completed successfully!")
+                    st.download_button(
+                        "📥 Download Analysis Report",
+                        data=report,
+                        file_name=filename,
+                        mime=mime,
+                        use_container_width=True
+                    )
+                    
+                    # Clear progress indicators
+                    progress_bar.empty()
+                    status_text.empty()
+                    
+                    # Show detailed analysis results
+                    st.markdown("### 📊 Analysis Results")
+                    
+                    # Convert results to DataFrame for analysis
+                    results_df = pd.DataFrame(results)
+                    
+                    # Create tabs for different views
+                    tab1, tab2, tab3 = st.tabs(["📈 Overview", "🔍 Detailed Analysis", "⚠️ Risk Analysis"])
+                    
+                    with tab1:
+                        # Summary metrics
+                        col1, col2, col3, col4 = st.columns(4)
+                        with col1:
+                            st.metric("Total Messages", f"{stats['total_messages']:,}")
+                        with col2:
+                            spam_percent = stats['spam_detected']/stats['total_messages']*100
+                            st.metric("Spam Detected", f"{stats['spam_detected']} ({spam_percent:.1f}%)")
+                        with col3:
+                            st.metric("Processing Time", f"{stats['processing_time']:.1f}s")
+                        with col4:
+                            st.metric("Messages/Second", f"{stats['messages_per_second']:.1f}")
+                        
+                        # Create visualization of spam vs ham
+                        fig = px.pie(
+                            values=[stats['spam_detected'], stats['ham_detected']],
+                            names=['Spam', 'Ham'],
+                            title='Message Classification Distribution',
+                            color_discrete_sequence=['#ff6b6b', '#4ecdc4']
+                        )
+                        st.plotly_chart(fig, use_container_width=True)
+                    
+                    with tab2:
+                        # Model performance comparison
+                        st.subheader("Model Performance Comparison")
+                        model_metrics = []
+                        for model in ['DistilBERT', 'BERT', 'RoBERTa', 'ALBERT']:
+                            metrics = {
+                                'Model': model,
+                                'Accuracy': sum(1 for r in results if r['model_predictions'][model]['label'] == r['ensemble_predictions']['majority_voting']['label']) / len(results),
+                                'Avg Confidence': sum(r['model_predictions'][model]['score'] for r in results) / len(results)
+                            }
+                            model_metrics.append(metrics)
+                        
+                        model_metrics_df = pd.DataFrame(model_metrics)
+                        fig = px.bar(
+                            model_metrics_df,
+                            x='Model',
+                            y=['Accuracy', 'Avg Confidence'],
+                            title='Model Performance Metrics',
+                            barmode='group'
+                        )
+                        st.plotly_chart(fig, use_container_width=True)
+                        
+                        # Confidence distribution
+                        confidence_data = []
+                        for result in results:
+                            for model, pred in result['model_predictions'].items():
+                                confidence_data.append({
+                                    'Model': model,
+                                    'Confidence': pred['score']
+                                })
+                        
+                        confidence_df = pd.DataFrame(confidence_data)
+                        fig = px.box(
+                            confidence_df,
+                            x='Model',
+                            y='Confidence',
+                            title='Confidence Score Distribution by Model'
+                        )
+                        st.plotly_chart(fig, use_container_width=True)
+                    
+                    with tab3:
+                        # Risk indicator analysis
+                        st.subheader("Risk Indicators Analysis")
+                        
+                        # Aggregate risk indicators
+                        risk_counts = defaultdict(int)
+                        for result in results:
+                            for indicator, present in result['risk_indicators'].items():
+                                if present:
+                                    risk_counts[indicator] += 1
+                        
+                        # Create risk indicators chart
+                        risk_df = pd.DataFrame([
+                            {'Indicator': k, 'Count': v, 'Percentage': (v/len(results))*100}
+                            for k, v in risk_counts.items()
+                        ])
+                        
+                        fig = px.bar(
+                            risk_df.sort_values('Count', ascending=False),
+                            x='Indicator',
+                            y='Count',
+                            title='Common Risk Indicators',
+                            text='Percentage',
+                            color='Count',
+                            color_continuous_scale='Reds'
+                        )
+                        fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+                        st.plotly_chart(fig, use_container_width=True)
+                        
+                        # List high-risk messages
+                        st.subheader("🚨 High-Risk Messages")
+                        high_risk_threshold = 3  # Messages with 3 or more risk indicators
+                        high_risk_messages = []
+                        
+                        for result in results:
+                            risk_count = sum(1 for v in result['risk_indicators'].values() if v)
+                            if risk_count >= high_risk_threshold:
+                                high_risk_messages.append({
+                                    'Message': result['message'],
+                                    'Risk Indicators': ', '.join(k for k, v in result['risk_indicators'].items() if v),
+                                    'Spam Probability': result['ensemble_predictions']['majority_voting']['spam_probability']
+                                })
+                        
+                        if high_risk_messages:
+                            st.dataframe(pd.DataFrame(high_risk_messages), use_container_width=True)
+                        else:
+                            st.info("No high-risk messages detected in this batch.")
+            
+            except Exception as e:
+                st.error(f"❌ Error processing file: {str(e)}")
+                st.info("Please ensure your CSV file is properly formatted and try again.")
     # The rest of the current main functionality will go here
 
 def show_about_page():
@@ -6544,17 +6906,16 @@ with col1:
     # Message input with sample selector
     sample_messages = [""] + sample_df["message"].tolist()
     st.markdown("<div style='color: #3b82f6; margin-bottom: 0.5rem; font-weight: 500;'>Choose a sample message (or type your own below):</div>", unsafe_allow_html=True)
-    selected_message = st.selectbox("", sample_messages, key="sample_selector", label_visibility="collapsed")
+    selected_message = st.selectbox("Sample Messages", sample_messages, key="sample_selector")
 
     # Set initial value of text_area based on sample_selector or previous user input
     user_sms_initial_value = selected_message if selected_message else st.session_state.get('user_sms_input_value', "")
     st.markdown("<div style='color: #3b82f6; margin-top: 1rem; margin-bottom: 0.5rem; font-weight: 500;'>Enter SMS message to analyse</div>", unsafe_allow_html=True)
     user_sms = st.text_area(
-        "",
+        "SMS Message",
         value=user_sms_initial_value,
         height=120,
         placeholder="Type or paste your SMS message here...",
-        label_visibility="collapsed",
         help="Enter the SMS message you want to classify as spam or ham (legitimate)"
     )
     # Store current text_area value in session state for persistence
@@ -7075,11 +7436,206 @@ with col2:
             st.info("No ensemble prediction history yet. Run an analysis to see stats.")
 
 
-# --- Bulk CSV Classification Section (Drag & Drop) ---
-st.markdown("### 📂 <span style='color: #00d4aa;'>Drag & Drop CSV for Bulk Classification</span>", unsafe_allow_html=True)
+# --- Bulk SMS Analysis Section ---
+st.markdown("### � <span style='color: #00d4aa;'>Bulk SMS Analysis</span>", unsafe_allow_html=True)
+st.markdown("<div style='color: #00d4aa; margin-bottom: 5px;'>Upload a CSV file containing SMS messages for batch analysis. The file must have a 'message' column.</div>", unsafe_allow_html=True)
 
-st.markdown("<div style='color: #00d4aa; margin-bottom: 5px;'>Upload a CSV file with a 'message' column:</div>", unsafe_allow_html=True)
-uploaded_csv = st.file_uploader("", type=["csv"], accept_multiple_files=False)
+# File upload
+uploaded_csv = st.file_uploader("Upload CSV", type=["csv"], accept_multiple_files=False)
+
+if uploaded_csv is not None:
+    try:
+        # Read the CSV file
+        df = pd.read_csv(uploaded_csv)
+        
+        if 'message' not in df.columns:
+            st.error("The CSV file must contain a column named 'message'")
+        else:
+            # Show sample of messages to be analyzed
+            st.write("📝 Sample of messages to be analyzed:", df[['message']].head())
+            
+            # Create columns for the analysis options
+            col1, col2, col3 = st.columns([2, 2, 1])
+            
+            with col1:
+                report_format = st.selectbox(
+                    "📄 Report Format",
+                    ["CSV", "Excel"],
+                    help="Choose the format for the downloadable report"
+                )
+            
+            with col2:
+                selected_models = st.multiselect(
+                    "🤖 Models to Use",
+                    ["DistilBERT", "BERT", "RoBERTa", "ALBERT"],
+                    default=["DistilBERT", "BERT", "RoBERTa", "ALBERT"],
+                    help="Select which models to use for analysis"
+                )
+            
+            with col3:
+                analyze_batch = st.button("🔍 Analyze", type="primary")
+            
+            if analyze_batch:
+                if not selected_models:
+                    st.error("Please select at least one model for analysis")
+                else:
+                    # Create a progress bar
+                    progress_bar = st.progress(0)
+                    status_text = st.empty()
+                    
+                    try:
+                        # Initialize the progress
+                        status_text.text("🔄 Initializing batch analysis...")
+                        
+                        # Process messages in batches
+                        total_messages = len(df)
+                        results = []
+                        
+                        for idx, row in df.iterrows():
+                            # Update progress
+                            progress = (idx + 1) / total_messages
+                            progress_bar.progress(progress)
+                            status_text.text(f"🔍 Analyzing message {idx + 1} of {total_messages}...")
+                            
+                            message = str(row['message'])
+                            
+                            # Get predictions from selected models
+                            predictions = {}
+                            for model_name in selected_models:
+                                classifier = load_model_if_needed(model_name)
+                                if classifier is not None:
+                                    pred = classifier(message)[0]
+                                    predictions[model_name] = {
+                                        'label': pred['label'].upper(),
+                                        'confidence': pred['score'],
+                                        'spam_probability': pred['score'] if pred['label'].upper() == 'SPAM' else 1 - pred['score']
+                                    }
+                            
+                            # Get ensemble prediction
+                            ensemble_result = ensemble_classifier.get_ensemble_prediction(predictions, "weighted_average")
+                            
+                            # Get risk indicators
+                            risk_indicators = word_analyzer.analyze_message(message)
+                            
+                            # Compile results
+                            result = {
+                                'message': message,
+                                'ensemble_prediction': ensemble_result['label'],
+                                'ensemble_confidence': ensemble_result['confidence'],
+                                'spam_probability': ensemble_result['spam_probability']
+                            }
+                            
+                            # Add individual model predictions
+                            for model_name in selected_models:
+                                if model_name in predictions:
+                                    result[f'{model_name}_prediction'] = predictions[model_name]['label']
+                                    result[f'{model_name}_confidence'] = predictions[model_name]['confidence']
+                                    result[f'{model_name}_spam_prob'] = predictions[model_name]['spam_probability']
+                                else:
+                                    result[f'{model_name}_prediction'] = 'N/A'
+                                    result[f'{model_name}_confidence'] = 0.0
+                                    result[f'{model_name}_spam_prob'] = 0.0
+                            
+                            # Add risk indicators
+                            result.update({
+                                'contains_urls': risk_indicators.get('contains_urls', False),
+                                'contains_caps': risk_indicators.get('contains_caps', False),
+                                'suspicious_formatting': risk_indicators.get('suspicious_formatting', False),
+                                'spam_keywords': ', '.join(risk_indicators.get('spam_keywords', []))
+                            })
+                            
+                            results.append(result)
+                        
+                        # Create the results DataFrame
+                        results_df = pd.DataFrame(results)
+                        
+                        # Update progress
+                        status_text.text("📊 Generating report...")
+                        
+                        # Prepare the file for download
+                        if report_format == "Excel":
+                            buffer = BytesIO()
+                            with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+                                results_df.to_excel(writer, index=False, sheet_name='SMS Analysis')
+                                worksheet = writer.sheets['SMS Analysis']
+                                
+                                # Add formatting
+                                workbook = writer.book
+                                header_format = workbook.add_format({
+                                    'bold': True,
+                                    'text_wrap': True,
+                                    'valign': 'top',
+                                    'bg_color': '#D9EAD3',
+                                    'border': 1
+                                })
+                                
+                                # Write headers with formatting
+                                for col_num, value in enumerate(results_df.columns.values):
+                                    worksheet.write(0, col_num, value, header_format)
+                                    
+                                # Auto-adjust columns
+                                for idx, col in enumerate(results_df):
+                                    series = results_df[col]
+                                    max_len = max(
+                                        series.astype(str).map(len).max(),
+                                        len(str(series.name))
+                                    ) + 1
+                                    worksheet.set_column(idx, idx, max_len)
+                            
+                            buffer.seek(0)
+                            download_data = buffer
+                            file_ext = "xlsx"
+                            mime_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                        else:
+                            # CSV format
+                            download_data = StringIO()
+                            results_df.to_csv(download_data, index=False)
+                            file_ext = "csv"
+                            mime_type = "text/csv"
+                            download_data = download_data.getvalue()
+                        
+                        # Show summary statistics
+                        st.markdown("### 📊 Analysis Summary")
+                        col1, col2, col3 = st.columns(3)
+                        
+                        with col1:
+                            total_spam = len(results_df[results_df['ensemble_prediction'] == 'SPAM'])
+                            st.metric("Total Spam Messages", total_spam)
+                        
+                        with col2:
+                            total_ham = len(results_df[results_df['ensemble_prediction'] == 'HAM'])
+                            st.metric("Total Ham Messages", total_ham)
+                        
+                        with col3:
+                            spam_ratio = total_spam / len(results_df) * 100
+                            st.metric("Spam Ratio", f"{spam_ratio:.1f}%")
+                        
+                        # Create the download button
+                        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                        st.download_button(
+                            label="📥 Download Complete Report",
+                            data=download_data,
+                            file_name=f"sms_analysis_report_{timestamp}.{file_ext}",
+                            mime=mime_type
+                        )
+                        
+                        # Show preview of results
+                        st.markdown("### 🔍 Results Preview")
+                        st.dataframe(results_df.head())
+                        
+                        # Clear progress bar and status
+                        progress_bar.empty()
+                        status_text.text("✅ Analysis complete!")
+                        
+                    except Exception as e:
+                        st.error(f"Error during batch analysis: {str(e)}")
+                        if progress_bar is not None:
+                            progress_bar.empty()
+                        if status_text is not None:
+                            status_text.text("❌ Analysis failed!")
+        
+    except Exception as e:
+        st.error(f"Error reading CSV file: {str(e)}")
 
 def classify_csv(file, ensemble_mode, selected_models_for_bulk, selected_ensemble_method_for_bulk, batch_size=100):
     try:
