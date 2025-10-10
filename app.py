@@ -83,10 +83,19 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- Page Navigation System ---
+# Import navigation component
+try:
+    from models.navigation import top_navigation_bar
+except ImportError:
+    def top_navigation_bar():
+        st.error("Navigation component not found")
+
+# --- Session State Initialization ---
+# Initialize all session state variables
 if 'current_page' not in st.session_state:
     st.session_state.current_page = 'home'
-
+    
+# Navigation function
 def navigate_to(page_name):
     """Function to navigate to different pages"""
     st.session_state.current_page = page_name
@@ -100,6 +109,7 @@ PAGES = {
     'features': '⚡ Features',
     'analytics': '📊 Analytics',
     'models': '🤖 Models',
+    'feedback': '💬 Feedback',
     'help': '❓ Help',
     'contact': '📞 Contact',
     'docs': '📚 Docs',
@@ -523,6 +533,156 @@ def show_home_page():
             <p style="margin: 0; font-size: 0.9rem; opacity: 0.8;">Results & Report</p>
         </div>
         """, unsafe_allow_html=True)
+        
+    # Feedback Section
+    st.markdown("---")
+    st.markdown("""
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h2 style="color: #00d4aa; font-size: 2.2rem; margin-bottom: 10px;">
+            💬 Your Feedback Matters!
+        </h2>
+        <p style="font-size: 1.1rem; color: #888; margin-bottom: 20px;">
+            Help us improve Spamlyser by sharing your thoughts and suggestions
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Feedback Form
+    with st.container():
+        feedback_col1, feedback_col2 = st.columns([2, 1])
+        
+        with feedback_col1:
+            # Initialize session state for feedback
+            if 'feedback_submitted' not in st.session_state:
+                st.session_state.feedback_submitted = False
+            if 'feedback_rating' not in st.session_state:
+                st.session_state.feedback_rating = 3
+                
+            if st.session_state.feedback_submitted:
+                st.success("🎉 Thank you for your feedback! Your input helps make Spamlyser better for everyone.")
+                if st.button("Submit Another Feedback", key="another_feedback"):
+                    st.session_state.feedback_submitted = False
+                    st.rerun()
+            else:
+                with st.form("home_feedback_form"):
+                    feedback_type = st.selectbox(
+                        "Type of Feedback",
+                        options=["Bug Report", "Feature Request", "Suggestion", "Question", "Compliment", "Other"],
+                        index=2,
+                        help="Select the category that best describes your feedback"
+                    )
+                    
+                    # Experience rating
+                    st.markdown("### Rate Your Experience")
+                    
+                    # Form-compatible star rating using radio buttons
+                    rating = st.radio(
+                        "How would you rate your experience with Spamlyser?",
+                        options=[1, 2, 3, 4, 5],
+                        horizontal=True,
+                        index=st.session_state.feedback_rating - 1,  # Convert to 0-based index
+                        format_func=lambda x: "⭐" * x,
+                        label_visibility="collapsed",
+                        help="1 = Poor, 5 = Excellent"
+                    )
+                    
+                    # Update session state with the selected rating
+                    st.session_state.feedback_rating = rating
+                    
+                    # Display star rating with text description
+                    rating_labels = {
+                        1: "Poor",
+                        2: "Fair",
+                        3: "Good", 
+                        4: "Very Good",
+                        5: "Excellent"
+                    }
+                    
+                    st.markdown(f"""
+                    <div style="margin: 5px 0 15px 0;">
+                        <p>Your rating: {'⭐' * rating}{'☆' * (5 - rating)} - {rating_labels[rating]}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Detailed feedback
+                    feedback_message = st.text_area(
+                        "Detailed Feedback",
+                        height=120,
+                        max_chars=1000,
+                        help="Please provide details about your feedback. What worked well? What could be improved?",
+                        placeholder="Share your thoughts, suggestions, or report issues here..."
+                    )
+                    
+                    # Optional email for follow-up
+                    email = st.text_input(
+                        "Email Address (Optional)",
+                        help="Provide your email if you'd like us to follow up on your feedback",
+                        placeholder="your.email@example.com (optional)"
+                    )
+                    
+                    submit_button = st.form_submit_button(
+                        "Submit Feedback",
+                        use_container_width=True,
+                        type="primary"
+                    )
+                    
+                    if submit_button:
+                        if not feedback_message:
+                            st.error("Please provide some feedback before submitting.")
+                        else:
+                            # Set feedback submitted to true for success message display
+                            st.session_state.feedback_submitted = True
+                            # Store feedback in session state for display purposes
+                            # In a real app, you would save this to a database
+                            if 'all_feedback' not in st.session_state:
+                                st.session_state.all_feedback = []
+                                
+                            # Get rating from session state
+                            user_rating = st.session_state.feedback_rating
+                                
+                            # Add to feedback storage
+                            st.session_state.all_feedback.append({
+                                "type": feedback_type,
+                                "rating": user_rating,
+                                "message": feedback_message,
+                                "email": email,
+                                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            })
+                            
+                            # Try to save to file if feedback handler is available
+                            try:
+                                from models.feedback_handler import FeedbackHandler
+                                feedback_handler = FeedbackHandler()
+                                feedback_handler.save_feedback({
+                                    "feedback_type": feedback_type,
+                                    "rating": user_rating,
+                                    "message": feedback_message,
+                                    "email": email
+                                })
+                            except Exception as e:
+                                # Silently continue if saving to file fails
+                                pass
+                            
+                            st.session_state.feedback_submitted = True
+                            st.session_state.feedback_rating = rating
+                            st.rerun()
+        
+        with feedback_col2:
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #667eea22 0%, #764ba222 100%); 
+                        padding: 20px; border-radius: 10px; height: 100%;">
+                <h3>Why Share Feedback?</h3>
+                <ul>
+                    <li>Help us identify bugs and issues</li>
+                    <li>Suggest new features you'd like to see</li>
+                    <li>Improve user experience for everyone</li>
+                    <li>Shape the future development of Spamlyser</li>
+                </ul>
+                <p style="font-style: italic; margin-top: 20px;">
+                    Your feedback directly influences our development priorities!
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
 
 def show_analyzer_page():
     """Main SMS analyzer functionality"""
@@ -5422,6 +5582,189 @@ ENSEMBLE_METHODS = {
 def main():
     """Main function to route between different pages"""
     
+    # Display the top navigation bar
+    top_navigation_bar()
+    
+    # Define the feedback page function directly
+    def show_feedback_page():
+        """Feedback page for user comments, suggestions, and bug reports"""
+        # Import the feedback handler
+        try:
+            from models.feedback_handler import FeedbackHandler
+            feedback_handler = FeedbackHandler()
+        except ImportError:
+            st.warning("Feedback handler not found. Feedback will not be saved.")
+            feedback_handler = None
+        
+        # Feedback page header
+        st.markdown("""
+        <div style="text-align: center; padding: 20px 0; background: linear-gradient(90deg, #1a1a1a, #2d2d2d); border-radius: 15px; margin-bottom: 30px; border: 1px solid #404040;">
+            <h1 style="color: #00d4aa; font-size: 3rem; margin: 0; text-shadow: 0 0 20px rgba(0, 212, 170, 0.3);">
+                💬 Feedback
+            </h1>
+            <p style="color: #d1d1d1; margin: 10px 0 0; font-size: 1.2rem;">
+                Help us improve Spamlyser by sharing your thoughts!
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Initialize session state for feedback form and submission status
+        if 'feedback_submitted' not in st.session_state:
+            st.session_state.feedback_submitted = False
+        if 'feedback_rating' not in st.session_state:
+            st.session_state.feedback_rating = 3
+        if 'feedback_context' not in st.session_state:
+            st.session_state.feedback_context = None
+        
+        # Check if feedback was just submitted
+        if st.session_state.feedback_submitted:
+            st.success("🎉 Thank you for your feedback! Your input helps make Spamlyser better for everyone.")
+            
+            # Add a button to submit another feedback
+            if st.button("Submit Another Feedback"):
+                st.session_state.feedback_submitted = False
+                st.rerun()
+        else:
+            # Main feedback form
+            with st.container():
+                st.markdown("""
+                ## 📝 Share Your Feedback
+                
+                Your insights are valuable to us! Use this form to:
+                - Report bugs or issues
+                - Request new features
+                - Suggest improvements
+                - Share your experience
+                """)
+                
+                # Create a form to collect feedback
+                with st.form("feedback_form"):
+                    # Feedback type selection
+                    feedback_type = st.selectbox(
+                        "Type of Feedback",
+                        options=["Bug Report", "Feature Request", "Suggestion", "Question", "Compliment", "Other"],
+                        index=2,
+                        help="Select the category that best describes your feedback"
+                    )
+                    
+                    # Context display if available
+                    if st.session_state.feedback_context:
+                        st.info(f"Providing feedback about: **{st.session_state.feedback_context}**")
+                    
+                    # Experience rating
+                    col1, col2 = st.columns([1, 4])
+                    with col1:
+                        st.markdown("### Rate Your Experience")
+                    with col2:
+                        rating = st.slider(
+                            "How would you rate your experience with Spamlyser?",
+                            min_value=1,
+                            max_value=5,
+                            value=st.session_state.feedback_rating,
+                            help="1 = Poor, 5 = Excellent",
+                            label_visibility="collapsed"
+                        )
+                    
+                    # Rating stars visualization
+                    st.markdown(f"""
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        {'⭐' * rating}{'☆' * (5 - rating)}
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Detailed feedback
+                    feedback_message = st.text_area(
+                        "Detailed Feedback",
+                        height=150,
+                        max_chars=1000,
+                        help="Please provide details about your feedback. What worked well? What could be improved?",
+                        placeholder="Share your thoughts, suggestions, or report issues here..."
+                    )
+                    
+                    # Optional email for follow-up
+                    st.markdown("### Contact Information (Optional)")
+                    email = st.text_input(
+                        "Email Address",
+                        help="Provide your email if you'd like us to follow up on your feedback",
+                        placeholder="your.email@example.com (optional)"
+                    )
+                    
+                    # Privacy note
+                    st.markdown("""
+                    <div style="font-size: 0.8rem; color: #888888; margin-bottom: 15px;">
+                        <i>Your email will only be used to respond to your feedback if necessary and will not be shared with third parties.</i>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Submit button
+                    submit_button = st.form_submit_button(
+                        "Submit Feedback",
+                        use_container_width=True,
+                        type="primary"
+                    )
+                    
+                    # Handle form submission
+                    if submit_button:
+                        if not feedback_message:
+                            st.error("Please provide some feedback before submitting.")
+                        else:
+                            # Prepare feedback data
+                            feedback_data = {
+                                "feedback_type": feedback_type,
+                                "rating": rating,
+                                "message": feedback_message,
+                                "email": email if email else None,
+                                "context": st.session_state.feedback_context if st.session_state.feedback_context else "General"
+                            }
+                            
+                            # Reset context after using it
+                            st.session_state.feedback_context = None
+                            
+                            # Save feedback if handler is available
+                            if feedback_handler:
+                                success = feedback_handler.save_feedback(feedback_data)
+                                if success:
+                                    st.session_state.feedback_submitted = True
+                                    st.session_state.feedback_rating = rating
+                                    st.rerun()
+                                else:
+                                    st.error("There was an error saving your feedback. Please try again later.")
+                            else:
+                                # Mock success if handler is not available (for demo)
+                                st.session_state.feedback_submitted = True
+                                st.session_state.feedback_rating = rating
+                                st.rerun()
+            
+            # Additional information
+            with st.expander("Why We Value Your Feedback"):
+                st.markdown("""
+                ### 🚀 Improving Together
+                
+                At Spamlyser, we believe in continuous improvement, and your feedback is essential to this process. Here's how your input helps:
+                
+                - **Bug Reports**: Help us identify and fix issues quickly
+                - **Feature Requests**: Guide our development roadmap based on user needs
+                - **Suggestions**: Provide insights on how we can enhance user experience
+                - **Questions**: Help us identify areas where documentation could be improved
+                
+                ### 🔄 Feedback Loop
+                
+                We review all feedback regularly and use it to prioritize improvements and new features. If you've provided your email, we may reach out for clarification or to let you know when your suggestion has been implemented.
+                """)
+        
+        # Navigation buttons
+        st.markdown("<hr>", unsafe_allow_html=True)
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            if st.button("🏠 Back to Home", use_container_width=True):
+                navigate_to('home')
+        with col2:
+            if st.button("🔍 Try SMS Analysis", use_container_width=True):
+                navigate_to('analyzer')
+        with col3:
+            if st.button("❓ Get Help", use_container_width=True):
+                navigate_to('help')
+    
     # Page routing logic
     if st.session_state.current_page == 'home':
         show_home_page()
@@ -5435,6 +5778,8 @@ def main():
         show_analytics_page()
     elif st.session_state.current_page == 'models':
         show_models_page()
+    elif st.session_state.current_page == 'feedback':
+        show_feedback_page()
     elif st.session_state.current_page == 'help':
         show_help_page()
     elif st.session_state.current_page == 'contact':
@@ -6632,10 +6977,13 @@ with col1:
                     st.markdown(f"🟢 **{word['word']}** (Score: {abs(influence):.2f})")
             else:
                 st.info("No ham indicators found")
-    
-    if clear_btn:
-        # Clear text area content
-        st.session_state.user_sms_input_value=""
+        
+        # Add a feedback button
+        st.markdown("---")
+        # Removed feedback option and kept only the "Try Another Message" button
+        if st.button("🔍 Try Another Message", use_container_width=True):
+            st.session_state.user_sms_input_value = ""
+            st.rerun()
         
         if "sample_selector" in st.session_state:
             st.session_state.pop("sample_selector")
@@ -7210,6 +7558,20 @@ if analysis_mode == "Single Model" and st.session_state.classification_history:
             <small style="color: #666;">{item['model']} • {item['timestamp'].strftime('%H:%M')}</small>
         </div>
         """, unsafe_allow_html=True)
+        
+    # Feedback functionality
+    st.markdown("---")
+    st.markdown("### 💬 Your feedback helps us improve!")
+    col_fb1, col_fb2 = st.columns(2)
+    with col_fb1:
+        if st.button("💬 Share Your Feedback", type="primary", use_container_width=True):
+            st.session_state.feedback_context = "Single Model Analysis"
+            navigate_to('feedback')
+    with col_fb2:
+        if st.button("🛡️ Report False Classification", use_container_width=True):
+            st.session_state.feedback_context = "False Classification Report"
+            navigate_to('feedback')
+    
     # Single Model export button
     export_results_button(st.session_state.classification_history, filename_prefix="spamlyser_singlemodel")
 
@@ -7226,6 +7588,20 @@ elif analysis_mode == "Ensemble Analysis" and st.session_state.ensemble_history:
             <small style="color: #666;">{ENSEMBLE_METHODS[item['method']]['name']} • {item['timestamp'].strftime('%H:%M')}</small>
         </div>
         """, unsafe_allow_html=True)
+    
+    # Feedback functionality for ensemble analysis
+    st.markdown("---")
+    st.markdown("### 💬 Your feedback helps us improve!")
+    col_fb1, col_fb2 = st.columns(2)
+    with col_fb1:
+        if st.button("💬 Share Your Feedback", key="ensemble_feedback", type="primary", use_container_width=True):
+            st.session_state.feedback_context = "Ensemble Analysis"
+            navigate_to('feedback')
+    with col_fb2:
+        if st.button("🛡️ Report False Classification", key="ensemble_report", use_container_width=True):
+            st.session_state.feedback_context = "Ensemble False Classification Report"
+            navigate_to('feedback')
+    
     export_results_button(st.session_state.ensemble_history, filename_prefix="spamlyser_ensemble")
 
     # Ensemble performance chart (Only show if enough data for a meaningful chart)
@@ -7444,8 +7820,8 @@ with col2:
 with col3:
     if st.button("🤖 Models", key="nav_models", use_container_width=True):
         navigate_to('models')
-    if st.button("❓ Help", key="nav_help", use_container_width=True):
-        navigate_to('help')
+    if st.button("💬 Feedback", key="nav_feedback", use_container_width=True):
+        navigate_to('feedback')
 
 with col4:
     if st.button("📞 Contact", key="nav_contact", use_container_width=True):
