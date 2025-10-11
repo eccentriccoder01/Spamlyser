@@ -8413,7 +8413,7 @@ st.markdown("---")
 # Copyright info
 st.markdown(
     '<div style="text-align: center; color: #888; padding: 20px;">'
-    '<p>© 2024 Spamlyser Pro | Built with ❤️ using Streamlit & Python</p>'
+    '<p>© 2025 Spamlyser Pro | Built with ❤️ using Streamlit & Python</p>'
     '<p><span style="color: #4ecdc4;">🔒 Protecting Your Digital Communications</span> | '
     '<span style="color: #feca57;">⭐ Advanced Threat Intelligence</span></p>'
     '</div>', 
