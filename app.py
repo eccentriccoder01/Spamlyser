@@ -143,6 +143,9 @@ st.markdown("""
         --accent-color: #00d4aa;
         --spam-color: #ff4444;
         --ham-color: #44bb44;
+        --hover-scale: 1.02;
+        --hover-shadow: rgba(0, 0, 0, 0.15);
+        --hover-glow: rgba(0, 212, 170, 0.3);
     }
     
     /* Dark theme overrides */
@@ -155,6 +158,8 @@ st.markdown("""
             --card-shadow: rgba(0, 0, 0, 0.3);
             --text-primary: #ffffff;
             --text-secondary: #bbbbbb;
+            --hover-shadow: rgba(0, 0, 0, 0.5);
+            --hover-glow: rgba(0, 212, 170, 0.4);
         }
     }
     
@@ -167,16 +172,70 @@ st.markdown("""
         background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
     }
     
-    /* Card Styles */
+    /* Enhanced Button Hover Effects */
+    .stButton > button {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        transform-origin: center !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-2px) scale(var(--hover-scale)) !important;
+        box-shadow: 0 8px 25px var(--hover-shadow) !important;
+        filter: brightness(1.05) !important;
+    }
+    
+    .stButton > button:active {
+        transform: translateY(0) scale(0.98) !important;
+        transition: all 0.1s ease !important;
+    }
+    
+    /* Primary Button Hover Effects */
+    .stButton > button[kind="primary"]:hover {
+        background: linear-gradient(45deg, #00d4aa, #00b894) !important;
+        box-shadow: 0 8px 25px var(--hover-glow) !important;
+        border-color: #00a085 !important;
+    }
+    
+    /* Secondary Button Hover Effects */
+    .stButton > button[kind="secondary"]:hover {
+        background: linear-gradient(45deg, #f8f9fa, #e9ecef) !important;
+        border-color: #00d4aa !important;
+        color: #00d4aa !important;
+        box-shadow: 0 8px 25px rgba(0, 212, 170, 0.2) !important;
+    }
+    
+    /* Dark theme button hover effects */
+    @media (prefers-color-scheme: dark) {
+        .stButton > button[kind="secondary"]:hover {
+            background: linear-gradient(45deg, #2d2d2d, #404040) !important;
+            border-color: #00d4aa !important;
+            color: #00d4aa !important;
+        }
+    }
+    
+    /* Card Styles with Enhanced Hover Effects */
     .metric-container, .prediction-card, .ensemble-card, .feature-card, 
     .model-info, .ensemble-method, .method-comparison {
         padding: 20px;
         border-radius: 12px;
         margin: 15px 0;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         color: var(--text-primary);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
     }
-
+    
+    .metric-container:hover, .prediction-card:hover, .ensemble-card:hover, 
+    .feature-card:hover, .model-info:hover, .ensemble-method:hover, 
+    .method-comparison:hover {
+        transform: translateY(-4px) scale(var(--hover-scale));
+        box-shadow: 0 12px 30px var(--hover-shadow);
+        border-color: var(--accent-color);
+    }
+    
     /* Light theme card styles */
     .metric-container {
         background: linear-gradient(145deg, #f0f2f6, #ffffff);
@@ -216,6 +275,12 @@ st.markdown("""
         margin: 20px 0;
         border-left: 4px solid var(--accent-color);
         color: var(--text-primary);
+        transition: all 0.3s ease;
+    }
+    
+    .analysis-header:hover {
+        transform: translateX(5px);
+        box-shadow: 0 8px 20px var(--hover-shadow);
     }
     
     .feature-card {
@@ -237,6 +302,43 @@ st.markdown("""
     .method-comparison {
         background: rgba(255, 255, 255, 0.8);
         border: 1px solid var(--card-border);
+    }
+    
+    /* Interactive Elements Hover Effects */
+    .stSelectbox > div > div:hover,
+    .stTextInput > div > div > input:hover,
+    .stTextArea > div > div > textarea:hover,
+    .stSlider > div > div > div:hover {
+        border-color: var(--accent-color) !important;
+        box-shadow: 0 0 0 2px rgba(0, 212, 170, 0.2) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    /* Form Elements Hover Effects */
+    .stForm > div {
+        transition: all 0.3s ease;
+    }
+    
+    .stForm:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px var(--hover-shadow);
+    }
+    
+    /* Navigation Button Hover Effects */
+    .stButton > button[data-testid="baseButton-secondary"]:hover {
+        background: linear-gradient(45deg, #f8f9fa, #e9ecef) !important;
+        border-color: var(--accent-color) !important;
+        color: var(--accent-color) !important;
+        transform: translateY(-2px) scale(1.02) !important;
+    }
+    
+    /* Export and Action Button Hover Effects */
+    .stButton > button:has-text("Export"):hover,
+    .stButton > button:has-text("Analyze"):hover,
+    .stButton > button:has-text("Clear"):hover {
+        background: linear-gradient(45deg, #00d4aa, #00b894) !important;
+        box-shadow: 0 8px 25px var(--hover-glow) !important;
+        transform: translateY(-2px) scale(1.02) !important;
     }
     
     /* Dark theme overrides */
@@ -295,6 +397,173 @@ st.markdown("""
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
+        
+        .stButton > button[kind="secondary"]:hover {
+            background: linear-gradient(45deg, #2d2d2d, #404040) !important;
+            border-color: #00d4aa !important;
+            color: #00d4aa !important;
+        }
+    }
+    
+    /* Special hover effects for specific button types */
+    .stButton > button[aria-label*="Analyze"]:hover,
+    .stButton > button[aria-label*="Start"]:hover {
+        background: linear-gradient(45deg, #00d4aa, #00b894) !important;
+        box-shadow: 0 8px 25px var(--hover-glow) !important;
+        transform: translateY(-3px) scale(1.03) !important;
+    }
+    
+    .stButton > button[aria-label*="Export"]:hover,
+    .stButton > button[aria-label*="Download"]:hover {
+        background: linear-gradient(45deg, #6366f1, #4f46e5) !important;
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3) !important;
+        transform: translateY(-2px) scale(1.02) !important;
+    }
+    
+    .stButton > button[aria-label*="Clear"]:hover,
+    .stButton > button[aria-label*="Reset"]:hover {
+        background: linear-gradient(45deg, #ef4444, #dc2626) !important;
+        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3) !important;
+        transform: translateY(-2px) scale(1.02) !important;
+    }
+    
+    /* Smooth transitions for all interactive elements */
+    * {
+        transition: all 0.2s ease !important;
+    }
+    
+    /* Remove transition from elements that shouldn't have it */
+    .stMarkdown, .stText, .stMetric, .stDataFrame {
+        transition: none !important;
+    }
+    
+    /* Additional Streamlit-specific button targeting */
+    div[data-testid="stButton"] > button:hover,
+    .stButton > button:hover,
+    button[data-testid="baseButton-primary"]:hover,
+    button[data-testid="baseButton-secondary"]:hover {
+        transform: translateY(-2px) scale(1.02) !important;
+        box-shadow: 0 8px 25px var(--hover-shadow) !important;
+        filter: brightness(1.05) !important;
+    }
+    
+    /* Ensure form submit buttons have hover effects */
+    .stForm > div > div > button:hover {
+        transform: translateY(-2px) scale(1.02) !important;
+        box-shadow: 0 8px 25px var(--hover-glow) !important;
+    }
+    
+    /* Download button hover effects */
+    .stDownloadButton > button:hover {
+        background: linear-gradient(45deg, #6366f1, #4f46e5) !important;
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3) !important;
+        transform: translateY(-2px) scale(1.02) !important;
+    }
+    
+    /* File uploader hover effects */
+    .stFileUploader > div:hover {
+        border-color: var(--accent-color) !important;
+        box-shadow: 0 0 0 2px rgba(0, 212, 170, 0.2) !important;
+    }
+    
+    /* Radio button hover effects */
+    .stRadio > div > label:hover {
+        background-color: rgba(0, 212, 170, 0.1) !important;
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    /* Checkbox hover effects */
+    .stCheckbox > label:hover {
+        background-color: rgba(0, 212, 170, 0.1) !important;
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    /* Number input hover effects */
+    .stNumberInput > div > div > input:hover {
+        border-color: var(--accent-color) !important;
+        box-shadow: 0 0 0 2px rgba(0, 212, 170, 0.2) !important;
+    }
+    
+    /* Date input hover effects */
+    .stDateInput > div > div > input:hover {
+        border-color: var(--accent-color) !important;
+        box-shadow: 0 0 0 2px rgba(0, 212, 170, 0.2) !important;
+    }
+    
+    /* Time input hover effects */
+    .stTimeInput > div > div > input:hover {
+        border-color: var(--accent-color) !important;
+        box-shadow: 0 0 0 2px rgba(0, 212, 170, 0.2) !important;
+    }
+    
+    /* Color picker hover effects */
+    .stColorPicker > div > div:hover {
+        border-color: var(--accent-color) !important;
+        box-shadow: 0 0 0 2px rgba(0, 212, 170, 0.2) !important;
+    }
+    
+    /* Multiselect hover effects */
+    .stMultiSelect > div > div:hover {
+        border-color: var(--accent-color) !important;
+        box-shadow: 0 0 0 2px rgba(0, 212, 170, 0.2) !important;
+    }
+    
+    /* Expander hover effects */
+    .stExpander > div > div:hover {
+        background-color: rgba(0, 212, 170, 0.05) !important;
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    /* Tabs hover effects */
+    .stTabs > div > div > div > button:hover {
+        background-color: rgba(0, 212, 170, 0.1) !important;
+        border-radius: 8px !important;
+        transform: translateY(-1px) !important;
+    }
+    
+    /* Sidebar hover effects */
+    .stSidebar > div:hover {
+        box-shadow: 0 4px 12px var(--hover-shadow) !important;
+    }
+    
+    /* Progress bar hover effects */
+    .stProgress > div:hover {
+        box-shadow: 0 0 10px var(--hover-glow) !important;
+    }
+    
+    /* Balloons animation enhancement */
+    .stBalloons {
+        animation: bounce 0.6s ease-in-out !important;
+    }
+    
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+        }
+        40% {
+            transform: translateY(-10px);
+        }
+        60% {
+            transform: translateY(-5px);
+        }
+    }
+    
+    /* Success/Error message hover effects */
+    .stSuccess:hover,
+    .stError:hover,
+    .stWarning:hover,
+    .stInfo:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 25px var(--hover-shadow) !important;
+    }
+    
+    /* Container hover effects */
+    .stContainer:hover {
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px var(--hover-shadow) !important;
     }
 </style>
 """, unsafe_allow_html=True)
