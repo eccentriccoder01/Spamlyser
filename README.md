@@ -425,7 +425,7 @@ This project is licensed under the MIT License - see the [`License`](https://git
 
 | Role          | Name               | GitHub Profile                                      | LinkedIn Profile                                                        |
 | ------------- | ------------------ | --------------------------------------------------- | ----------------------------------------------------------------------- |
-| Mentor 1 | Shaanif Ahmed |  | [shaanif-ahmed](https://www.linkedin.com/in/shaanif-ahmed-765934233/) |
+| Mentor 1 | Shaanif Ahmed |https://github.com/shaanlabs  | [shaanif-ahmed](https://www.linkedin.com/in/shaanif-ahmed-765934233/) |
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
