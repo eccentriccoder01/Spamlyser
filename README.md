@@ -1,4 +1,4 @@
-<div align="center"><img src="SpamlyserLogo.png" style="width: 220px; height: 220px;" /></div>
+<div align="center"><img src="imgs/SpamlyserLogo.png" style="width: 220px; height: 220px;" /></div>
 
 <h1 align="center">SPAMLYSER</h1>
 
