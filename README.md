@@ -17,6 +17,7 @@
 - <a href="#features">Features</a>
 - <a href="#models-used">Models Used</a>
 - <a href="#video-explanation">Video Explanation</a>
+- <a href="#folder-structure">Folder Structure</a>
 - <a href="#technologies-used"> Technologies Used </a>
 - <a href="#installation-setup"> Installation & Setup </a>
 - <a href="#example-usage"> Example Usage </a>
@@ -171,6 +172,91 @@ Experience Spamlyser live here:
 For a detailed walkthrough of Spamlyser's features and how to use them, check out this video:
 
 **[Insert YouTube Video Link Here]**
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
+
+<details>
+<summary>
+<h2 id="folder-structure">📁 Folder Structure</h2>
+</summary>
+
+```
+Spamlyser/
+├───.gitignore                                                 # Specifies files and directories to be ignored by Git
+├───app.py                                                     # Main application script
+├───CODE_OF_CONDUCT.md                                         # Code of conduct document
+├───CONTRIBUTING.md                                            # Guidelines for contributing to the project
+├───Dockerfile                                                 # Create Docker container
+├───LICENSE                                                    # Open Source license file for the project
+├───page_functions.py                                          # Functions for web page handling
+├───README.md                                                  # Project overview
+├───requirements.txt                                           # Lists all the dependencies required
+├───spamlyser_performance_20250812_142348.json                 # Performance data snapshot
+├───spamlyser_performance_20250910_212105.json                 # Performance data snapshot
+├───.devcontainer/                                             # Configuration file for devcontainer environment
+│   └───devcontainer.json                                      
+├───.github/                                                   # GitHub configuration files
+│   ├───FUNDING.yml                                            # Configuration file for funding
+│   ├───pull_request_template.md                               # Template for creating pull requests
+│   ├───ISSUE_TEMPLATE/                                        # Templates for issue creation
+│   ├───bug_report.yml                                         # Template for bug report
+│   ├───config.yml                                             # Configuration for issue template
+│   ├───feature_request.yml                                    # Template for feature requests
+│   └───workflows/                                             # GitHub Actions workflows
+│       ├───auto-author-assign.yml                             # Automatically assign authors to issues
+│       ├───ci.yml                                             # Automate continuous integration process
+│       ├───issue-create-automate-message.yml                  # Automates message creation for issues
+│       ├───pr-create-automate-message.yml                     # Automates message creation for PRs
+│       └───sync-issue-labels.yml                              # Synchronizes issue labels across repos
+├───csv/                                                       # Sample CSV data files
+│   ├───multiclass_sample_data.csv                             
+│   └───sample_data.csv                                        
+├───imgs/                                                      # Image files used 
+│   ├───App.jpeg                                               # Project screenshot
+│   ├───gssoc logo.png                                         # GSSoC logo
+│   ├───Results.jpeg                                           # Results screenshot
+│   └───SpamlyserLogo.png                                      # Spamlyser logo
+├───models/                                                    # Machine learning model scripts
+│   ├───batch_processor.py                                     # Process messages in batches 
+│   ├───ensemble_classifier_method.py                          # Combine model predictions
+│   ├───export_feature.py                                      # Export results
+│   ├───feedback_handler.py                                    # Manage user feedback
+│   ├───model_explainer.py                                     # Model explainability module
+│   ├───model_init.py                                          # Model initialization
+│   ├───optimize_model.py                                      # Export pretrained model
+│   ├───simple_explainer.py                                    
+│   ├───smart_preprocess.py                                    # Preprocess text and identify suspicious elements
+│   ├───threat_analyzer.py                                     # Analyze specific type of threats
+│   ├───word_analyzer.py                                       # Advanced word analysis
+│   ├───__init__.py                                            # Packages
+│   └───__pycache__/                                           # Compiled files
+│       ├───batch_processor.cpython-311.pyc                    
+│       ├───ensemble_classifier_method.cpython-311.pyc         
+│       ├───ensemble_classifier_method.cpython-313.pyc         
+│       ├───export_feature.cpython-311.pyc                     
+│       ├───export_feature.cpython-313.pyc                     
+│       ├───model_init.cpython-311.pyc                         
+│       ├───threat_analyzer.cpython-311.pyc                    
+│       ├───threat_analyzer.cpython-313.pyc                    
+│       ├───word_analyzer.cpython-311.pyc                      
+│       ├───word_analyzer.cpython-313.pyc                      
+│       └───__init__.cpython-311.pyc                           
+├───tests/                                                     # Unit tests for functionality
+│   ├───test_basic.py                                          
+│   ├───test_threat_analyzer.py                                
+│   └───__pycache__/                                           # Compiled files for test scripts
+│       └───test_basic.cpython-313-pytest-8.4.1.pyc            
+└───__pycache__/                                               # Compiled files for test scripts
+    ├───ensemble_classifier_method.cpython-310.pyc             
+    ├───ensemble_classifier_method.cpython-311.pyc             
+    ├───ensemble_classifier_method.cpython-313.pyc             
+    ├───export_feature.cpython-310.pyc                         
+    ├───export_feature.cpython-313.pyc                         
+    ├───model_explainer.cpython-313.pyc                        
+    ├───smart_preprocess.cpython-313.pyc                       
+    └───threat_analyzer.cpython-313.pyc                        
+```
+</details>
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%">
 
