@@ -3820,6 +3820,8 @@ def show_about_page():
     # Team Behind Spamlyser
     st.markdown("### 👥 Meet the Team")
     st.markdown("")
+
+    
     
     team_col1, team_col2, team_col3 = st.columns(3)
     
