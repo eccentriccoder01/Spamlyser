@@ -165,64 +165,56 @@ st.markdown("""
     
     .main {
         background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
-        color: var(--text-primary);
+        color: var(--text-primary) !important;
     }
     
     .stApp {
         background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+        color: var(--text-primary) !important;
     }
     
-    /* Enhanced Button Hover Effects */
-    .stButton > button {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        transform-origin: center !important;
-        position: relative !important;
-        overflow: hidden !important;
+    /* Ensure all text elements use the theme color */
+    .stMarkdown, .stText, .stMetric, .stDataFrame, 
+    .stButton > button, .stSelectbox label, .stRadio label,
+    .stTextInput label, .stTextArea label, .stNumberInput label,
+    .stSlider label, .stCheckbox label, .stFileUploader label {
+        color: var(--text-primary) !important;
     }
     
-    .stButton > button:hover {
-        transform: translateY(-2px) scale(var(--hover-scale)) !important;
-        box-shadow: 0 8px 25px var(--hover-shadow) !important;
-        filter: brightness(1.05) !important;
+    /* Input fields and text areas */
+    .stTextInput>div>div>input, .stTextArea>div>div>textarea {
+        color: var(--text-primary) !important;
+        background: var(--card-bg) !important;
+        border: 1px solid var(--card-border) !important;
     }
     
-    .stButton > button:active {
-        transform: translateY(0) scale(0.98) !important;
-        transition: all 0.1s ease !important;
+    .stTextInput>div>div>input::placeholder, .stTextArea>div>div>textarea::placeholder {
+        color: var(--text-secondary) !important;
     }
     
-    /* Primary Button Hover Effects */
-    .stButton > button[kind="primary"]:hover {
-        background: linear-gradient(45deg, #00d4aa, #00b894) !important;
-        box-shadow: 0 8px 25px var(--hover-glow) !important;
-        border-color: #00a085 !important;
+    /* Select boxes and dropdowns */
+    .stSelectbox>div>div>div {
+        color: var(--text-primary) !important;
+        background: var(--card-bg) !important;
+        border: 1px solid var(--card-border) !important;
     }
     
-    /* Secondary Button Hover Effects */
-    .stButton > button[kind="secondary"]:hover {
-        background: linear-gradient(45deg, #f8f9fa, #e9ecef) !important;
-        border-color: #00d4aa !important;
-        color: #00d4aa !important;
-        box-shadow: 0 8px 25px rgba(0, 212, 170, 0.2) !important;
+    /* Radio buttons and checkboxes */
+    .stRadio>div>label, .stCheckbox>label {
+        color: var(--text-primary) !important;
     }
     
-    /* Dark theme button hover effects */
-    @media (prefers-color-scheme: dark) {
-        .stButton > button[kind="secondary"]:hover {
-            background: linear-gradient(45deg, #2d2d2d, #404040) !important;
-            border-color: #00d4aa !important;
-            color: #00d4aa !important;
-        }
-    }
-    
-    /* Card Styles with Enhanced Hover Effects */
+    /* Metric containers and cards */
     .metric-container, .prediction-card, .ensemble-card, .feature-card, 
     .model-info, .ensemble-method, .method-comparison {
         padding: 20px;
         border-radius: 12px;
         margin: 15px 0;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        color: var(--text-primary);
+        color: var(--text-primary) !important;
+        background: var(--card-bg) !important;
+        border: 1px solid var(--card-border) !important;
+        box-shadow: 0 4px 12px var(--card-shadow);
         cursor: pointer;
         position: relative;
         overflow: hidden;
@@ -236,45 +228,26 @@ st.markdown("""
         border-color: var(--accent-color);
     }
     
-    /* Light theme card styles */
-    .metric-container {
-        background: linear-gradient(145deg, #f0f2f6, #ffffff);
-        border: 1px solid var(--card-border);
-        box-shadow: 0 4px 12px var(--card-shadow);
-    }
-    
-    .prediction-card {
-        background: var(--card-bg);
-        border: 1px solid var(--card-border);
-        box-shadow: 0 6px 16px var(--card-shadow);
-        text-align: center;
-        padding: 25px;
-    }
-    
-    .ensemble-card {
-        background: linear-gradient(145deg, #f0f0ff, #ffffff);
-        border: 2px solid #6366f1;
-    }
-    
+    /* Specific card styles */
     .spam-alert {
-        background: linear-gradient(145deg, #fff0f0, #ffffff);
-        border: 2px solid var(--spam-color);
-        color: var(--spam-color);
+        background: linear-gradient(145deg, #fff0f0, var(--card-bg)) !important;
+        border: 2px solid var(--spam-color) !important;
+        color: var(--spam-color) !important;
     }
     
     .ham-safe {
-        background: linear-gradient(145deg, #f0fff0, #ffffff);
-        border: 2px solid var(--ham-color);
-        color: var(--ham-color);
+        background: linear-gradient(145deg, #f0fff0, var(--card-bg)) !important;
+        border: 2px solid var(--ham-color) !important;
+        color: var(--ham-color) !important;
     }
     
     .analysis-header {
-        background: linear-gradient(90deg, #f0f0f0, #e0e0e0);
+        background: linear-gradient(90deg, var(--bg-gradient-start), var(--bg-gradient-end));
         padding: 15px;
         border-radius: 10px;
         margin: 20px 0;
         border-left: 4px solid var(--accent-color);
-        color: var(--text-primary);
+        color: var(--text-primary) !important;
         transition: all 0.3s ease;
     }
     
@@ -283,287 +256,50 @@ st.markdown("""
         box-shadow: 0 8px 20px var(--hover-shadow);
     }
     
-    .feature-card {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(10px);
-        border: 1px solid var(--card-border);
+    /* Button styling */
+    .stButton > button {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        transform-origin: center !important;
+        position: relative !important;
+        overflow: hidden !important;
+        color: white !important;
     }
     
-    .model-info {
-        background: linear-gradient(145deg, #f0f0f0, #ffffff);
-        border-left: 4px solid var(--accent-color);
-    }
-    
-    .ensemble-method {
-        background: linear-gradient(145deg, #f0f0ff, #ffffff);
-        border-left: 4px solid #6366f1;
-    }
-    
-    .method-comparison {
-        background: rgba(255, 255, 255, 0.8);
-        border: 1px solid var(--card-border);
-    }
-    
-    /* Interactive Elements Hover Effects */
-    .stSelectbox > div > div:hover,
-    .stTextInput > div > div > input:hover,
-    .stTextArea > div > div > textarea:hover,
-    .stSlider > div > div > div:hover {
-        border-color: var(--accent-color) !important;
-        box-shadow: 0 0 0 2px rgba(0, 212, 170, 0.2) !important;
-        transition: all 0.3s ease !important;
-    }
-    
-    /* Form Elements Hover Effects */
-    .stForm > div {
-        transition: all 0.3s ease;
-    }
-    
-    .stForm:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px var(--hover-shadow);
-    }
-    
-    /* Navigation Button Hover Effects */
-    .stButton > button[data-testid="baseButton-secondary"]:hover {
-        background: linear-gradient(45deg, #f8f9fa, #e9ecef) !important;
-        border-color: var(--accent-color) !important;
-        color: var(--accent-color) !important;
-        transform: translateY(-2px) scale(1.02) !important;
-    }
-    
-    /* Export and Action Button Hover Effects */
-    .stButton > button:has-text("Export"):hover,
-    .stButton > button:has-text("Analyze"):hover,
-    .stButton > button:has-text("Clear"):hover {
-        background: linear-gradient(45deg, #00d4aa, #00b894) !important;
-        box-shadow: 0 8px 25px var(--hover-glow) !important;
-        transform: translateY(-2px) scale(1.02) !important;
-    }
-    
-    /* Dark theme overrides */
-    @media (prefers-color-scheme: dark) {
-        .metric-container {
-            background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
-            border: 1px solid #333;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-        
-        .prediction-card {
-            background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
-            border: 1px solid #404040;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-        }
-        
-        .ensemble-card {
-            background: linear-gradient(145deg, #1a1a2a, #2d2d3d);
-            border: 2px solid #6366f1;
-        }
-        
-        .spam-alert {
-            background: linear-gradient(145deg, #2a1a1a, #3d2626);
-            border: 2px solid #ff4444;
-            color: #ff6b6b;
-        }
-        
-        .ham-safe {
-            background: linear-gradient(145deg, #1a2a1a, #263d26);
-            border: 2px solid #44ff44;
-            color: #6bff6b;
-        }
-        
-        .analysis-header {
-            background: linear-gradient(90deg, #333, #555);
-            border-left: 4px solid #00d4aa;
-            color: #ffffff;
-        }
-        
-        .feature-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .model-info {
-            background: linear-gradient(145deg, #252525, #3a3a3a);
-            border-left: 4px solid #00d4aa;
-        }
-        
-        .ensemble-method {
-            background: linear-gradient(145deg, #252545, #3a3a5a);
-            border-left: 4px solid #6366f1;
-        }
-        
-        .method-comparison {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .stButton > button[kind="secondary"]:hover {
-            background: linear-gradient(45deg, #2d2d2d, #404040) !important;
-            border-color: #00d4aa !important;
-            color: #00d4aa !important;
-        }
-    }
-    
-    /* Special hover effects for specific button types */
-    .stButton > button[aria-label*="Analyze"]:hover,
-    .stButton > button[aria-label*="Start"]:hover {
-        background: linear-gradient(45deg, #00d4aa, #00b894) !important;
-        box-shadow: 0 8px 25px var(--hover-glow) !important;
-        transform: translateY(-3px) scale(1.03) !important;
-    }
-    
-    .stButton > button[aria-label*="Export"]:hover,
-    .stButton > button[aria-label*="Download"]:hover {
-        background: linear-gradient(45deg, #6366f1, #4f46e5) !important;
-        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3) !important;
-        transform: translateY(-2px) scale(1.02) !important;
-    }
-    
-    .stButton > button[aria-label*="Clear"]:hover,
-    .stButton > button[aria-label*="Reset"]:hover {
-        background: linear-gradient(45deg, #ef4444, #dc2626) !important;
-        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3) !important;
-        transform: translateY(-2px) scale(1.02) !important;
-    }
-    
-    /* Smooth transitions for all interactive elements */
-    * {
-        transition: all 0.2s ease !important;
-    }
-    
-    /* Remove transition from elements that shouldn't have it */
-    .stMarkdown, .stText, .stMetric, .stDataFrame {
-        transition: none !important;
-    }
-    
-    /* Additional Streamlit-specific button targeting */
-    div[data-testid="stButton"] > button:hover,
-    .stButton > button:hover,
-    button[data-testid="baseButton-primary"]:hover,
-    button[data-testid="baseButton-secondary"]:hover {
-        transform: translateY(-2px) scale(1.02) !important;
+    .stButton > button:hover {
+        transform: translateY(-2px) scale(var(--hover-scale)) !important;
         box-shadow: 0 8px 25px var(--hover-shadow) !important;
         filter: brightness(1.05) !important;
     }
     
-    /* Ensure form submit buttons have hover effects */
-    .stForm > div > div > button:hover {
-        transform: translateY(-2px) scale(1.02) !important;
-        box-shadow: 0 8px 25px var(--hover-glow) !important;
+    /* Dataframes and tables */
+    .stDataFrame, .dataframe {
+        color: var(--text-primary) !important;
+        background: var(--card-bg) !important;
     }
     
-    /* Download button hover effects */
-    .stDownloadButton > button:hover {
-        background: linear-gradient(45deg, #6366f1, #4f46e5) !important;
-        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3) !important;
-        transform: translateY(-2px) scale(1.02) !important;
+    /* Plotly chart text colors */
+    .js-plotly-plot .plotly .main-svg {
+        color: var(--text-primary) !important;
     }
     
-    /* File uploader hover effects */
-    .stFileUploader > div:hover {
-        border-color: var(--accent-color) !important;
-        box-shadow: 0 0 0 2px rgba(0, 212, 170, 0.2) !important;
+    /* Streamlit specific element overrides */
+    div[data-testid="stExpander"] div[role="button"] p {
+        color: var(--text-primary) !important;
     }
     
-    /* Radio button hover effects */
-    .stRadio > div > label:hover {
-        background-color: rgba(0, 212, 170, 0.1) !important;
-        border-radius: 8px !important;
-        transition: all 0.3s ease !important;
+    /* Sidebar styling */
+    .stSidebar {
+        background: var(--card-bg) !important;
+        color: var(--text-primary) !important;
     }
     
-    /* Checkbox hover effects */
-    .stCheckbox > label:hover {
-        background-color: rgba(0, 212, 170, 0.1) !important;
-        border-radius: 8px !important;
-        transition: all 0.3s ease !important;
+    .stSidebar .stMarkdown, .stSidebar .stText {
+        color: var(--text-primary) !important;
     }
     
-    /* Number input hover effects */
-    .stNumberInput > div > div > input:hover {
-        border-color: var(--accent-color) !important;
-        box-shadow: 0 0 0 2px rgba(0, 212, 170, 0.2) !important;
-    }
-    
-    /* Date input hover effects */
-    .stDateInput > div > div > input:hover {
-        border-color: var(--accent-color) !important;
-        box-shadow: 0 0 0 2px rgba(0, 212, 170, 0.2) !important;
-    }
-    
-    /* Time input hover effects */
-    .stTimeInput > div > div > input:hover {
-        border-color: var(--accent-color) !important;
-        box-shadow: 0 0 0 2px rgba(0, 212, 170, 0.2) !important;
-    }
-    
-    /* Color picker hover effects */
-    .stColorPicker > div > div:hover {
-        border-color: var(--accent-color) !important;
-        box-shadow: 0 0 0 2px rgba(0, 212, 170, 0.2) !important;
-    }
-    
-    /* Multiselect hover effects */
-    .stMultiSelect > div > div:hover {
-        border-color: var(--accent-color) !important;
-        box-shadow: 0 0 0 2px rgba(0, 212, 170, 0.2) !important;
-    }
-    
-    /* Expander hover effects */
-    .stExpander > div > div:hover {
-        background-color: rgba(0, 212, 170, 0.05) !important;
-        border-radius: 8px !important;
-        transition: all 0.3s ease !important;
-    }
-    
-    /* Tabs hover effects */
-    .stTabs > div > div > div > button:hover {
-        background-color: rgba(0, 212, 170, 0.1) !important;
-        border-radius: 8px !important;
-        transform: translateY(-1px) !important;
-    }
-    
-    /* Sidebar hover effects */
-    .stSidebar > div:hover {
-        box-shadow: 0 4px 12px var(--hover-shadow) !important;
-    }
-    
-    /* Progress bar hover effects */
-    .stProgress > div:hover {
-        box-shadow: 0 0 10px var(--hover-glow) !important;
-    }
-    
-    /* Balloons animation enhancement */
-    .stBalloons {
-        animation: bounce 0.6s ease-in-out !important;
-    }
-    
-    @keyframes bounce {
-        0%, 20%, 50%, 80%, 100% {
-            transform: translateY(0);
-        }
-        40% {
-            transform: translateY(-10px);
-        }
-        60% {
-            transform: translateY(-5px);
-        }
-    }
-    
-    /* Success/Error message hover effects */
-    .stSuccess:hover,
-    .stError:hover,
-    .stWarning:hover,
-    .stInfo:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 8px 25px var(--hover-shadow) !important;
-    }
-    
-    /* Container hover effects */
-    .stContainer:hover {
-        transform: translateY(-1px) !important;
-        box-shadow: 0 4px 12px var(--hover-shadow) !important;
+    /* Success/Error/Warning messages */
+    .stSuccess, .stError, .stWarning, .stInfo {
+        color: var(--text-primary) !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -3956,6 +3692,30 @@ def show_about_page():
     # Add bottom padding for proper spacing
     st.markdown("<div style='margin-bottom: 30px;'></div>", unsafe_allow_html=True)
 
+
+
+# def debug_text_visibility():
+#     """Debug function to check text visibility"""
+#     st.sidebar.markdown("---")
+#     st.sidebar.markdown("###  Text Visibility Debug")
+    
+#     # Test  text elements
+#     st.sidebar.markdown("**Regular text**")
+#     st.sidebar.markdown("*Italic text*")
+#     st.sidebar.markdown("`Code text`")
+#     st.sidebar.info("Info message")
+#     st.sidebar.warning("Warning message")
+#     st.sidebar.error("Error message")
+#     st.sidebar.success("Success message")
+    
+#     # Check current 
+#     if st.session_state.get('dark_mode', False):
+#         st.sidebar.markdown(" **Dark Mode Active**")
+#     else:
+#         st.sidebar.markdown(" **Light Mode Active**")
+
+# 
+# debug_text_visibility()
 def show_analytics_page():
     """Beautiful and comprehensive Analytics dashboard"""
     
@@ -6650,114 +6410,129 @@ if st.session_state.get('dark_mode', False):
     st.markdown("""
     <style>
         .main, .stApp {
-            background: #181f2f;
+            background: #0f0f0f !important;
+            color: #ffffff !important;
         }
-        .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison {
-            background: #232a3d;
-            border-radius: 16px;
-            border: 1px solid #324a7c;
-            color: #f8fafc;
-            box-shadow: 0 2px 12px rgba(44, 62, 80, 0.08);
+        
+        /* Force text colors in dark mode */
+        .stMarkdown, .stText, .stMetric, .stDataFrame, 
+        .stButton > button, .stSelectbox label, .stRadio label,
+        .stTextInput label, .stTextArea label, .stNumberInput label,
+        .stSlider label, .stCheckbox label, .stFileUploader label,
+        div[data-testid="stExpander"] div[role="button"] p,
+        .stSidebar .stMarkdown, .stSidebar .stText {
+            color: #ffffff !important;
         }
-        .spam-alert {
-            background: #2a3350;
-            border: 2px solid #ff4444;
-            color: #ff6b6b;
+        
+        /* Cards and containers */
+        .metric-container, .prediction-card, .ensemble-card, .feature-card, 
+        .model-info, .ensemble-method, .method-comparison {
+            background: #1e1e1e !important;
+            color: #ffffff !important;
+            border: 1px solid #333333 !important;
         }
-        .ham-safe {
-            background: #233d2a;
-            border: 2px solid #44ff44;
-            color: #6bff6b;
+        
+        /* Input fields */
+        .stTextInput>div>div>input, .stTextArea>div>div>textarea,
+        .stSelectbox>div>div>div {
+            background: #1e1e1e !important;
+            color: #ffffff !important;
+            border: 1px solid #333333 !important;
         }
+        
+        .stTextInput>div>div>input::placeholder, 
+        .stTextArea>div>div>textarea::placeholder {
+            color: #888888 !important;
+        }
+        
+        /* Analysis headers */
         .analysis-header {
-            background: #232a3d;
-            border-left: 4px solid #324a7c;
-            color: #f8fafc;
+            background: #1a1a1a !important;
+            color: #ffffff !important;
+            border-left: 4px solid #00d4aa !important;
         }
-        /* Input fields and dropdowns */
-        .stTextInput>div>input, .stTextArea>div>textarea, .stSelectbox>div>div>div {
-            background: #232a3d !important;
-            color: #f8fafc !important;
-            border: 1px solid #324a7c !important;
+        
+        /* Special cards */
+        .spam-alert {
+            background: linear-gradient(145deg, #2a1a1a, #1e1e1e) !important;
+            border: 2px solid #ff4444 !important;
+            color: #ff6b6b !important;
         }
-        .stTextInput>div>input::placeholder, .stTextArea>div>textarea::placeholder {
-            color: #b3c7f7 !important;
+        
+        .ham-safe {
+            background: linear-gradient(145deg, #1a2a1a, #1e1e1e) !important;
+            border: 2px solid #44ff44 !important;
+            color: #6bff6b !important;
         }
-        /* Button styling */
-        .stButton>button {
-            background: #324a7c;
-            color: #f8fafc;
-            border-radius: 8px;
-            border: none;
-            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+        
+        /* Plotly charts */
+        .js-plotly-plot .plotly .main-svg {
+            background: #1e1e1e !important;
         }
-        .stButton>button:hover {
-            background: #415a9c;
-            color: #fff;
+        
+        .js-plotly-plot .plotly .main-svg text {
+            fill: #ffffff !important;
         }
-        /* Label and text color for clarity */
-        label, .stMarkdown, .stRadio>div>label, .stSelectbox label, .stTextInput label {
-            color: #f8fafc !important;
-        }
-        /* Scrollbar styling for dark mode */
-        ::-webkit-scrollbar {
-            width: 8px;
-            background: #232a3d;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #324a7c;
-            border-radius: 8px;
-        }
+        
     </style>
     """, unsafe_allow_html=True)
 else:
     st.markdown("""
     <style>
         .main, .stApp {
-            background: #f4f8ff;
+            background: #f4f8ff !important;
+            color: #333333 !important;
         }
-        .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison {
-            background: #e3eafc;
-            border-radius: 16px;
-            border: 1px solid #b3c7f7;
-            color: #232a3d;
-            box-shadow: 0 2px 12px rgba(44, 62, 80, 0.06);
+        
+        /* Force text colors in light mode */
+        .stMarkdown, .stText, .stMetric, .stDataFrame, 
+        .stButton > button, .stSelectbox label, .stRadio label,
+        .stTextInput label, .stTextArea label, .stNumberInput label,
+        .stSlider label, .stCheckbox label, .stFileUploader label,
+        div[data-testid="stExpander"] div[role="button"] p,
+        .stSidebar .stMarkdown, .stSidebar .stText {
+            color: #333333 !important;
         }
-        .spam-alert {
-            background: #ffe3e3;
-            border: 2px solid #ff4444;
-            color: #ff6b6b;
+        
+        /* Cards and containers */
+        .metric-container, .prediction-card, .ensemble-card, .feature-card, 
+        .model-info, .ensemble-method, .method-comparison {
+            background: #ffffff !important;
+            color: #333333 !important;
+            border: 1px solid #e0e0e0 !important;
         }
-        .ham-safe {
-            background: #e3ffe3;
-            border: 2px solid #44ff44;
-            color: #6bff6b;
+        
+        /* Input fields */
+        .stTextInput>div>div>input, .stTextArea>div>div>textarea,
+        .stSelectbox>div>div>div {
+            background: #ffffff !important;
+            color: #333333 !important;
+            border: 1px solid #e0e0e0 !important;
         }
+        
+        .stTextInput>div>div>input::placeholder, 
+        .stTextArea>div>div>textarea::placeholder {
+            color: #666666 !important;
+        }
+        
+        /* Analysis headers */
         .analysis-header {
-            background: #e3eafc;
-            border-left: 4px solid #324a7c;
-            color: #232a3d;
+            background: #f0f2f6 !important;
+            color: #333333 !important;
+            border-left: 4px solid #00d4aa !important;
         }
-        /* Scrollbar styling for light mode */
-        ::-webkit-scrollbar {
-            width: 8px;
-            background: #e3eafc;
+        
+        /* Special cards */
+        .spam-alert {
+            background: linear-gradient(145deg, #fff0f0, #ffffff) !important;
+            border: 2px solid #ff4444 !important;
+            color: #ff4444 !important;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #324a7c;
-            border-radius: 8px;
-        }
-        /* Button styling */
-        .stButton>button {
-            background: #324a7c;
-            color: #e3eafc;
-            border-radius: 8px;
-            border: none;
-            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
-        }
-        .stButton>button:hover {
-            background: #415a9c;
-            color: #fff;
+        
+        .ham-safe {
+            background: linear-gradient(145deg, #f0fff0, #ffffff) !important;
+            border: 2px solid #44bb44 !important;
+            color: #44bb44 !important;
         }
     </style>
     """, unsafe_allow_html=True)
