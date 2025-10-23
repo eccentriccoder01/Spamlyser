@@ -128,6 +128,12 @@ PAGES = {
     'settings': '⚙️ Settings'
 }
 
+# Forward declaration for apply_theme_css so earlier UI code can call it before
+# the real implementation is defined later in the file. The real function will
+# override this stub when it's defined.
+def apply_theme_css():
+    return
+
 # --- Custom CSS for Styling ---
 st.markdown("""
 <style>
@@ -576,11 +582,11 @@ def show_home_page():
     <div style="
         text-align: center; 
         padding: 40px 20px; 
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--hero-bg, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
         border-radius: 20px; 
         margin-bottom: 40px; 
         box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-        color: white;
+        color: var(--hero-text, white);
     ">
         <h1 style="
             font-size: 4rem; 
@@ -967,8 +973,8 @@ def show_home_page():
 def show_analyzer_page():
     """Main SMS analyzer functionality"""
     st.markdown("""
-    <div style="text-align: center; padding: 20px 0; background: linear-gradient(90deg, #1a1a1a, #2d2d2d); border-radius: 15px; margin-bottom: 30px; border: 1px solid #404040;">
-        <h1 style="color: #00d4aa; font-size: 3rem; margin: 0; text-shadow: 0 0 20px rgba(0, 212, 170, 0.3);">
+    <div style="text-align: center; padding: 20px 0; background: var(--hero-bg, linear-gradient(90deg, #1a1a1a, #2d2d2d)); border-radius: 15px; margin-bottom: 30px; border: 1px solid #404040;">
+        <h1 style="color: var(--hero-text, #00d4aa); font-size: 3rem; margin: 0; text-shadow: 0 0 20px rgba(0, 212, 170, 0.3);">
             🛡️ Spamlyser Pro - Analyzer
         </h1>
         <p style="color: #888; font-size: 1.2rem; margin: 10px 0 0 0;">
@@ -1333,7 +1339,7 @@ def show_analyzer_page():
 def show_about_page():
     """About page with detailed information"""
     st.markdown("""
-    <div style="text-align: center; padding: 20px 0; background: linear-gradient(90deg, #1a1a1a, #2d2d2d); border-radius: 15px; margin-bottom: 30px; border: 1px solid #404040;">
+    <div style="text-align: center; padding: 20px 0; background: var(--hero-bg, linear-gradient(90deg, #1a1a1a, #2d2d2d)); border-radius: 15px; margin-bottom: 30px; border: 1px solid #404040;">
         <h1 style="color: #00d4aa; font-size: 3rem; margin: 0; text-shadow: 0 0 20px rgba(0, 212, 170, 0.3);">
             ℹ️ About Spamlyser Pro
         </h1>
@@ -5896,7 +5902,14 @@ def show_settings_page():
             index=['Light', 'Dark', 'Auto'].index(st.session_state.settings['theme']),
             help="Light: Always light | Dark: Always dark | Auto: Follow system"
         )
+        # Update settings and sync sidebar checkbox
+        prev_theme = st.session_state.settings.get('theme')
         st.session_state.settings['theme'] = theme
+        # Sync sidebar checkbox to reflect the selected theme (Dark => checked, Light/Auto => unchecked)
+        st.session_state.dark_mode = True if theme == 'Dark' else False
+        # Re-apply CSS whenever theme changes
+        if prev_theme != theme:
+            apply_theme_css()
         
         show_confidence = st.checkbox(
             "Always show confidence scores",
@@ -6086,6 +6099,9 @@ def show_settings_page():
     
     # Save confirmation
     if st.button("💾 Save All Settings", use_container_width=True, type="primary"):
+        # Ensure session state reflects saved theme and re-apply CSS so changes take effect
+        st.session_state.dark_mode = True if st.session_state.settings.get('theme') == 'Dark' else False
+        apply_theme_css()
         st.success("✅ All settings saved successfully!")
         st.balloons()
     
@@ -6095,7 +6111,7 @@ def show_settings_page():
 def show_placeholder_page(page_name, icon):
     """Placeholder for other pages"""
     st.markdown(f"""
-    <div style="text-align: center; padding: 20px 0; background: linear-gradient(90deg, #1a1a1a, #2d2d2d); border-radius: 15px; margin-bottom: 30px; border: 1px solid #404040;">
+    <div style="text-align: center; padding: 20px 0; background: var(--hero-bg, linear-gradient(90deg, #1a1a1a, #2d2d2d)); border-radius: 15px; margin-bottom: 30px; border: 1px solid #404040;">
         <h1 style="color: #00d4aa; font-size: 3rem; margin: 0; text-shadow: 0 0 20px rgba(0, 212, 170, 0.3);">
             {icon} {page_name.title()}
         </h1>
@@ -6231,7 +6247,7 @@ def main():
         
         # Feedback page header
         st.markdown("""
-        <div style="text-align: center; padding: 20px 0; background: linear-gradient(90deg, #1a1a1a, #2d2d2d); border-radius: 15px; margin-bottom: 30px; border: 1px solid #404040;">
+    <div style="text-align: center; padding: 20px 0; background: var(--hero-bg, linear-gradient(90deg, #1a1a1a, #2d2d2d)); border-radius: 15px; margin-bottom: 30px; border: 1px solid #404040;">
             <h1 style="color: #00d4aa; font-size: 3rem; margin: 0; text-shadow: 0 0 20px rgba(0, 212, 170, 0.3);">
                 💬 Feedback
             </h1>
@@ -6432,7 +6448,7 @@ def main():
 if st.session_state.current_page == 'analyzer':
     # --- Header for Analyzer ---
     st.markdown("""
-    <div style="text-align: center; padding: 20px 0; background: linear-gradient(90deg, #1a1a1a, #2d2d2d); border-radius: 15px; margin-bottom: 30px; border: 1px solid #404040;">
+    <div style="text-align: center; padding: 20px 0; background: var(--hero-bg, linear-gradient(90deg, #1a1a1a, #2d2d2d)); border-radius: 15px; margin-bottom: 30px; border: 1px solid #404040;">
         <h1 style="color: #00d4aa; font-size: 3rem; margin: 0; text-shadow: 0 0 20px rgba(0, 212, 170, 0.3);">
             🛡️ Spamlyser Pro - SMS Analyzer
         </h1>
@@ -6449,14 +6465,40 @@ with st.sidebar:
     with st.expander("⚙️ Analysis Controls", expanded=True):
         
         # Dark Mode Toggle (Keep this one outside, but close)
-        if 'dark_mode' not in st.session_state:
-            st.session_state.dark_mode = False
-        
-        # [REMOVED] st.markdown (the colored Analysis Mode header)
-        
-        st.session_state.dark_mode = st.checkbox("🌙 Enable Dark Mode", 
-                                                value=st.session_state.dark_mode, 
-                                                help="Toggle dark mode for the app")
+        # Ensure settings exists and provide a checkbox that stays in sync with settings['theme']
+        if 'settings' not in st.session_state:
+            st.session_state.settings = {
+                'default_model': 'DistilBERT',
+                'confidence_threshold': 0.7,
+                'enable_detailed_analysis': True,
+                'auto_preprocess': True,
+                'theme': 'Light',
+                'show_confidence_scores': True,
+                'enable_batch_mode': False,
+                'max_message_length': 500,
+                'cache_models': True,
+                'gpu_acceleration': False
+            }
+
+        # Initialize dark_mode checkbox value based on settings['theme']
+        checkbox_default = True if st.session_state.settings.get('theme', 'Light') == 'Dark' else False
+        st.session_state.dark_mode = st.checkbox(
+            "🌙 Enable Dark Mode",
+            value=checkbox_default,
+            help="Toggle dark mode for the app"
+        )
+
+        # Keep settings['theme'] in sync when the user toggles the sidebar checkbox
+        if st.session_state.dark_mode:
+            # if user enables the sidebar checkbox, set theme to Dark (overrides Auto)
+            st.session_state.settings['theme'] = 'Dark'
+            apply_theme_css()
+        else:
+            # if disabled, set theme to Light (overrides Auto)
+            # Note: the settings page still allows selecting Auto explicitly
+            if st.session_state.settings.get('theme') == 'Dark':
+                st.session_state.settings['theme'] = 'Light'
+                apply_theme_css()
         
         analysis_mode = st.radio(
             "Choose Analysis Mode",
@@ -6503,17 +6545,24 @@ with st.sidebar:
             st.markdown("#### ⚖️ Model Weights")
             weights = {}
             for model_name in MODEL_OPTIONS.keys():
-                default_weight = st.session_state.ensemble_classifier.model_weights.get(model_name, 0.25)
+                # Persist each model weight in session_state so sliders keep their values
+                weight_key = f"ensemble_weight_{model_name}"
+                if weight_key not in st.session_state:
+                    st.session_state[weight_key] = st.session_state.ensemble_classifier.model_weights.get(model_name, 0.25)
                 weights[model_name] = st.slider(
                     f"{MODEL_OPTIONS[model_name]['icon']} {model_name}",
-                    0.0, 1.0, default_weight, 0.05
+                    0.0, 1.0, st.session_state[weight_key], 0.05,
+                    key=weight_key
                 )
             if st.button("Update Weights"):
                 st.session_state.ensemble_classifier.update_model_weights(weights)
                 st.success("Weights updated!")
         if selected_ensemble_method == "adaptive_threshold":
             st.markdown("#### 🎛️ Threshold Settings")
-            base_threshold = st.slider("Base Threshold", 0.1, 0.9, 0.5, 0.05)
+            # Persist base threshold so it not forgotten across reruns
+            if 'ensemble_base_threshold' not in st.session_state:
+                st.session_state['ensemble_base_threshold'] = 0.5
+            base_threshold = st.slider("Base Threshold", 0.1, 0.9, st.session_state['ensemble_base_threshold'], 0.05, key='ensemble_base_threshold')
 
     st.markdown("---")
 
@@ -6524,9 +6573,9 @@ with st.sidebar:
     total_predictions_overall = total_single_predictions + total_ensemble_predictions
 
     st.markdown(f"""
-    <div class="metric-container" style="background: rgba(30, 30, 30, 0.9); border: 1px solid #444;">
-        <p style="color: #00d4aa; font-size: 1.1rem; margin-bottom: 5px; font-weight: 500;">Total Predictions</p>
-        <h3 style="color: #f0f0f0; margin: 10px 0; font-size: 1.8rem;">{total_predictions_overall}</h3>
+    <div class="metric-container" style="background: var(--card-bg, rgba(30, 30, 30, 0.9)); border: 1px solid var(--card-border, #444);">
+        <p style="color: var(--accent-color, #00d4aa); font-size: 1.1rem; margin-bottom: 5px; font-weight: 500;">Total Predictions</p>
+        <h3 style="color: var(--text-primary, #f0f0f0); margin: 10px 0; font-size: 1.8rem;">{total_predictions_overall}</h3>
     </div>
     """, unsafe_allow_html=True)
 
@@ -6538,16 +6587,16 @@ with st.sidebar:
     col_spam, col_ham = st.columns(2)
     with col_spam:
         st.markdown(f"""
-        <div class="metric-container spam-alert" style="padding: 15px;">
-            <p style="color: #ff6b6b; font-size: 1rem; margin-bottom: 5px;">Spam Count</p>
-            <h4 style="color: #ff6b6b; margin-top: 0;">{overall_spam_count}</h4>
+        <div class="metric-container spam-alert" style="padding: 15px; background: var(--spam-card-bg, rgba(255, 227, 227, 0.9)); border: 1px solid var(--spam-color, #ff4444);">
+            <p style="color: var(--spam-color, #ff6b6b); font-size: 1rem; margin-bottom: 5px;">Spam Count</p>
+            <h4 style="color: var(--spam-color, #ff6b6b); margin-top: 0;">{overall_spam_count}</h4>
         </div>
         """, unsafe_allow_html=True)
     with col_ham:
         st.markdown(f"""
-        <div class="metric-container ham-safe" style="padding: 15px;">
-            <p style="color: #6bff6b; font-size: 1rem; margin-bottom: 5px;">Ham Count</p>
-            <h4 style="color: #6bff6b; margin-top: 0;">{overall_ham_count}</h4>
+        <div class="metric-container ham-safe" style="padding: 15px; background: var(--ham-card-bg, rgba(227, 255, 227, 0.9)); border: 1px solid var(--ham-color, #44ff44);">
+            <p style="color: var(--ham-color, #6bff6b); font-size: 1rem; margin-bottom: 5px;">Ham Count</p>
+            <h4 style="color: var(--ham-color, #6bff6b); margin-top: 0;">{overall_ham_count}</h4>
         </div>
         """, unsafe_allow_html=True)
 
@@ -6647,123 +6696,107 @@ def get_loaded_models():
 
 load_all_models = get_loaded_models
 
-# --- Dynamic CSS for Dark Mode ---
-if st.session_state.get('dark_mode', False):
-    st.markdown("""
-    <style>
-        .main, .stApp {
-            background: #181f2f;
+# --- Theme CSS helper ---
+def apply_theme_css():
+    """Apply theme-specific CSS based on st.session_state.settings['theme'].
+    Supports 'Light', 'Dark', and 'Auto' (follows prefers-color-scheme).
+    """
+    theme = st.session_state.get('settings', {}).get('theme', 'Light')
+
+    if theme == 'Auto':
+        # Use prefers-color-scheme to allow browser/system to decide
+        st.markdown("""
+        <style>
+        /* Let the browser handle light/dark via prefers-color-scheme */
+        @media (prefers-color-scheme: dark) {
+            .main, .stApp { background: #181f2f; }
+            .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison { background: #232a3d; color: #f8fafc; }
+            :root { --hero-bg: linear-gradient(90deg, #1a1a1a, #2d2d2d); --hero-text: #00d4aa; }
         }
-        .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison {
-            background: #232a3d;
-            border-radius: 16px;
-            border: 1px solid #324a7c;
-            color: #f8fafc;
-            box-shadow: 0 2px 12px rgba(44, 62, 80, 0.08);
+        @media (prefers-color-scheme: light) {
+            .main, .stApp { background: #f4f8ff; }
+            .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison { background: #e3eafc; color: #232a3d; }
+            :root { --hero-bg: linear-gradient(90deg, #f4f8ff, #e9f7ff); --hero-text: #0f172a; }
         }
-        .spam-alert {
-            background: #2a3350;
-            border: 2px solid #ff4444;
-            color: #ff6b6b;
-        }
-        .ham-safe {
-            background: #233d2a;
-            border: 2px solid #44ff44;
-            color: #6bff6b;
-        }
-        .analysis-header {
-            background: #232a3d;
-            border-left: 4px solid #324a7c;
-            color: #f8fafc;
-        }
-        /* Input fields and dropdowns */
-        .stTextInput>div>input, .stTextArea>div>textarea, .stSelectbox>div>div>div {
-            background: #232a3d !important;
-            color: #f8fafc !important;
-            border: 1px solid #324a7c !important;
-        }
-        .stTextInput>div>input::placeholder, .stTextArea>div>textarea::placeholder {
-            color: #b3c7f7 !important;
-        }
-        /* Button styling */
-        .stButton>button {
-            background: #324a7c;
-            color: #f8fafc;
-            border-radius: 8px;
-            border: none;
-            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
-        }
-        .stButton>button:hover {
-            background: #415a9c;
-            color: #fff;
-        }
-        /* Label and text color for clarity */
-        label, .stMarkdown, .stRadio>div>label, .stSelectbox label, .stTextInput label {
-            color: #f8fafc !important;
-        }
-        /* Scrollbar styling for dark mode */
-        ::-webkit-scrollbar {
-            width: 8px;
-            background: #232a3d;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #324a7c;
-            border-radius: 8px;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-else:
-    st.markdown("""
-    <style>
-        .main, .stApp {
-            background: #f4f8ff;
-        }
-        .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison {
-            background: #e3eafc;
-            border-radius: 16px;
-            border: 1px solid #b3c7f7;
-            color: #232a3d;
-            box-shadow: 0 2px 12px rgba(44, 62, 80, 0.06);
-        }
-        .spam-alert {
-            background: #ffe3e3;
-            border: 2px solid #ff4444;
-            color: #ff6b6b;
-        }
-        .ham-safe {
-            background: #e3ffe3;
-            border: 2px solid #44ff44;
-            color: #6bff6b;
-        }
-        .analysis-header {
-            background: #e3eafc;
-            border-left: 4px solid #324a7c;
-            color: #232a3d;
-        }
-        /* Scrollbar styling for light mode */
-        ::-webkit-scrollbar {
-            width: 8px;
-            background: #e3eafc;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #324a7c;
-            border-radius: 8px;
-        }
-        /* Button styling */
-        .stButton>button {
-            background: #324a7c;
-            color: #e3eafc;
-            border-radius: 8px;
-            border: none;
-            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
-        }
-        .stButton>button:hover {
-            background: #415a9c;
-            color: #fff;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-    # ...existing code...
+        </style>
+        """, unsafe_allow_html=True)
+        return
+
+    if theme == 'Dark':
+        css = """
+        <style>
+            :root { --hero-bg: linear-gradient(90deg, #1a1a1a, #2d2d2d); --hero-text: #00d4aa; }
+            .main, .stApp { background: #181f2f; }
+            .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison { background: #232a3d; border-radius: 16px; border: 1px solid #324a7c; color: #f8fafc; }
+            .spam-alert { background: #2a3350; border: 2px solid #ff4444; color: #ff6b6b; }
+            .ham-safe { background: #233d2a; border: 2px solid #44ff44; color: #6bff6b; }
+            .analysis-header { background: #232a3d; border-left: 4px solid #324a7c; color: #f8fafc; }
+            .stTextInput>div>input, .stTextArea>div>textarea, .stSelectbox>div>div>div { background: #232a3d !important; color: #f8fafc !important; border: 1px solid #324a7c !important; }
+            .stTextInput>div>input::placeholder, .stTextArea>div>textarea::placeholder { color: #b3c7f7 !important; }
+            .stButton>button { background: #324a7c; color: #f8fafc; border-radius: 8px; border: none; }
+            .stButton>button:hover { background: #415a9c; color: #fff; }
+            label, .stMarkdown, .stRadio>div>label, .stSelectbox label, .stTextInput label { color: #f8fafc !important; }
+            ::-webkit-scrollbar { width: 8px; background: #232a3d; }
+            ::-webkit-scrollbar-thumb { background: #324a7c; border-radius: 8px; }
+            /* Sidebar specific styling for dark theme */
+            .stSidebar { background: #0f1724 !important; color: #f8fafc !important; }
+            .stSidebar .metric-container { background: rgba(255,255,255,0.02) !important; border: 1px solid rgba(255,255,255,0.03) !important; }
+            /* Slider styles for dark theme */
+            input[type=range] { -webkit-appearance: none; width: 100%; height: 8px; background: #2a3350; border-radius: 6px; }
+            input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #00d4aa; box-shadow: 0 2px 6px rgba(0,0,0,0.6); border: 2px solid #1c2636; }
+            input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #00d4aa; border: 2px solid #1c2636; }
+            input[type=range]::-webkit-slider-runnable-track { height: 8px; background: linear-gradient(90deg,#1f2736,#2a3350); border-radius: 6px; }
+        </style>
+        """
+    else:
+        css = """
+        <style>
+            /* Light theme variables */
+            :root {
+                --hero-bg: linear-gradient(90deg, #f4f8ff, #e9f7ff);
+                --hero-text: #0f172a;
+                --text-primary: #0f172a;
+                --text-secondary: #374151;
+                --muted: #6b7280;
+                --card-bg: #e3eafc;
+                --card-border: #b3c7f7;
+                --accent-color: #3265d0;
+                --spam-color: #ff6b6b;
+                --ham-color: #4ecdc4;
+            }
+            .main, .stApp { background: var(--hero-bg); color: var(--text-primary); }
+            .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison {
+                background: var(--card-bg); border-radius: 16px; border: 1px solid var(--card-border); color: var(--text-primary);
+            }
+            .spam-alert { background: var(--spam-card-bg, #ffe3e3); border: 2px solid var(--spam-color); color: var(--spam-color); }
+            .ham-safe { background: var(--ham-card-bg, #e3ffe3); border: 2px solid var(--ham-color); color: var(--ham-color); }
+            .analysis-header { background: var(--card-bg); border-left: 4px solid var(--accent-color); color: var(--text-primary); }
+
+            /* Global text rules for light theme */
+            body, .stApp, .stMarkdown, .stText, .stMetric, .stDataFrame, label, .stRadio>div>label, .stSelectbox label, .stTextInput label, h1, h2, h3, h4, p, small {
+                color: var(--text-primary) !important;
+            }
+            .stMarkdown p, .stText p { color: var(--text-secondary) !important; }
+
+            ::-webkit-scrollbar { width: 8px; background: var(--card-bg); }
+            ::-webkit-scrollbar-thumb { background: #324a7c; border-radius: 8px; }
+            .stButton>button { background: #324a7c; color: #e3eafc; border-radius: 8px; border: none; }
+            .stButton>button:hover { background: #415a9c; color: #fff; }
+            /* Sidebar specific styling for light theme */
+            .stSidebar { background: var(--card-bg) !important; color: var(--text-primary) !important; }
+            .stSidebar .metric-container { background: rgba(255,255,255,0.9) !important; border: 1px solid var(--card-border) !important; }
+            /* Slider styles for light theme */
+            input[type=range] { -webkit-appearance: none; width: 100%; height: 8px; background: #e6eefc; border-radius: 6px; }
+            input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent-color, #3265d0); box-shadow: 0 2px 6px rgba(0,0,0,0.15); border: 2px solid #ffffff; }
+            input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--accent-color, #3265d0); border: 2px solid #ffffff; }
+            input[type=range]::-webkit-slider-runnable-track { height: 8px; background: linear-gradient(90deg,#e6eefc,#dfeeff); border-radius: 6px; }
+        </style>
+        """
+
+    st.markdown(css, unsafe_allow_html=True)
+
+# Apply theme CSS at top-level after settings initialization
+apply_theme_css()
 
 # --- Helper Functions ---
 def analyse_message_features(message):
@@ -6820,36 +6853,37 @@ def render_spamlyser_dashboard():
 
 def render_overview_dashboard():
     st.markdown("""
-<style>
-.metric-container {
-    background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    <style>
+    .metric-container {
+        background: var(--card-bg, linear-gradient(145deg, #1e1e1e, #2a2a2a));
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
 
-    /* 🔑 Force same size for all cards */
-    min-height: 180px;
-    max-height: 180px;
-    min-width: 200px;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-.metric-container h2 {
-    margin: 0;
-    font-size: 2rem;
-}
-.metric-container p {
-    margin: 6px 0;
-    color: #ccc;
-}
-.metric-container small {
-    color: #aaa;
-}
-</style>
-""", unsafe_allow_html=True)
+        /* 🔑 Force same size for all cards */
+        min-height: 180px;
+        max-height: 180px;
+        min-width: 200px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .metric-container h2 {
+        margin: 0;
+        font-size: 2rem;
+        color: var(--accent-color, #00d4aa);
+    }
+    .metric-container p {
+        margin: 6px 0;
+        color: var(--text-secondary, #ccc);
+    }
+    .metric-container small {
+        color: var(--muted, #aaa);
+    }
+    </style>
+    """, unsafe_allow_html=True)
     
     # --- Calculate key metrics ---
     total_single = len(st.session_state.classification_history)
@@ -7394,7 +7428,9 @@ def render_realtime_monitor():
     with control_col1:
         auto_refresh = st.checkbox("🔄 Auto-refresh Dashboard", key="dashboard_auto_refresh")
         if auto_refresh:
-            refresh_interval = st.slider("Refresh Interval (seconds)", 5, 60, 10)
+            if 'dashboard_refresh_interval' not in st.session_state:
+                st.session_state['dashboard_refresh_interval'] = 10
+            refresh_interval = st.slider("Refresh Interval (seconds)", 5, 60, st.session_state['dashboard_refresh_interval'], key='dashboard_refresh_interval')
     
     with control_col2:
         if st.button("🧹 Clear All History", type="secondary"):
@@ -8481,12 +8517,12 @@ if analysis_mode == "Ensemble Analysis":
                 for model_name, stats in tracker_stats.items():
                     if stats:
                         st.markdown(f"""
-            <div style='background: rgba(30, 30, 30, 0.9); padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #3b82f6;'>
-                <h4 style='color: #3b82f6; margin: 0 0 10px 0;'>{MODEL_OPTIONS[model_name]['icon']} {model_name}</h4>
-                <p style='color: #e0e0e0; margin: 5px 0;'><strong>Accuracy:</strong> {stats.get('accuracy', 'N/A'):.2%}</p>
-                <p style='color: #e0e0e0; margin: 5px 0;'><strong>Total Predictions:</strong> {stats.get('total_predictions', 0)}</p>
-                <p style='color: #e0e0e0; margin: 5px 0;'><strong>Trend:</strong> {stats.get('performance_trend', 'N/A')}</p>
-                <p style='color: #e0e0e0; margin: 5px 0;'><strong>Current Weight:</strong> {stats.get('current_weight', 0):.3f}</p>
+            <div style='background: var(--card-bg, rgba(30, 30, 30, 0.9)); padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid var(--accent-color, #3b82f6);'>
+                <h4 style='color: var(--accent-color, #3b82f6); margin: 0 0 10px 0;'>{MODEL_OPTIONS[model_name]['icon']} {model_name}</h4>
+                <p style='color: var(--text-secondary, #e0e0e0); margin: 5px 0;'><strong>Accuracy:</strong> {stats.get('accuracy', 'N/A'):.2%}</p>
+                <p style='color: var(--text-secondary, #e0e0e0); margin: 5px 0;'><strong>Total Predictions:</strong> {stats.get('total_predictions', 0)}</p>
+                <p style='color: var(--text-secondary, #e0e0e0); margin: 5px 0;'><strong>Trend:</strong> {stats.get('performance_trend', 'N/A')}</p>
+                <p style='color: var(--text-secondary, #e0e0e0); margin: 5px 0;'><strong>Current Weight:</strong> {stats.get('current_weight', 0):.3f}</p>
         """, unsafe_allow_html=True)
 
         if st.button("💾 Export Performance Data"):
@@ -8495,13 +8531,13 @@ if analysis_mode == "Ensemble Analysis":
                 filename = f"spamlyser_performance_{timestamp}.json"
                 st.session_state.ensemble_tracker.save_to_file(filename)
                 st.markdown(f"""
-        <div style='background: rgba(30, 30, 30, 0.9); color: #4caf50; padding: 12px; border-radius: 8px; border-left: 4px solid #4caf50;'>
+        <div style='background: var(--card-bg, rgba(30, 30, 30, 0.9)); color: var(--success-color, #4caf50); padding: 12px; border-radius: 8px; border-left: 4px solid var(--success-color, #4caf50);'>
             ✅ Performance data exported to {filename}
         </div>
         """, unsafe_allow_html=True)
             except Exception as e:
                 st.markdown(f"""
-            <div style='background: rgba(30, 30, 30, 0.9); color: #f44336; padding: 12px; border-radius: 8px; border-left: 4px solid #f44336;'>
+            <div style='background: var(--card-bg, rgba(30, 30, 30, 0.9)); color: var(--error-color, #f44336); padding: 12px; border-radius: 8px; border-left: 4px solid var(--error-color, #f44336);'>
                 ❌ Error exporting data: {str(e)}
             </div>
             """, unsafe_allow_html=True)
@@ -8525,7 +8561,7 @@ if analysis_mode == "Ensemble Analysis":
                 st.session_state.ensemble_classifier.default_weights
             )
             st.markdown(f"""
-            <div style='background: rgba(46, 125, 50, 0.15); color: {"#0d652d" if st.session_state.theme == "light" else "#fff"}; padding: 12px; border-radius: 6px; margin: 12px 0; border-left: 4px solid {"#0d652d" if st.session_state.theme == "light" else "#fff"}; font-weight: 500;'>
+            <div style='background: rgba(46, 125, 50, 0.15); color: {"#0d652d" if st.session_state.get("settings", {}).get("theme", "Light").lower() == "light" else "#fff"}; padding: 12px; border-radius: 6px; margin: 12px 0; border-left: 4px solid {"#0d652d" if st.session_state.get("settings", {}).get("theme", "Light").lower() == "light" else "#fff"}; font-weight: 500;'>
                 ✅ Weights reset to default values!
             </div>
             """, unsafe_allow_html=True)
