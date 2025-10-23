@@ -85,6 +85,18 @@ from typing import Dict, List, Tuple, Any, Optional
 from io import StringIO
 import torch
 from collections import defaultdict # Added for easier analytics data aggregation
+# Optional imports that may not be present in the environment
+try:
+    from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
+except Exception:
+    AutoTokenizer = None
+    AutoModelForSequenceClassification = None
+    pipeline = None
+
+try:
+    from io import BytesIO
+except Exception:
+    BytesIO = None
 
 # --- Streamlit Page Configuration ---
 st.set_page_config(
