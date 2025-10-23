@@ -6172,6 +6172,11 @@ if 'ensemble_tracker' not in st.session_state:
     st.session_state.ensemble_tracker = ModelPerformanceTracker()
 if 'ensemble_classifier' not in st.session_state:
     st.session_state.ensemble_classifier = EnsembleSpamClassifier(performance_tracker=st.session_state.ensemble_tracker)
+if 'word_analyzer' not in st.session_state:
+    try:
+        st.session_state.word_analyzer = WordAnalyzer()
+    except Exception:
+        st.session_state.word_analyzer = None
 if 'ensemble_history' not in st.session_state:
     st.session_state.ensemble_history = []
 if 'loaded_models' not in st.session_state:
@@ -6616,6 +6621,10 @@ with st.sidebar:
 # --- Model Loading Helpers ---
 @st.cache_resource
 def load_tokenizer(model_id):
+    # Ensure transformers AutoTokenizer is available
+    if AutoTokenizer is None:
+        st.error("❌ Transformers library not available. Install it with: pip install transformers")
+        return None
     try:
         return AutoTokenizer.from_pretrained(model_id)
     except Exception as e:
@@ -6625,6 +6634,10 @@ def load_tokenizer(model_id):
 
 @st.cache_resource
 def load_model(model_id):
+    # Ensure transformers model class is available
+    if AutoModelForSequenceClassification is None:
+        st.error("❌ Transformers library not available. Install it with: pip install transformers")
+        return None
     try:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         return AutoModelForSequenceClassification.from_pretrained(model_id).to(device)
@@ -6639,13 +6652,21 @@ def _load_model_cached(model_id):
         model = load_model(model_id)
         if tokenizer is None or model is None:
             return None
-        pipe = pipeline(
-            "text-classification", 
-            model=model, 
-            tokenizer=tokenizer,
-            device=0 if torch.cuda.is_available() else -1
-        )
-        return pipe
+        # Ensure pipeline helper is available
+        if pipeline is None:
+            st.error("❌ Transformers pipeline helper not available. Install transformers to use model pipelines: pip install transformers")
+            return None
+        try:
+            pipe = pipeline(
+                "text-classification",
+                model=model,
+                tokenizer=tokenizer,
+                device=0 if torch.cuda.is_available() else -1
+            )
+            return pipe
+        except Exception as e:
+            st.error(f"❌ Error creating pipeline for {model_id}: {str(e)}")
+            return None
     except Exception as e:
         st.error(f"❌ Error creating pipeline for {model_id}: {str(e)}")
         return None
@@ -8178,11 +8199,27 @@ if uploaded_csv is not None:
                                         'spam_probability': pred['score'] if pred['label'].upper() == 'SPAM' else 1 - pred['score']
                                     }
                             
-                            # Get ensemble prediction
-                            ensemble_result = ensemble_classifier.get_ensemble_prediction(predictions, "weighted_average")
-                            
-                            # Get risk indicators
-                            risk_indicators = word_analyzer.analyze_message(message)
+                            # Get ensemble prediction (use session_state instance if available)
+                            ec = st.session_state.get('ensemble_classifier')
+                            if ec:
+                                try:
+                                    ensemble_result = ec.get_ensemble_prediction(predictions, "weighted_average")
+                                except Exception as e:
+                                    st.warning(f"Ensemble prediction error: {e}")
+                                    ensemble_result = {'label': 'UNKNOWN', 'confidence': 0.0, 'spam_probability': 0.0}
+                            else:
+                                ensemble_result = {'label': 'UNKNOWN', 'confidence': 0.0, 'spam_probability': 0.0}
+
+                            # Get risk indicators using session_state word_analyzer if available
+                            wa = st.session_state.get('word_analyzer')
+                            if wa:
+                                try:
+                                    risk_indicators = wa.analyze_message(message)
+                                except Exception as e:
+                                    st.warning(f"Word analyzer error: {e}")
+                                    risk_indicators = {}
+                            else:
+                                risk_indicators = {}
                             
                             # Compile results
                             result = {
