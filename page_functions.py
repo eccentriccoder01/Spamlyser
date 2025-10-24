@@ -16,7 +16,7 @@ def show_feedback_page():
     
     # Feedback page header
     st.markdown("""
-    <div style="text-align: center; padding: 20px 0; background: linear-gradient(90deg, #1a1a1a, #2d2d2d); border-radius: 15px; margin-bottom: 30px; border: 1px solid #404040;">
+    <div style="text-align: center; padding: 20px 0; background: var(--hero-bg, linear-gradient(90deg, #1a1a1a, #2d2d2d)); border-radius: 15px; margin-bottom: 30px; border: 1px solid #404040;">
         <h1 style="color: #00d4aa; font-size: 3rem; margin: 0; text-shadow: 0 0 20px rgba(0, 212, 170, 0.3);">
             💬 Feedback
         </h1>
