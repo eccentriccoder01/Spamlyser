@@ -6775,6 +6775,38 @@ if st.session_state.get('dark_mode', False):
         .main, .stApp {
             background: #181f2f;
         }
+        
+        /* Sidebar dark mode styling */
+        .stSidebar {
+            background: #232a3d !important;
+            color: #f8fafc !important;
+        }
+        
+        .stSidebar .stMarkdown {
+            color: #f8fafc !important;
+        }
+        
+        .stSidebar label {
+            color: #f8fafc !important;
+        }
+        
+        .stSidebar .stExpander {
+            background: #232a3d !important;
+            border: 1px solid #324a7c !important;
+        }
+        
+        .stSidebar .stCheckbox label {
+            color: #f8fafc !important;
+        }
+        
+        .stSidebar .stRadio label {
+            color: #f8fafc !important;
+        }
+        
+        .stSidebar .stSelectbox label {
+            color: #f8fafc !important;
+        }
+        
         .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison {
             background: #232a3d;
             border-radius: 16px;
@@ -6839,6 +6871,166 @@ else:
         .main, .stApp {
             background: #f4f8ff;
         }
+        
+        /* Sidebar light mode styling */
+        .stSidebar {
+            background: #ffffff !important;
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stMarkdown {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stExpander {
+            background: #ffffff !important;
+            border: 1px solid #b3c7f7 !important;
+        }
+        
+        .stSidebar .stCheckbox label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stRadio label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stSelectbox label {
+            color: #232a3d !important;
+        }
+        
+        /* Additional sidebar elements for light mode */
+        .stSidebar .stText {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stMetric {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stSelectbox > div > div {
+            background: #ffffff !important;
+            color: #232a3d !important;
+            border: 1px solid #b3c7f7 !important;
+        }
+        
+        .stSidebar .stSelectbox > div > div > div {
+            background: #ffffff !important;
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stCheckbox > div > label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stRadio > div > label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stNumberInput label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stSlider label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stProgress label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stInfo {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stSuccess {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stWarning {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stError {
+            color: #232a3d !important;
+        }
+        
+        /* Force sidebar text visibility in light mode */
+        .stSidebar * {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar div {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar span {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar p {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar h1, .stSidebar h2, .stSidebar h3, .stSidebar h4, .stSidebar h5, .stSidebar h6 {
+            color: #232a3d !important;
+        }
+        
+        /* Specific targeting for Streamlit components */
+        .stSidebar [data-testid="stCheckbox"] label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar [data-testid="stRadio"] label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar [data-testid="stSelectbox"] label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar [data-testid="stExpander"] label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar [data-testid="stText"] {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar [data-testid="stMetric"] {
+            color: #232a3d !important;
+        }
+        
+        /* Override any inherited light colors */
+        .stSidebar .stMarkdown p {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stMarkdown div {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stMarkdown span {
+            color: #232a3d !important;
+        }
+        
+        /* Ensure form elements are visible */
+        .stSidebar .stForm label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stForm div {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stForm span {
+            color: #232a3d !important;
+        }
+        
         .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison {
             background: #e3eafc;
             border-radius: 16px;
