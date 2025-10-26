@@ -524,9 +524,24 @@ st.markdown("""
         transform: translateY(-1px) !important;
     }
     
-    /* Sidebar hover effects */
+    /* Sidebar hover effects and scrolling fix */
     .stSidebar > div:hover {
         box-shadow: 0 4px 12px var(--hover-shadow) !important;
+    }
+    
+    /* Ensure sidebar can scroll properly */
+    .stSidebar {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        position: relative !important;
+        z-index: 999 !important;
+    }
+    
+    .stSidebar > div {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        height: 100vh !important;
+        max-height: 100vh !important;
     }
     
     /* Progress bar hover effects */
@@ -564,6 +579,55 @@ st.markdown("""
     .stContainer:hover {
         transform: translateY(-1px) !important;
         box-shadow: 0 4px 12px var(--hover-shadow) !important;
+    }
+    
+    /* Minimal fix for overlapping issues - only for dashboard elements */
+    .stTooltip {
+        z-index: 9999 !important;
+        position: fixed !important;
+    }
+    
+    /* Fix only dashboard-specific elements */
+    .metric-container {
+        position: relative !important;
+        z-index: 1 !important;
+        margin: 10px 0 !important;
+    }
+    
+    /* Fix column layout for dashboard cards */
+    .stColumns {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .stColumns > div {
+        flex: 1 !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Dashboard container fixes */
+    .dashboard-content {
+        position: relative !important;
+        z-index: 1 !important;
+        margin: 20px 0 !important;
+    }
+    
+    .dashboard-tabs-container {
+        position: relative !important;
+        z-index: 1 !important;
+        margin: 20px 0 !important;
+    }
+    
+    .dashboard-tab-content {
+        position: relative !important;
+        z-index: 1 !important;
+        margin: 20px 0 !important;
+        padding: 10px 0 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -6787,7 +6851,7 @@ def render_spamlyser_dashboard():
     
     st.markdown("---")
     st.markdown("""
-    <div style="text-align: center; padding: 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; margin: 20px 0; border: 2px solid #8b5cf6;">
+    <div class="dashboard-content" style="text-align: center; padding: 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; margin: 20px 0; border: 2px solid #8b5cf6;">
         <h1 style="color: white; font-size: 2.8rem; margin: 0; text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);">
             📊 Advanced Analytics Dashboard
         </h1>
@@ -6797,44 +6861,73 @@ def render_spamlyser_dashboard():
     </div>
     """, unsafe_allow_html=True)
 
-    # Dashboard tabs
-    # Dashboard tabs
+    # Dashboard tabs with proper container
+    st.markdown('<div class="dashboard-tabs-container">', unsafe_allow_html=True)
+    
     dashboard_tabs = st.tabs(["🎯 Overview", "🤖 Model Performance", "🧠 Ensemble Analytics", "📊 Detailed Stats", "⚡ Real-time Monitor"])
 
     with dashboard_tabs[0]:  # Overview Tab
+        st.markdown('<div class="dashboard-tab-content">', unsafe_allow_html=True)
         render_overview_dashboard()
+        st.markdown('</div>', unsafe_allow_html=True)
     
     with dashboard_tabs[1]:  # Model Performance Tab
+        st.markdown('<div class="dashboard-tab-content">', unsafe_allow_html=True)
         render_model_performance_dashboard()
+        st.markdown('</div>', unsafe_allow_html=True)
     
     with dashboard_tabs[2]:  # Ensemble Analytics Tab
+        st.markdown('<div class="dashboard-tab-content">', unsafe_allow_html=True)
         render_ensemble_dashboard()
+        st.markdown('</div>', unsafe_allow_html=True)
     
     with dashboard_tabs[3]:  # Detailed Stats Tab
+        st.markdown('<div class="dashboard-tab-content">', unsafe_allow_html=True)
         render_detailed_stats_dashboard()
+        st.markdown('</div>', unsafe_allow_html=True)
     
     with dashboard_tabs[4]:  # Real-time Monitor Tab
+        st.markdown('<div class="dashboard-tab-content">', unsafe_allow_html=True)
         render_realtime_monitor()
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
 def render_overview_dashboard():
     st.markdown("""
 <style>
+/* Fix column layout to prevent overlapping */
+.stColumns > div {
+    position: relative !important;
+    z-index: 1 !important;
+    margin: 0 5px !important;
+    padding: 0 !important;
+    width: calc(20% - 10px) !important;
+    box-sizing: border-box !important;
+    float: left !important;
+}
+
 .metric-container {
     background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
     border-radius: 12px;
     padding: 20px;
     text-align: center;
     box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-
+    
     /* 🔑 Force same size for all cards */
     min-height: 180px;
     max-height: 180px;
-    min-width: 200px;
-    height: 100%;
+    width: 100% !important;
+    height: 180px !important;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    position: relative !important;
+    z-index: 1 !important;
+    margin: 10px 0 !important;
+    box-sizing: border-box !important;
 }
+
 .metric-container h2 {
     margin: 0;
     font-size: 2rem;
@@ -6845,6 +6938,13 @@ def render_overview_dashboard():
 }
 .metric-container small {
     color: #aaa;
+}
+
+/* Clear floats to prevent layout issues */
+.stColumns::after {
+    content: "";
+    display: table;
+    clear: both;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -7427,7 +7527,7 @@ def render_realtime_monitor():
 # Add this to your main app.py file after your existing analysis section:
 
 # --- ADD THE DASHBOARD SECTION ---
-if st.sidebar.button("📊 Open Dashboard", key="open_dashboard", help="Open the advanced analytics dashboard"):
+if st.sidebar.button("📊 Open Dashboard", key="open_dashboard"):
     st.session_state.show_dashboard = True
 
 if st.session_state.get('show_dashboard', False):
