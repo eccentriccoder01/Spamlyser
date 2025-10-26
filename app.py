@@ -99,7 +99,7 @@ try:
     from models.navigation import top_navigation_bar
 except ImportError:
     def top_navigation_bar():
-        st.error("Navigation component not found")
+        pass  # Silent fallback
 
 # --- Session State Initialization ---
 # Initialize all session state variables
@@ -629,8 +629,67 @@ st.markdown("""
         margin: 20px 0 !important;
         padding: 10px 0 !important;
     }
+    
+    /* Smooth scrolling for navigation */
+    html {
+        scroll-behavior: smooth !important;
+    }
+    
+    /* Content sections for navigation */
+    .content-section {
+        scroll-margin-top: 100px !important;
+        padding: 20px 0 !important;
+    }
+    
+    /* Navigation button scroll effects */
+    .nav-scroll-button {
+        transition: all 0.3s ease !important;
+        cursor: pointer !important;
+    }
+    
+    .nav-scroll-button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    /* Active button styling */
+    .stButton > button:active,
+    .stButton > button:focus {
+        background-color: #4ecdc4 !important;
+        color: #ffffff !important;
+        border: 2px solid #4ecdc4 !important;
+        box-shadow: 0 0 10px rgba(78, 205, 196, 0.5) !important;
+    }
+    
+    /* Clicked button styling */
+    .nav-button-clicked {
+        background-color: #4ecdc4 !important;
+        color: #ffffff !important;
+        border: 2px solid #4ecdc4 !important;
+        box-shadow: 0 0 10px rgba(78, 205, 196, 0.5) !important;
+    }
 </style>
 """, unsafe_allow_html=True)
+
+# Add JavaScript for button click styling
+st.markdown("""
+<script>
+function handleNavClick(buttonId) {
+    // Remove clicked class from all nav buttons
+    document.querySelectorAll('.nav-button').forEach(btn => {
+        btn.classList.remove('nav-button-clicked');
+    });
+    
+    // Add clicked class to the clicked button
+    const button = document.querySelector(`[data-testid="${buttonId}"]`);
+    if (button) {
+        button.classList.add('nav-button-clicked');
+    }
+}
+</script>
+""", unsafe_allow_html=True)
+
+
 
 # --- Page Functions ---
 def show_home_page():
@@ -881,7 +940,7 @@ def show_home_page():
     # Feedback Section
     st.markdown("---")
     st.markdown("""
-    <div style="text-align: center; margin-bottom: 30px;">
+    <div id="feedback-section" style="text-align: center; margin-bottom: 30px;">
         <h2 style="color: #00d4aa; font-size: 2.2rem; margin-bottom: 10px;">
             💬 Your Feedback Matters!
         </h2>
@@ -6913,7 +6972,7 @@ def render_overview_dashboard():
     padding: 20px;
     text-align: center;
     box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    
+
     /* 🔑 Force same size for all cards */
     min-height: 180px;
     max-height: 180px;
@@ -8727,38 +8786,51 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+
 # Create beautiful navigation links in columns
 col1, col2, col3, col4, col5 = st.columns(5)
 
 with col1:
-    if st.button("🏠 Home", key="nav_home", use_container_width=True):
+    if st.button("Home", key="nav_home", use_container_width=True):
+        st.markdown('<script>handleNavClick("nav_home");</script>', unsafe_allow_html=True)
         navigate_to('home')
-    if st.button("ℹ️ About", key="nav_about", use_container_width=True):
+    if st.button("About", key="nav_about", use_container_width=True):
+        st.markdown('<script>handleNavClick("nav_about");</script>', unsafe_allow_html=True)
         navigate_to('about')
 
 with col2:
-    if st.button("⚡ Features", key="nav_features", use_container_width=True):
+    if st.button("Features", key="nav_features", use_container_width=True):
+        st.markdown('<script>handleNavClick("nav_features");</script>', unsafe_allow_html=True)
         navigate_to('features')
-    if st.button("📊 Analytics", key="nav_analytics", use_container_width=True):
+    if st.button("Analytics", key="nav_analytics", use_container_width=True):
+        st.markdown('<script>handleNavClick("nav_analytics");</script>', unsafe_allow_html=True)
         navigate_to('analytics')
 
 with col3:
-    if st.button("🤖 Models", key="nav_models", use_container_width=True):
+    if st.button("Models", key="nav_models", use_container_width=True):
+        st.markdown('<script>handleNavClick("nav_models");</script>', unsafe_allow_html=True)
         navigate_to('models')
-    if st.button("💬 Feedback", key="nav_feedback", use_container_width=True):
+    if st.button("Feedback", key="nav_feedback", use_container_width=True):
+        st.markdown('<script>handleNavClick("nav_feedback");</script>', unsafe_allow_html=True)
         navigate_to('feedback')
 
 with col4:
-    if st.button("📞 Contact", key="nav_contact", use_container_width=True):
+    if st.button("Contact", key="nav_contact", use_container_width=True):
+        st.markdown('<script>handleNavClick("nav_contact");</script>', unsafe_allow_html=True)
         navigate_to('contact')
-    if st.button("📚 Docs", key="nav_docs", use_container_width=True):
+    if st.button("Docs", key="nav_docs", use_container_width=True):
+        st.markdown('<script>handleNavClick("nav_docs");</script>', unsafe_allow_html=True)
         navigate_to('docs')
 
 with col5:
-    if st.button("🔌 API", key="nav_api", use_container_width=True):
+    if st.button("API", key="nav_api", use_container_width=True):
+        st.markdown('<script>handleNavClick("nav_api");</script>', unsafe_allow_html=True)
         navigate_to('api')
-    if st.button("⚙️ Settings", key="nav_settings", use_container_width=True):
+    if st.button("Settings", key="nav_settings", use_container_width=True):
+        st.markdown('<script>handleNavClick("nav_settings");</script>', unsafe_allow_html=True)
         navigate_to('settings')
+
+
 
 # Beautiful Footer Info Section
 # Clean and simple footer info
@@ -8790,31 +8862,5 @@ st.markdown(
 )
 
 # --- Main Execution ---
-# Route to appropriate page based on session state
-if st.session_state.current_page == 'home':
-    show_home_page()
-elif st.session_state.current_page == 'analyzer':
-    # All the above analyzer content has already been executed
-    pass
-elif st.session_state.current_page == 'about':
-    show_about_page()
-elif st.session_state.current_page == 'features':
-    show_features_page()
-elif st.session_state.current_page == 'analytics':
-    show_analytics_page()
-elif st.session_state.current_page == 'models':
-    show_models_page()
-elif st.session_state.current_page == 'help':
-    show_help_page()
-elif st.session_state.current_page == 'contact':
-    show_contact_page()
-elif st.session_state.current_page == 'docs':
-    show_docs_page()
-elif st.session_state.current_page == 'api':
-    show_api_page()
-elif st.session_state.current_page == 'settings':
-    show_settings_page()
-else:
-    # Default to home page
-    st.session_state.current_page = 'home'
-    show_home_page()
+# Call the main function to handle routing
+main()
