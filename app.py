@@ -5,6 +5,13 @@ import plotly.graph_objects as go
 import numpy as np
 from datetime import datetime, timedelta
 
+# Load unified global styles
+try:
+    from page_functions import load_global_styles
+    load_global_styles()
+except Exception:
+    pass
+
 # Initialize models and check availability
 try:
     from models.model_init import MODEL_STATUS

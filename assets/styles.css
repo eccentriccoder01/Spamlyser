@@ -1,0 +1,107 @@
+/* Unified interaction design tokens */
+:root {
+  /* Motion - Standardized timings */
+  --dur-fast: 150ms;  /* Quick feedback */
+  --dur: 250ms;       /* Standard transitions */
+  --dur-slow: 350ms;  /* Emphasis transitions */
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);  /* Smooth easing */
+
+  /* Elevation - Enhanced shadow hierarchy */
+  --shadow-rest: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 12px 24px rgba(0, 0, 0, 0.12);
+  --shadow-active: 0 4px 12px rgba(0, 0, 0, 0.16);
+  
+  /* Scale - Refined proportions */
+  --scale-hover: 1.03;
+  --scale-active: 0.97;
+  
+  /* Brand - Enhanced glow effect */
+  --accent: #00d4aa;
+  --glow: 0 0 12px rgba(0, 212, 170, 0.24);
+}
+
+/* Dark mode refinements */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --shadow-rest: 0 2px 10px rgba(0, 0, 0, 0.45);
+    --shadow-hover: 0 12px 28px rgba(0, 0, 0, 0.55);
+    --shadow-active: 0 4px 16px rgba(0, 0, 0, 0.65);
+    --glow: 0 0 16px rgba(0, 212, 170, 0.32);
+  }
+}
+
+/* Unified interactive elements */
+.stButton > button,
+.stDownloadButton > button,
+.stTabs [data-baseweb="tab"] button,
+[role="button"],
+a[href],
+.metric-container,
+.prediction-card,
+.ensemble-card,
+.feature-card,
+.model-info {
+  transition: 
+    transform var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease),
+    border-color var(--dur-fast) linear,
+    filter var(--dur) var(--ease);
+  box-shadow: var(--shadow-rest);
+  transform-origin: center;
+  backface-visibility: hidden; /* Prevent flickering */
+}
+
+/* Hover state */
+.stButton > button:hover,
+.stDownloadButton > button:hover,
+.stTabs [data-baseweb="tab"] button:hover,
+[role="button"]:hover,
+a[href]:hover,
+.metric-container:hover,
+.prediction-card:hover,
+.ensemble-card:hover,
+.feature-card:hover,
+.model-info:hover {
+  transform: translateY(-2px) scale(var(--scale-hover));
+  box-shadow: var(--shadow-hover);
+  filter: brightness(1.05);
+}
+
+/* Active state */
+.stButton > button:active,
+.stDownloadButton > button:active,
+.stTabs [data-baseweb="tab"] button:active,
+[role="button"]:active,
+a[href]:active,
+.metric-container:active,
+.prediction-card:active,
+.ensemble-card:active,
+.feature-card:active,
+.model-info:active {
+  transform: translateY(1px) scale(var(--scale-active));
+  box-shadow: var(--shadow-active);
+  filter: brightness(0.98);
+  transition-duration: var(--dur-fast);
+}
+
+/* Form elements */
+.stTextArea > div > div > textarea,
+.stSlider > div > div > div {
+  transition: all var(--dur) var(--ease);
+}
+
+.stTextArea > div > div > textarea:hover,
+.stSlider > div > div > div:hover {
+  border-color: var(--accent) !important;
+  box-shadow: var(--glow) !important;
+}
+
+/* Optional: Page transition animation */
+.main .block-container {
+  animation: fadeIn var(--dur-slow) var(--ease);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
