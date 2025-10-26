@@ -1,0 +1,7 @@
+# Unified Streamlit theme to complement interaction styles
+[theme]
+primaryColor = "#00d4aa"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f5f7fa"
+textColor = "#222222"
+font = "sans serif"

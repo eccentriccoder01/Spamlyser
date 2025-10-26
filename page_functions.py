@@ -1,4 +1,19 @@
 import streamlit as st
+from pathlib import Path
+
+# Load unified global styles once
+def load_global_styles():
+    """Inject the global CSS stylesheet (assets/styles.css) once per session."""
+    key = "__global_css_loaded__"
+    if not st.session_state.get(key, False):
+        # page_functions.py sits in the repo root, so assets/ is a sibling folder
+        css_path = Path(__file__).resolve().parent / "assets" / "styles.css"
+        try:
+            css = css_path.read_text(encoding="utf-8")
+            st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+            st.session_state[key] = True
+        except Exception as e:
+            st.warning(f"Could not load global styles from {css_path}: {e}")
 
 # Import the navigate_to function
 # This will be provided by app.py when importing this function
