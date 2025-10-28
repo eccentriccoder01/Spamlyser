@@ -96,7 +96,7 @@ from collections import defaultdict # Added for easier analytics data aggregatio
 # --- Streamlit Page Configuration ---
 st.set_page_config(
     page_title="Spamlyser Pro - Ensemble Edition",
-    page_icon="🛡️",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -121,18 +121,18 @@ def navigate_to(page_name):
 
 # Page registry for navigation
 PAGES = {
-    'home': '🏠 Home',
-    'analyzer': '🔍 SMS Analyzer',
-    'about': 'ℹ️ About',
-    'features': '⚡ Features',
-    'analytics': '📊 Analytics',
-    'models': '🤖 Models',
-    'feedback': '💬 Feedback',
-    'help': '❓ Help',
-    'contact': '📞 Contact',
-    'docs': '📚 Docs',
-    'api': '🔌 API',
-    'settings': '⚙️ Settings'
+    'home': 'Home',
+    'analyzer': 'SMS Analyzer',
+    'about': 'About',
+    'features': 'Features',
+    'analytics': 'Analytics',
+    'models': 'Models',
+    'feedback': 'Feedback',
+    'help': 'Help',
+    'contact': 'Contact',
+    'docs': 'Docs',
+    'api': 'API',
+    'settings': 'Settings'
 }
 
 # --- Custom CSS for Styling ---
@@ -153,6 +153,52 @@ st.markdown("""
         --hover-scale: 1.02;
         --hover-shadow: rgba(0, 0, 0, 0.15);
         --hover-glow: rgba(0, 212, 170, 0.3);
+    }
+    
+    /* Improved font styling */
+    body, .stApp, .main {
+        font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif !important;
+        font-weight: 400 !important;
+        line-height: 1.6 !important;
+        letter-spacing: 0.01em !important;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif !important;
+        font-weight: 600 !important;
+        line-height: 1.3 !important;
+        letter-spacing: -0.02em !important;
+    }
+    
+    .stMarkdown h1 {
+        font-size: 2.5rem !important;
+        font-weight: 700 !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    .stMarkdown h2 {
+        font-size: 2rem !important;
+        font-weight: 600 !important;
+        margin-bottom: 0.8rem !important;
+    }
+    
+    .stMarkdown h3 {
+        font-size: 1.5rem !important;
+        font-weight: 600 !important;
+        margin-bottom: 0.6rem !important;
+    }
+    
+    .stMarkdown p {
+        font-size: 1rem !important;
+        line-height: 1.7 !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    .stButton > button {
+        font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif !important;
+        font-weight: 500 !important;
+        font-size: 0.95rem !important;
+        letter-spacing: 0.02em !important;
     }
     
     /* Dark theme overrides */
@@ -718,7 +764,7 @@ def show_home_page():
             text-shadow: 0 0 30px rgba(255,255,255,0.3);
             font-weight: 700;
         ">
-            🛡️ Spamlyser Pro
+            Spamlyser Pro
         </h1>
         <h2 style="
             font-size: 1.8rem; 
@@ -742,29 +788,29 @@ def show_home_page():
     """, unsafe_allow_html=True)
     
     # Quick Action Buttons
-    st.markdown("### 🚀 Quick Actions")
+    st.markdown("### Quick Actions")
     col_btn1, col_btn2, col_btn3, col_btn4 = st.columns(4)
     
     with col_btn1:
-        if st.button("🔍 Start Analysis", type="primary", use_container_width=True, help="Analyze SMS messages for threats"):
+        if st.button("Start Analysis", type="primary", use_container_width=True, help="Analyze SMS messages for threats"):
             navigate_to('analyzer')
     
     with col_btn2:
-        if st.button("📊 Analytics", use_container_width=True, help="View performance metrics"):
+        if st.button("Analytics", use_container_width=True, help="View performance metrics"):
             navigate_to('analytics')
     
     with col_btn3:
-        if st.button("⚡ Features", use_container_width=True, help="Explore all features"):
+        if st.button("Features", use_container_width=True, help="Explore all features"):
             navigate_to('features')
     
     with col_btn4:
-        if st.button("ℹ️ About", use_container_width=True, help="Learn more about Spamlyser"):
+        if st.button("About", use_container_width=True, help="Learn more about Spamlyser"):
             navigate_to('about')
     
     st.markdown("---")
     
     # Feature Showcase
-    st.markdown("### 🌟 Why Choose Spamlyser Pro?")
+    st.markdown("### Why Choose Spamlyser Pro?")
     
     col1, col2 = st.columns(2)
     
@@ -777,7 +823,7 @@ def show_home_page():
             margin-bottom: 20px;
             box-shadow: 0 5px 15px rgba(255, 154, 158, 0.3);
         ">
-            <h3 style="color: #fff; margin: 0 0 15px 0;">🤖 AI-Powered Detection</h3>
+            <h3 style="color: #fff; margin: 0 0 15px 0;">AI-Powered Detection</h3>
             <p style="color: #fff; margin: 0; opacity: 0.9; line-height: 1.6;">
                 Uses state-of-the-art transformer models including BERT, RoBERTa, DistilBERT, and ALBERT 
                 for maximum accuracy in threat detection.
@@ -793,7 +839,7 @@ def show_home_page():
             margin-bottom: 20px;
             box-shadow: 0 5px 15px rgba(168, 237, 234, 0.3);
         ">
-            <h3 style="color: #333; margin: 0 0 15px 0;">⚡ Real-Time Analysis</h3>
+            <h3 style="color: #333; margin: 0 0 15px 0;">Real-Time Analysis</h3>
             <p style="color: #333; margin: 0; opacity: 0.8; line-height: 1.6;">
                 Get instant results with lightning-fast processing. Analyze SMS messages 
                 in milliseconds with our optimized AI pipeline.
@@ -826,7 +872,7 @@ def show_home_page():
             margin-bottom: 20px;
             box-shadow: 0 5px 15px rgba(210, 153, 194, 0.3);
         ">
-            <h3 style="color: #333; margin: 0 0 15px 0;">📊 Smart Analytics</h3>
+            <h3 style="color: #333; margin: 0 0 15px 0;">Smart Analytics</h3>
             <p style="color: #333; margin: 0; opacity: 0.8; line-height: 1.6;">
                 Track performance metrics, view detailed reports, and export results 
                 in multiple formats for comprehensive analysis.
@@ -837,26 +883,26 @@ def show_home_page():
     st.markdown("---")
     
     # Statistics Section
-    st.markdown("### 📈 Platform Statistics")
+    st.markdown("### Platform Statistics")
     
     metric_col1, metric_col2, metric_col3, metric_col4 = st.columns(4)
     
     with metric_col1:
-        st.metric("🎯 Accuracy", "97.8%", "+2.1%")
+        st.metric("Accuracy", "97.8%", "+2.1%")
     
     with metric_col2:
-        st.metric("⚡ Speed", "< 100ms", "-15ms")
+        st.metric("Speed", "< 100ms", "-15ms")
     
     with metric_col3:
-        st.metric("🛡️ Threats Blocked", "10M+", "+2.3M")
+        st.metric("Threats Blocked", "10M+", "+2.3M")
     
     with metric_col4:
-        st.metric("🤖 AI Models", "4", "+1")
+        st.metric("AI Models", "4", "+1")
     
     st.markdown("---")
     
     # How It Works Section
-    st.markdown("### 🎯 How Spamlyser Pro Works")
+    st.markdown("### How Spamlyser Pro Works")
     
     step_col1, step_col2, step_col3, step_col4 = st.columns(4)
     
@@ -874,7 +920,7 @@ def show_home_page():
                 margin: 0 auto 15px auto;
                 box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
             ">
-                <span style="font-size: 2rem;">📱</span>
+                <span style="font-size: 2rem;">1</span>
             </div>
             <h4 style="color: #667eea; margin: 0 0 10px 0;">Step 1</h4>
             <p style="margin: 0; font-size: 0.9rem; opacity: 0.8;">Input SMS Message</p>
@@ -895,7 +941,7 @@ def show_home_page():
                 margin: 0 auto 15px auto;
                 box-shadow: 0 5px 15px rgba(255, 154, 158, 0.4);
             ">
-                <span style="font-size: 2rem;">🤖</span>
+                <span style="font-size: 2rem;">2</span>
             </div>
             <h4 style="color: #ff9a9e; margin: 0 0 10px 0;">Step 2</h4>
             <p style="margin: 0; font-size: 0.9rem; opacity: 0.8;">AI Analysis</p>
@@ -916,7 +962,7 @@ def show_home_page():
                 margin: 0 auto 15px auto;
                 box-shadow: 0 5px 15px rgba(168, 237, 234, 0.4);
             ">
-                <span style="font-size: 2rem;">🔍</span>
+                <span style="font-size: 2rem;">3</span>
             </div>
             <h4 style="color: #a8edea; margin: 0 0 10px 0;">Step 3</h4>
             <p style="margin: 0; font-size: 0.9rem; opacity: 0.8;">Threat Detection</p>
@@ -937,7 +983,7 @@ def show_home_page():
                 margin: 0 auto 15px auto;
                 box-shadow: 0 5px 15px rgba(255, 236, 210, 0.4);
             ">
-                <span style="font-size: 2rem;">📊</span>
+                <span style="font-size: 2rem;">4</span>
             </div>
             <h4 style="color: #ffecd2; margin: 0 0 10px 0;">Step 4</h4>
             <p style="margin: 0; font-size: 0.9rem; opacity: 0.8;">Results & Report</p>
@@ -949,7 +995,7 @@ def show_home_page():
     st.markdown("""
     <div id="feedback-section" style="text-align: center; margin-bottom: 30px;">
         <h2 style="color: #00d4aa; font-size: 2.2rem; margin-bottom: 10px;">
-            💬 Your Feedback Matters!
+            Your Feedback Matters!
         </h2>
         <p style="font-size: 1.1rem; color: #888; margin-bottom: 20px;">
             Help us improve Spamlyser by sharing your thoughts and suggestions
@@ -1099,7 +1145,7 @@ def show_analyzer_page():
     st.markdown("""
     <div style="text-align: center; padding: 20px 0; background: linear-gradient(90deg, #1a1a1a, #2d2d2d); border-radius: 15px; margin-bottom: 30px; border: 1px solid #404040;">
         <h1 style="color: #00d4aa; font-size: 3rem; margin: 0; text-shadow: 0 0 20px rgba(0, 212, 170, 0.3);">
-            🛡️ Spamlyser Pro - Analyzer
+            Spamlyser Pro - Analyzer
         </h1>
         <p style="color: #888; font-size: 1.2rem; margin: 10px 0 0 0;">
             Advanced Multi-Model SMS Threat Detection & Analysis Platform
@@ -1108,7 +1154,7 @@ def show_analyzer_page():
     """, unsafe_allow_html=True)
     
     # Analysis Mode Selection
-    st.markdown("### 🔍 Choose Analysis Mode")
+    st.markdown("### Choose Analysis Mode")
     analysis_mode = st.radio(
         "Select how you want to analyze messages:",
         ["Single Message Analysis", "Batch Processing (CSV)"],
@@ -1116,10 +1162,10 @@ def show_analyzer_page():
     )
     
     if analysis_mode == "Single Message":
-        st.markdown("### 📝 Single Message Analysis")
+        st.markdown("### Single Message Analysis")
         # Existing single message analysis code will go here
     else:
-        st.markdown("### 📊 Batch Message Analysis")
+        st.markdown("### Batch Message Analysis")
         st.markdown("""
         Upload a CSV file containing multiple messages for analysis. The file should have the following format:
         - Required column: `message` (The SMS text to analyze)
@@ -1140,7 +1186,7 @@ def show_analyzer_page():
                 # Create containers for progress tracking
                 progress_container = st.container()
                 with progress_container:
-                    st.markdown("### ⚡ Processing Status")
+                    st.markdown("### Processing Status")
                     progress_cols = st.columns([2, 1, 1])
                     with progress_cols[0]:
                         progress_bar = st.progress(0)
@@ -1160,7 +1206,7 @@ def show_analyzer_page():
                 # Read and validate CSV
                     df = pd.read_csv(uploaded_file)
                     if 'message' not in df.columns:
-                        st.error("❌ Error: CSV file must contain a 'message' column!")
+                        st.error("Error: CSV file must contain a 'message' column!")
                         return
                         
                     # Create a callback for updating detailed metrics
@@ -1176,7 +1222,7 @@ def show_analyzer_page():
                         # Update progress and status
                         progress_bar.progress(progress)
                         processed_count = int(progress * len(df))
-                        status_text.markdown(f"✨ Processing message {processed_count} of {len(df)}...")
+                        status_text.markdown(f"Processing message {processed_count} of {len(df)}...")
                         
                         # Calculate processing speed and time
                         elapsed_time = (datetime.now() - start_time).total_seconds()
@@ -1196,7 +1242,7 @@ def show_analyzer_page():
                             spam_metric.metric("Spam", f"{spam_count} ({spam_count/processed_count*100:.1f}%)")
                             ham_metric.metric("Ham", f"{ham_count} ({ham_count/processed_count*100:.1f}%)")
                             confidence_metric.metric("Avg Confidence", f"{(total_confidence/processed_count):.2%}")                # Show file statistics
-                st.info(f"📊 File Statistics:\n- Total messages: {len(df)}\n- File size: {uploaded_file.size/1024:.1f} KB")
+                st.info(f"File Statistics:\n- Total messages: {len(df)}\n- File size: {uploaded_file.size/1024:.1f} KB")
                 
                 # Batch processing options
                 col1, col2 = st.columns(2)
@@ -1217,7 +1263,7 @@ def show_analyzer_page():
                     )
                 
                 # Process button
-                if st.button("🚀 Start Batch Processing", type="primary", use_container_width=True):
+                if st.button("Start Batch Processing", type="primary", use_container_width=True):
                     import time
                     
                     # Initialize processing
@@ -1225,7 +1271,7 @@ def show_analyzer_page():
                     processed = 0
                     results = []
                     
-                    status_text.text("⚡ Initializing batch processing...")
+                    status_text.text("Initializing batch processing...")
                     time.sleep(1)  # Simulate initialization
                     
                     # Initialize batch processor
@@ -1323,9 +1369,9 @@ def show_analyzer_page():
                         mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     
                     # Show completion message and download button
-                    st.success("✅ Batch processing completed successfully!")
+                    st.success("Batch processing completed successfully!")
                     st.download_button(
-                        "📥 Download Analysis Report",
+                        "Download Analysis Report",
                         data=report,
                         file_name=filename,
                         mime=mime,
@@ -1337,13 +1383,13 @@ def show_analyzer_page():
                     status_text.empty()
                     
                     # Show detailed analysis results
-                    st.markdown("### 📊 Analysis Results")
+                    st.markdown("### Analysis Results")
                     
                     # Convert results to DataFrame for analysis
                     results_df = pd.DataFrame(results)
                     
                     # Create tabs for different views
-                    tab1, tab2, tab3 = st.tabs(["📈 Overview", "🔍 Detailed Analysis", "⚠️ Risk Analysis"])
+                    tab1, tab2, tab3 = st.tabs(["Overview", "Detailed Analysis", "Risk Analysis"])
                     
                     with tab1:
                         # Summary metrics
@@ -1437,7 +1483,7 @@ def show_analyzer_page():
                         st.plotly_chart(fig, use_container_width=True)
                         
                         # List high-risk messages
-                        st.subheader("🚨 High-Risk Messages")
+                        st.subheader("High-Risk Messages")
                         high_risk_threshold = 3  # Messages with 3 or more risk indicators
                         high_risk_messages = []
                         
@@ -1456,7 +1502,7 @@ def show_analyzer_page():
                             st.info("No high-risk messages detected in this batch.")
             
             except Exception as e:
-                st.error(f"❌ Error processing file: {str(e)}")
+                st.error(f"Error processing file: {str(e)}")
                 st.info("Please ensure your CSV file is properly formatted and try again.")
     # The rest of the current main functionality will go here
 
@@ -1465,34 +1511,34 @@ def show_about_page():
     st.markdown("""
     <div style="text-align: center; padding: 20px 0; background: linear-gradient(90deg, #1a1a1a, #2d2d2d); border-radius: 15px; margin-bottom: 30px; border: 1px solid #404040;">
         <h1 style="color: #00d4aa; font-size: 3rem; margin: 0; text-shadow: 0 0 20px rgba(0, 212, 170, 0.3);">
-            ℹ️ About Spamlyser Pro
+            About Spamlyser Pro
         </h1>
     </div>
     """, unsafe_allow_html=True)
     
     st.markdown("""
-    ## 🛡️ About Spamlyser Pro
+    ## About Spamlyser Pro
     
     **Spamlyser Pro** is a cutting-edge SMS threat detection system built using advanced machine learning techniques and ensemble methods.
     
-    ### 🎯 Mission
+    ### Mission
     To provide accurate, real-time SMS threat detection and help users identify potentially harmful messages before they cause damage.
     
-    ### 🤖 Technology Stack
+    ### Technology Stack
     - **Machine Learning Models**: DistilBERT, BERT, RoBERTa, ALBERT
     - **Framework**: Streamlit for web interface
     - **Backend**: Python with Transformers library
     - **Analytics**: Plotly for data visualization
     
-    ### 🏆 Features
+    ### Features
     - Multi-model ensemble predictions
     - Real-time threat analysis
     - Detailed performance metrics
     - Export functionality
     - User-friendly interface
     
-    ### 👨‍💻 Developer
-    Built with ❤️ by the Spamlyser Pro team using state-of-the-art AI technology.
+    ### Developer
+    Built with love by the Spamlyser Pro team using state-of-the-art AI technology.
     """)
 
 def show_features_page():
@@ -1514,7 +1560,7 @@ def show_features_page():
             text-shadow: 0 0 30px rgba(255,255,255,0.3);
             font-weight: 700;
         ">
-            ⚡ Advanced Features
+            Advanced Features
         </h1>
         <h2 style="
             font-size: 1.8rem; 
@@ -1538,17 +1584,17 @@ def show_features_page():
     """, unsafe_allow_html=True)
     
     # Interactive Feature Categories
-    st.markdown("### 🎯 Feature Categories")
+    st.markdown("### Feature Categories")
     
     # Feature tabs using selectbox for better interaction
     feature_category = st.selectbox(
         "Choose a category to explore:",
-        ["🤖 AI & Machine Learning", "🔒 Security & Protection", "📊 Analytics & Reporting", "⚡ Performance & Speed", "🛠️ Tools & Integration"],
+        ["AI & Machine Learning", "Security & Protection", "Analytics & Reporting", "Performance & Speed", "Tools & Integration"],
         help="Select different categories to explore specific features"
     )
     
     # Dynamic content based on selected category
-    if feature_category == "🤖 AI & Machine Learning":
+    if feature_category == "AI & Machine Learning":
         st.markdown("""
         <div style="
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -1557,7 +1603,7 @@ def show_features_page():
             margin: 20px 0;
             color: white;
         ">
-            <h3 style="margin: 0 0 20px 0;">🤖 Advanced AI Models</h3>
+            <h3 style="margin: 0 0 20px 0;">Advanced AI Models</h3>
             <p style="opacity: 0.9; line-height: 1.8; margin: 0;">
                 Our ensemble of state-of-the-art transformer models provides unmatched accuracy in SMS threat detection.
             </p>
@@ -1576,7 +1622,7 @@ def show_features_page():
                 margin-bottom: 20px;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             ">
-                <h4 style="color: #667eea; margin: 0 0 15px 0;">🚀 BERT (Bidirectional Encoder)</h4>
+                <h4 style="color: #667eea; margin: 0 0 15px 0;">BERT (Bidirectional Encoder)</h4>
                 <p style="margin: 0; color: #333; line-height: 1.6;">
                     Deep contextual understanding of SMS content with bidirectional attention mechanisms.
                     <br><br>
@@ -1598,7 +1644,7 @@ def show_features_page():
                 margin-bottom: 20px;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             ">
-                <h4 style="color: #ff6b6b; margin: 0 0 15px 0;">⚡ DistilBERT (Lightweight)</h4>
+                <h4 style="color: #ff6b6b; margin: 0 0 15px 0;">DistilBERT (Lightweight)</h4>
                 <p style="margin: 0; color: #333; line-height: 1.6;">
                     60% smaller, 60% faster than BERT while retaining 97% of performance.
                     <br><br>
@@ -1621,7 +1667,7 @@ def show_features_page():
                 margin-bottom: 20px;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             ">
-                <h4 style="color: #4ecdc4; margin: 0 0 15px 0;">🎯 RoBERTa (Robustly Optimized)</h4>
+                <h4 style="color: #4ecdc4; margin: 0 0 15px 0;">RoBERTa (Robustly Optimized)</h4>
                 <p style="margin: 0; color: #333; line-height: 1.6;">
                     Enhanced BERT with improved training methodology and dynamic masking.
                     <br><br>
@@ -1643,7 +1689,7 @@ def show_features_page():
                 margin-bottom: 20px;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             ">
-                <h4 style="color: #feca57; margin: 0 0 15px 0;">🧠 ALBERT (A Lite BERT)</h4>
+                <h4 style="color: #feca57; margin: 0 0 15px 0;">ALBERT (A Lite BERT)</h4>
                 <p style="margin: 0; color: #333; line-height: 1.6;">
                     Parameter sharing and factorized embeddings for efficient processing.
                     <br><br>
@@ -1656,7 +1702,7 @@ def show_features_page():
             </div>
             """, unsafe_allow_html=True)
     
-    elif feature_category == "🔒 Security & Protection":
+    elif feature_category == "Security & Protection":
         st.markdown("""
         <div style="
             background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
@@ -1665,7 +1711,7 @@ def show_features_page():
             margin: 20px 0;
             color: white;
         ">
-            <h3 style="margin: 0 0 20px 0;">🔒 Comprehensive Security Features</h3>
+            <h3 style="margin: 0 0 20px 0;">Comprehensive Security Features</h3>
             <p style="opacity: 0.9; line-height: 1.8; margin: 0;">
                 Multi-layered protection against various types of SMS-based threats and attacks.
             </p>
@@ -1677,21 +1723,21 @@ def show_features_page():
         with threat_col1:
             threats = [
                 {
-                    "icon": "🎣",
+                    "icon": "",
                     "name": "Phishing Detection",
                     "description": "Identifies attempts to steal personal information through deceptive messages",
                     "accuracy": "98.5%",
                     "color": "#e74c3c"
                 },
                 {
-                    "icon": "💰",
+                    "icon": "",
                     "name": "Financial Fraud",
                     "description": "Detects scams targeting bank accounts, credit cards, and financial data",
                     "accuracy": "97.9%", 
                     "color": "#f39c12"
                 },
                 {
-                    "icon": "🦠",
+                    "icon": "",
                     "name": "Malware Links",
                     "description": "Scans for malicious URLs that could download harmful software",
                     "accuracy": "99.2%",
@@ -1732,21 +1778,21 @@ def show_features_page():
         with threat_col2:
             threats2 = [
                 {
-                    "icon": "🎭",
+                    "icon": "",
                     "name": "Social Engineering",
                     "description": "Identifies psychological manipulation tactics used in SMS attacks",
                     "accuracy": "96.7%",
                     "color": "#2ecc71"
                 },
                 {
-                    "icon": "📱",
+                    "icon": "",
                     "name": "SIM Swapping Alerts",
                     "description": "Detects messages related to unauthorized SIM card transfers",
                     "accuracy": "98.1%",
                     "color": "#3498db"
                 },
                 {
-                    "icon": "🔐",
+                    "icon": "",
                     "name": "Identity Theft",
                     "description": "Prevents attempts to gather personal identifying information",
                     "accuracy": "97.3%",
@@ -1784,7 +1830,7 @@ def show_features_page():
                 </div>
                 """, unsafe_allow_html=True)
     
-    elif feature_category == "📊 Analytics & Reporting":
+    elif feature_category == "Analytics & Reporting":
         st.markdown("""
         <div style="
             background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
@@ -1793,7 +1839,7 @@ def show_features_page():
             margin: 20px 0;
             color: white;
         ">
-            <h3 style="margin: 0 0 20px 0;">📊 Advanced Analytics & Reporting</h3>
+            <h3 style="margin: 0 0 20px 0;">Advanced Analytics & Reporting</h3>
             <p style="opacity: 0.9; line-height: 1.8; margin: 0;">
                 Comprehensive insights and detailed reports to track performance and understand threat patterns.
             </p>
@@ -1802,12 +1848,12 @@ def show_features_page():
         
         # Analytics features with interactive elements
         analytics_features = [
-            {"name": "Real-time Dashboard", "icon": "📈", "desc": "Live monitoring of threat detection performance"},
-            {"name": "Historical Analysis", "icon": "📊", "desc": "Trend analysis and pattern recognition over time"},
-            {"name": "Model Performance", "icon": "🎯", "desc": "Individual and ensemble model accuracy tracking"},
-            {"name": "Threat Intelligence", "icon": "🧠", "desc": "Insights into emerging threat types and patterns"},
-            {"name": "Export Capabilities", "icon": "📤", "desc": "Multiple format exports (CSV, JSON, PDF reports)"},
-            {"name": "Custom Reports", "icon": "📋", "desc": "Tailored reporting for specific business needs"}
+            {"name": "Real-time Dashboard", "icon": "", "desc": "Live monitoring of threat detection performance"},
+            {"name": "Historical Analysis", "icon": "", "desc": "Trend analysis and pattern recognition over time"},
+            {"name": "Model Performance", "icon": "", "desc": "Individual and ensemble model accuracy tracking"},
+            {"name": "Threat Intelligence", "icon": "", "desc": "Insights into emerging threat types and patterns"},
+            {"name": "Export Capabilities", "icon": "", "desc": "Multiple format exports (CSV, JSON, PDF reports)"},
+            {"name": "Custom Reports", "icon": "", "desc": "Tailored reporting for specific business needs"}
         ]
         
         for i in range(0, len(analytics_features), 2):
@@ -1855,7 +1901,7 @@ def show_features_page():
                     </div>
                     """, unsafe_allow_html=True)
     
-    elif feature_category == "⚡ Performance & Speed":
+    elif feature_category == "Performance & Speed":
         st.markdown("""
         <div style="
             background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
@@ -1864,7 +1910,7 @@ def show_features_page():
             margin: 20px 0;
             color: white;
         ">
-            <h3 style="margin: 0 0 20px 0;">⚡ Lightning-Fast Performance</h3>
+            <h3 style="margin: 0 0 20px 0;">Lightning-Fast Performance</h3>
             <p style="opacity: 0.9; line-height: 1.8; margin: 0;">
                 Optimized for speed without compromising accuracy. Built for real-time threat detection at scale.
             </p>
@@ -1875,20 +1921,20 @@ def show_features_page():
         perf_col1, perf_col2, perf_col3, perf_col4 = st.columns(4)
         
         with perf_col1:
-            st.metric("⚡ Analysis Speed", "< 50ms", "−25ms")
+            st.metric("Analysis Speed", "< 50ms", "−25ms")
         with perf_col2:
-            st.metric("🎯 Accuracy", "97.8%", "+2.1%")
+            st.metric("Accuracy", "97.8%", "+2.1%")
         with perf_col3:
-            st.metric("📊 Throughput", "1000/sec", "+200/sec")
+            st.metric("Throughput", "1000/sec", "+200/sec")
         with perf_col4:
-            st.metric("🧠 Memory Usage", "2.1GB", "−0.5GB")
+            st.metric("Memory Usage", "2.1GB", "−0.5GB")
         
         # Performance features
         st.markdown("---")
         
         performance_details = [
             {
-                "title": "🚀 Optimized Inference Pipeline",
+                "title": "Optimized Inference Pipeline",
                 "details": [
                     "GPU acceleration with CUDA support",
                     "Batch processing for multiple SMS analysis",
@@ -1897,7 +1943,7 @@ def show_features_page():
                 ]
             },
             {
-                "title": "⚖️ Smart Load Balancing", 
+                "title": "Smart Load Balancing", 
                 "details": [
                     "Intelligent model routing based on message complexity",
                     "Dynamic resource allocation",
@@ -1906,7 +1952,7 @@ def show_features_page():
                 ]
             },
             {
-                "title": "🔄 Real-time Processing",
+                "title": "Real-time Processing",
                 "details": [
                     "Stream processing architecture",
                     "Zero-downtime updates",
@@ -1919,7 +1965,7 @@ def show_features_page():
         for detail in performance_details:
             with st.expander(detail['title'], expanded=False):
                 for item in detail['details']:
-                    st.markdown(f"✅ {item}")
+                    st.markdown(f"• {item}")
     
     else:  # Tools & Integration
         st.markdown("""
@@ -1930,7 +1976,7 @@ def show_features_page():
             margin: 20px 0;
             color: #333;
         ">
-            <h3 style="margin: 0 0 20px 0;">🛠️ Tools & Integration Capabilities</h3>
+            <h3 style="margin: 0 0 20px 0;">Tools & Integration Capabilities</h3>
             <p style="opacity: 0.8; line-height: 1.8; margin: 0;">
                 Seamlessly integrate with your existing systems and workflows with our comprehensive API and tools.
             </p>
@@ -1950,7 +1996,7 @@ def show_features_page():
                 margin-bottom: 20px;
                 box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
             ">
-                <h4 style="color: #667eea; margin: 0 0 15px 0;">🔌 REST API</h4>
+                <h4 style="color: #667eea; margin: 0 0 15px 0;">REST API</h4>
                 <ul style="margin: 0; color: #333;">
                     <li>RESTful endpoints for all features</li>
                     <li>JSON request/response format</li>
@@ -1970,7 +2016,7 @@ def show_features_page():
                 margin-bottom: 20px;
                 box-shadow: 0 5px 15px rgba(78, 205, 196, 0.2);
             ">
-                <h4 style="color: #4ecdc4; margin: 0 0 15px 0;">📱 Mobile Integration</h4>
+                <h4 style="color: #4ecdc4; margin: 0 0 15px 0;">Mobile Integration</h4>
                 <ul style="margin: 0; color: #333;">
                     <li>iOS and Android SDK support</li>
                     <li>Real-time SMS scanning</li>
@@ -1991,7 +2037,7 @@ def show_features_page():
                 margin-bottom: 20px;
                 box-shadow: 0 5px 15px rgba(255, 107, 107, 0.2);
             ">
-                <h4 style="color: #ff6b6b; margin: 0 0 15px 0;">☁️ Cloud Deployment</h4>
+                <h4 style="color: #ff6b6b; margin: 0 0 15px 0;">Cloud Deployment</h4>
                 <ul style="margin: 0; color: #333;">
                     <li>AWS, Azure, GCP compatible</li>
                     <li>Docker containerization</li>
@@ -2011,7 +2057,7 @@ def show_features_page():
                 margin-bottom: 20px;
                 box-shadow: 0 5px 15px rgba(254, 202, 87, 0.2);
             ">
-                <h4 style="color: #feca57; margin: 0 0 15px 0;">🔧 Enterprise Tools</h4>
+                <h4 style="color: #feca57; margin: 0 0 15px 0;">Enterprise Tools</h4>
                 <ul style="margin: 0; color: #333;">
                     <li>Custom model training</li>
                     <li>On-premise deployment</li>
@@ -2045,15 +2091,15 @@ def show_features_page():
     action_col1, action_col2, action_col3 = st.columns(3)
     
     with action_col1:
-        if st.button("🔍 Try SMS Analyzer", type="primary", use_container_width=True):
+        if st.button("Try SMS Analyzer", type="primary", use_container_width=True):
             navigate_to('analyzer')
     
     with action_col2:
-        if st.button("📊 View Analytics", use_container_width=True):
+        if st.button("View Analytics", use_container_width=True):
             navigate_to('analytics')
     
     with action_col3:
-        if st.button("🏠 Back to Home", use_container_width=True):
+        if st.button("Back to Home", use_container_width=True):
             navigate_to('home')
 
 def show_models_page():
@@ -2075,7 +2121,7 @@ def show_models_page():
             text-shadow: 0 0 30px rgba(255,255,255,0.3);
             font-weight: 700;
         ">
-            🤖 AI Models
+            AI Models
         </h1>
         <h2 style="
             font-size: 1.8rem; 
@@ -2099,16 +2145,16 @@ def show_models_page():
     """, unsafe_allow_html=True)
     
     # Model Selection
-    st.markdown("### 🎯 Select a Model to Explore")
+    st.markdown("### Select a Model to Explore")
     
     model_category = st.selectbox(
         "Choose an AI model to learn more:",
-        ["🚀 BERT - Bidirectional Encoder", "⚡ DistilBERT - Lightweight Champion", "🎯 RoBERTa - Robustly Optimized", "🧠 ALBERT - A Lite BERT", "🔥 Ensemble Methods", "📊 Model Comparison"],
+        ["BERT - Bidirectional Encoder", "DistilBERT - Lightweight Champion", "RoBERTa - Robustly Optimized", "ALBERT - A Lite BERT", "Ensemble Methods", "Model Comparison"],
         help="Select different models to explore their capabilities and specifications"
     )
     
     # Dynamic content based on selected model
-    if model_category == "🚀 BERT - Bidirectional Encoder":
+    if model_category == "BERT - Bidirectional Encoder":
         st.markdown("""
         <div style="
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -2117,7 +2163,7 @@ def show_models_page():
             margin: 20px 0;
             color: white;
         ">
-            <h3 style="margin: 0 0 20px 0;">🚀 BERT: The Foundation Model</h3>
+            <h3 style="margin: 0 0 20px 0;">BERT: The Foundation Model</h3>
             <p style="opacity: 0.9; line-height: 1.8; margin: 0;">
                 Bidirectional Encoder Representations from Transformers - the revolutionary model that changed NLP forever.
             </p>
@@ -2136,7 +2182,7 @@ def show_models_page():
                 box-shadow: 0 5px 15px rgba(0,0,0,0.1);
                 border-left: 5px solid #667eea;
             ">
-                <h4 style="color: #667eea; margin: 0 0 20px 0;">🔬 Technical Architecture</h4>
+                <h4 style="color: #667eea; margin: 0 0 20px 0;">Technical Architecture</h4>
                 <ul style="color: #333; line-height: 1.8; margin: 0;">
                     <li><strong>Architecture:</strong> 12-layer Transformer encoder</li>
                     <li><strong>Parameters:</strong> 110M parameters</li>
@@ -2157,7 +2203,7 @@ def show_models_page():
                 box-shadow: 0 5px 15px rgba(0,0,0,0.1);
                 border-left: 5px solid #4ecdc4;
             ">
-                <h4 style="color: #4ecdc4; margin: 0 0 20px 0;">🎯 SMS Detection Capabilities</h4>
+                <h4 style="color: #4ecdc4; margin: 0 0 20px 0;">SMS Detection Capabilities</h4>
                 <ul style="color: #333; line-height: 1.8; margin: 0;">
                     <li><strong>Contextual Understanding:</strong> Bidirectional context analysis</li>
                     <li><strong>Semantic Analysis:</strong> Deep meaning comprehension</li>
@@ -2170,10 +2216,10 @@ def show_models_page():
         
         with col2:
             # Performance metrics for BERT
-            st.metric("🎯 Accuracy", "97.2%", "+0.8%")
-            st.metric("⚡ Speed", "120ms", "Standard")
-            st.metric("🧠 Memory", "440MB", "Base Model")
-            st.metric("🔥 F1-Score", "96.8%", "+1.2%")
+            st.metric("Accuracy", "97.2%", "+0.8%")
+            st.metric("Speed", "120ms", "Standard")
+            st.metric("Memory", "440MB", "Base Model")
+            st.metric("F1-Score", "96.8%", "+1.2%")
             
             st.markdown("""
             <div style="
@@ -2184,7 +2230,7 @@ def show_models_page():
                 color: white;
                 text-align: center;
             ">
-                <h4 style="margin: 0 0 15px 0;">🏆 Best For</h4>
+                <h4 style="margin: 0 0 15px 0;">Best For</h4>
                 <p style="margin: 0; opacity: 0.9;">
                     • High accuracy requirements<br>
                     • Complex threat analysis<br>
@@ -2194,7 +2240,7 @@ def show_models_page():
             </div>
             """, unsafe_allow_html=True)
     
-    elif model_category == "⚡ DistilBERT - Lightweight Champion":
+    elif model_category == "DistilBERT - Lightweight Champion":
         st.markdown("""
         <div style="
             background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
@@ -2203,7 +2249,7 @@ def show_models_page():
             margin: 20px 0;
             color: white;
         ">
-            <h3 style="margin: 0 0 20px 0;">⚡ DistilBERT: Speed Meets Intelligence</h3>
+            <h3 style="margin: 0 0 20px 0;">DistilBERT: Speed Meets Intelligence</h3>
             <p style="opacity: 0.9; line-height: 1.8; margin: 0;">
                 A distilled version of BERT that's 60% smaller, 60% faster, while retaining 97% of performance.
             </p>
@@ -2222,7 +2268,7 @@ def show_models_page():
                 box-shadow: 0 5px 15px rgba(0,0,0,0.1);
                 border-left: 5px solid #ff6b6b;
             ">
-                <h4 style="color: #ff6b6b; margin: 0 0 20px 0;">🏃‍♂️ Optimization Features</h4>
+                <h4 style="color: #ff6b6b; margin: 0 0 20px 0;">Optimization Features</h4>
                 <ul style="color: #333; line-height: 1.8; margin: 0;">
                     <li><strong>Knowledge Distillation:</strong> Learned from BERT teacher model</li>
                     <li><strong>Layer Reduction:</strong> 6 layers instead of 12</li>
@@ -2242,7 +2288,7 @@ def show_models_page():
                 box-shadow: 0 5px 15px rgba(0,0,0,0.1);
                 border-left: 5px solid #feca57;
             ">
-                <h4 style="color: #feca57; margin: 0 0 20px 0;">🚀 Performance Advantages</h4>
+                <h4 style="color: #feca57; margin: 0 0 20px 0;">Performance Advantages</h4>
                 <ul style="color: #333; line-height: 1.8; margin: 0;">
                     <li><strong>Speed Boost:</strong> 2x faster inference than BERT</li>
                     <li><strong>Memory Efficient:</strong> 60% less memory usage</li>
@@ -2269,7 +2315,7 @@ def show_models_page():
                 color: white;
                 text-align: center;
             ">
-                <h4 style="margin: 0 0 15px 0;">🏆 Best For</h4>
+                <h4 style="margin: 0 0 15px 0;">Best For</h4>
                 <p style="margin: 0; opacity: 0.9;">
                     • Real-time applications<br>
                     • Mobile deployments<br>
@@ -2354,7 +2400,7 @@ def show_models_page():
                 color: #333;
                 text-align: center;
             ">
-                <h4 style="margin: 0 0 15px 0;">🏆 Best For</h4>
+                <h4 style="margin: 0 0 15px 0;">Best For</h4>
                 <p style="margin: 0; opacity: 0.8;">
                     • Highest accuracy needs<br>
                     • Complex threat patterns<br>
@@ -2439,7 +2485,7 @@ def show_models_page():
                 color: white;
                 text-align: center;
             ">
-                <h4 style="margin: 0 0 15px 0;">🏆 Best For</h4>
+                <h4 style="margin: 0 0 15px 0;">Best For</h4>
                 <p style="margin: 0; opacity: 0.9;">
                     • Memory constraints<br>
                     • Balanced performance<br>
@@ -2725,7 +2771,7 @@ def show_models_page():
             navigate_to('features')
     
     with action_col3:
-        if st.button("🏠 Back to Home", use_container_width=True):
+        if st.button("Back to Home", use_container_width=True):
             navigate_to('home')
 
 def show_contact_page():
@@ -3113,7 +3159,7 @@ def show_contact_page():
             navigate_to('analyzer')
     
     with action_col3:
-        if st.button("🏠 Back to Home", use_container_width=True):
+        if st.button("Back to Home", use_container_width=True):
             navigate_to('home')
     
     # Add bottom padding for proper spacing
@@ -3641,7 +3687,7 @@ public class SpamDetection {
             navigate_to('analyzer')
     
     with action_col3:
-        if st.button("🏠 Back to Home", use_container_width=True):
+        if st.button("Back to Home", use_container_width=True):
             navigate_to('home')
     
     # Add bottom padding for proper spacing
@@ -4080,7 +4126,7 @@ def show_about_page():
             navigate_to('api')
     
     with action_col3:
-        if st.button("🏠 Back to Home", use_container_width=True):
+        if st.button("Back to Home", use_container_width=True):
             navigate_to('home')
     
     # Add bottom padding for proper spacing
@@ -4504,7 +4550,7 @@ def show_analytics_page():
             navigate_to('analyzer')
     
     with action_col3:
-        if st.button("🏠 Back to Home", use_container_width=True):
+        if st.button("Back to Home", use_container_width=True):
             navigate_to('home')
     
     # Add bottom padding for proper spacing
@@ -4957,11 +5003,11 @@ def show_help_page():
             navigate_to('analyzer')
     
     with action_col2:
-        if st.button("🤖 AI Models", use_container_width=True):
+        if st.button("AI Models", use_container_width=True):
             navigate_to('models')
     
     with action_col3:
-        if st.button("🏠 Back to Home", use_container_width=True):
+        if st.button("Back to Home", use_container_width=True):
             navigate_to('home')
     
     # Add bottom padding for proper spacing
@@ -6186,7 +6232,7 @@ def show_settings_page():
             navigate_to('docs')
     
     with action_col4:
-        if st.button("🏠 Back to Home", use_container_width=True):
+        if st.button("Back to Home", use_container_width=True):
             navigate_to('home')
     
     # Settings Summary
@@ -6517,7 +6563,7 @@ def main():
         st.markdown("<hr>", unsafe_allow_html=True)
         col1, col2, col3 = st.columns(3)
         with col1:
-            if st.button("🏠 Back to Home", use_container_width=True):
+            if st.button("Back to Home", use_container_width=True):
                 navigate_to('home')
         with col2:
             if st.button("🔍 Try SMS Analysis", use_container_width=True):
@@ -6562,7 +6608,7 @@ if st.session_state.current_page == 'analyzer':
     st.markdown("""
     <div style="text-align: center; padding: 20px 0; background: linear-gradient(90deg, #1a1a1a, #2d2d2d); border-radius: 15px; margin-bottom: 30px; border: 1px solid #404040;">
         <h1 style="color: #00d4aa; font-size: 3rem; margin: 0; text-shadow: 0 0 20px rgba(0, 212, 170, 0.3);">
-            🛡️ Spamlyser Pro - SMS Analyzer
+            Spamlyser Pro - SMS Analyzer
         </h1>
         <p style="color: #888; font-size: 1.2rem; margin: 10px 0 0 0;">
             Advanced Multi-Model SMS Threat Detection & Analysis Platform
@@ -6782,6 +6828,38 @@ if st.session_state.get('dark_mode', False):
         .main, .stApp {
             background: #181f2f;
         }
+        
+        /* Sidebar dark mode styling */
+        .stSidebar {
+            background: #232a3d !important;
+            color: #f8fafc !important;
+        }
+        
+        .stSidebar .stMarkdown {
+            color: #f8fafc !important;
+        }
+        
+        .stSidebar label {
+            color: #f8fafc !important;
+        }
+        
+        .stSidebar .stExpander {
+            background: #232a3d !important;
+            border: 1px solid #324a7c !important;
+        }
+        
+        .stSidebar .stCheckbox label {
+            color: #f8fafc !important;
+        }
+        
+        .stSidebar .stRadio label {
+            color: #f8fafc !important;
+        }
+        
+        .stSidebar .stSelectbox label {
+            color: #f8fafc !important;
+        }
+        
         .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison {
             background: #232a3d;
             border-radius: 16px;
@@ -6846,6 +6924,204 @@ else:
         .main, .stApp {
             background: #f4f8ff;
         }
+        
+        /* Sidebar light mode styling */
+        .stSidebar {
+            background: #ffffff !important;
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stMarkdown {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stExpander {
+            background: #ffffff !important;
+            border: 1px solid #b3c7f7 !important;
+        }
+        
+        .stSidebar .stCheckbox label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stRadio label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stSelectbox label {
+            color: #232a3d !important;
+        }
+        
+        /* Additional sidebar elements for light mode */
+        .stSidebar .stText {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stMetric {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stSelectbox > div > div {
+            background: #ffffff !important;
+            color: #232a3d !important;
+            border: 1px solid #b3c7f7 !important;
+        }
+        
+        .stSidebar .stSelectbox > div > div > div {
+            background: #ffffff !important;
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stCheckbox > div > label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stRadio > div > label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stNumberInput label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stSlider label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stProgress label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stInfo {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stSuccess {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stWarning {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stError {
+            color: #232a3d !important;
+        }
+        
+        /* Force sidebar text visibility in light mode */
+        .stSidebar * {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar div {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar span {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar p {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar h1, .stSidebar h2, .stSidebar h3, .stSidebar h4, .stSidebar h5, .stSidebar h6 {
+            color: #232a3d !important;
+        }
+        
+        /* Specific targeting for Streamlit components */
+        .stSidebar [data-testid="stCheckbox"] label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar [data-testid="stRadio"] label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar [data-testid="stSelectbox"] label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar [data-testid="stExpander"] label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar [data-testid="stText"] {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar [data-testid="stMetric"] {
+            color: #232a3d !important;
+        }
+        
+        /* Override any inherited light colors */
+        .stSidebar .stMarkdown p {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stMarkdown div {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stMarkdown span {
+            color: #232a3d !important;
+        }
+        
+        /* Ensure form elements are visible */
+        .stSidebar .stForm label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stForm div {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stForm span {
+            color: #232a3d !important;
+        }
+        
+        /* Specific fix for Overall Statistics section */
+        .stSidebar .stMetric {
+            background: #ffffff !important;
+            border: 1px solid #b3c7f7 !important;
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stMetric > div {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stMetric label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stMetric div {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stMetric span {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stMetric p {
+            color: #232a3d !important;
+        }
+        
+        /* Force visibility for metric containers */
+        .stSidebar [data-testid="metric-container"] {
+            background: #ffffff !important;
+            border: 1px solid #b3c7f7 !important;
+            color: #232a3d !important;
+        }
+        
+        .stSidebar [data-testid="metric-container"] * {
+            color: #232a3d !important;
+        }
+        
         .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison {
             background: #e3eafc;
             border-radius: 16px;
