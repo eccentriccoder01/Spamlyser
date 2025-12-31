@@ -6782,6 +6782,22 @@ if st.session_state.get('dark_mode', False):
         .main, .stApp {
             background: #181f2f;
         }
+        /* Header */
+        header[data-testid="stHeader"]{
+            background-color: #0e1117 ! important;
+            border-bottom: 1px solid #1f2937;
+            color:white;
+        }
+
+        /* Sidebar */
+        section[data-testid="stSidebar"]{
+            background-color: #0e1117 !important;
+            border-right: 1px solid #1f2937;
+        }
+        section[data-testid="stSidebar"]{
+            color: #e6edf3 !important;
+        }
+
         .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison {
             background: #232a3d;
             border-radius: 16px;
@@ -6846,6 +6862,16 @@ else:
         .main, .stApp {
             background: #f4f8ff;
         }
+
+        header[data-testid="stHeader"]{
+            background-color: #f4f8ff !important;
+            
+        }
+
+        section[data-testid="stSidebar"]{
+            background-color: #f4f8ff !important;
+        }
+
         .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison {
             background: #e3eafc;
             border-radius: 16px;
