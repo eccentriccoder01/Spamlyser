@@ -155,6 +155,52 @@ st.markdown("""
         --hover-glow: rgba(0, 212, 170, 0.3);
     }
     
+    /* Improved font styling */
+    body, .stApp, .main {
+        font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif !important;
+        font-weight: 400 !important;
+        line-height: 1.6 !important;
+        letter-spacing: 0.01em !important;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif !important;
+        font-weight: 600 !important;
+        line-height: 1.3 !important;
+        letter-spacing: -0.02em !important;
+    }
+    
+    .stMarkdown h1 {
+        font-size: 2.5rem !important;
+        font-weight: 700 !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    .stMarkdown h2 {
+        font-size: 2rem !important;
+        font-weight: 600 !important;
+        margin-bottom: 0.8rem !important;
+    }
+    
+    .stMarkdown h3 {
+        font-size: 1.5rem !important;
+        font-weight: 600 !important;
+        margin-bottom: 0.6rem !important;
+    }
+    
+    .stMarkdown p {
+        font-size: 1rem !important;
+        line-height: 1.7 !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    .stButton > button {
+        font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif !important;
+        font-weight: 500 !important;
+        font-size: 0.95rem !important;
+        letter-spacing: 0.02em !important;
+    }
+    
     /* Dark theme overrides */
     @media (prefers-color-scheme: dark) {
         :root {
@@ -742,29 +788,29 @@ def show_home_page():
     """, unsafe_allow_html=True)
     
     # Quick Action Buttons
-    st.markdown("### 🚀 Quick Actions")
+    st.markdown("### Quick Actions")
     col_btn1, col_btn2, col_btn3, col_btn4 = st.columns(4)
     
     with col_btn1:
-        if st.button("🔍 Start Analysis", type="primary", use_container_width=True, help="Analyze SMS messages for threats"):
+        if st.button("Start Analysis", type="primary", use_container_width=True, help="Analyze SMS messages for threats"):
             navigate_to('analyzer')
     
     with col_btn2:
-        if st.button("📊 Analytics", use_container_width=True, help="View performance metrics"):
+        if st.button("Analytics", use_container_width=True, help="View performance metrics"):
             navigate_to('analytics')
     
     with col_btn3:
-        if st.button("⚡ Features", use_container_width=True, help="Explore all features"):
+        if st.button("Features", use_container_width=True, help="Explore all features"):
             navigate_to('features')
     
     with col_btn4:
-        if st.button("ℹ️ About", use_container_width=True, help="Learn more about Spamlyser"):
+        if st.button("About", use_container_width=True, help="Learn more about Spamlyser"):
             navigate_to('about')
     
     st.markdown("---")
     
     # Feature Showcase
-    st.markdown("### 🌟 Why Choose Spamlyser Pro?")
+    st.markdown("### Why Choose Spamlyser Pro?")
     
     col1, col2 = st.columns(2)
     
@@ -777,7 +823,7 @@ def show_home_page():
             margin-bottom: 20px;
             box-shadow: 0 5px 15px rgba(255, 154, 158, 0.3);
         ">
-            <h3 style="color: #fff; margin: 0 0 15px 0;">🤖 AI-Powered Detection</h3>
+            <h3 style="color: #fff; margin: 0 0 15px 0;">AI-Powered Detection</h3>
             <p style="color: #fff; margin: 0; opacity: 0.9; line-height: 1.6;">
                 Uses state-of-the-art transformer models including BERT, RoBERTa, DistilBERT, and ALBERT 
                 for maximum accuracy in threat detection.
@@ -793,7 +839,7 @@ def show_home_page():
             margin-bottom: 20px;
             box-shadow: 0 5px 15px rgba(168, 237, 234, 0.3);
         ">
-            <h3 style="color: #333; margin: 0 0 15px 0;">⚡ Real-Time Analysis</h3>
+            <h3 style="color: #333; margin: 0 0 15px 0;">Real-Time Analysis</h3>
             <p style="color: #333; margin: 0; opacity: 0.8; line-height: 1.6;">
                 Get instant results with lightning-fast processing. Analyze SMS messages 
                 in milliseconds with our optimized AI pipeline.
@@ -826,7 +872,7 @@ def show_home_page():
             margin-bottom: 20px;
             box-shadow: 0 5px 15px rgba(210, 153, 194, 0.3);
         ">
-            <h3 style="color: #333; margin: 0 0 15px 0;">📊 Smart Analytics</h3>
+            <h3 style="color: #333; margin: 0 0 15px 0;">Smart Analytics</h3>
             <p style="color: #333; margin: 0; opacity: 0.8; line-height: 1.6;">
                 Track performance metrics, view detailed reports, and export results 
                 in multiple formats for comprehensive analysis.
@@ -837,26 +883,26 @@ def show_home_page():
     st.markdown("---")
     
     # Statistics Section
-    st.markdown("### 📈 Platform Statistics")
+    st.markdown("### Platform Statistics")
     
     metric_col1, metric_col2, metric_col3, metric_col4 = st.columns(4)
     
     with metric_col1:
-        st.metric("🎯 Accuracy", "97.8%", "+2.1%")
+        st.metric("Accuracy", "97.8%", "+2.1%")
     
     with metric_col2:
-        st.metric("⚡ Speed", "< 100ms", "-15ms")
+        st.metric("Speed", "< 100ms", "-15ms")
     
     with metric_col3:
-        st.metric("🛡️ Threats Blocked", "10M+", "+2.3M")
+        st.metric("Threats Blocked", "10M+", "+2.3M")
     
     with metric_col4:
-        st.metric("🤖 AI Models", "4", "+1")
+        st.metric("AI Models", "4", "+1")
     
     st.markdown("---")
     
     # How It Works Section
-    st.markdown("### 🎯 How Spamlyser Pro Works")
+    st.markdown("### How Spamlyser Pro Works")
     
     step_col1, step_col2, step_col3, step_col4 = st.columns(4)
     
@@ -874,7 +920,7 @@ def show_home_page():
                 margin: 0 auto 15px auto;
                 box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
             ">
-                <span style="font-size: 2rem;">📱</span>
+                <span style="font-size: 2rem;">1</span>
             </div>
             <h4 style="color: #667eea; margin: 0 0 10px 0;">Step 1</h4>
             <p style="margin: 0; font-size: 0.9rem; opacity: 0.8;">Input SMS Message</p>
@@ -895,7 +941,7 @@ def show_home_page():
                 margin: 0 auto 15px auto;
                 box-shadow: 0 5px 15px rgba(255, 154, 158, 0.4);
             ">
-                <span style="font-size: 2rem;">🤖</span>
+                <span style="font-size: 2rem;">2</span>
             </div>
             <h4 style="color: #ff9a9e; margin: 0 0 10px 0;">Step 2</h4>
             <p style="margin: 0; font-size: 0.9rem; opacity: 0.8;">AI Analysis</p>
@@ -916,7 +962,7 @@ def show_home_page():
                 margin: 0 auto 15px auto;
                 box-shadow: 0 5px 15px rgba(168, 237, 234, 0.4);
             ">
-                <span style="font-size: 2rem;">🔍</span>
+                <span style="font-size: 2rem;">3</span>
             </div>
             <h4 style="color: #a8edea; margin: 0 0 10px 0;">Step 3</h4>
             <p style="margin: 0; font-size: 0.9rem; opacity: 0.8;">Threat Detection</p>
@@ -937,7 +983,7 @@ def show_home_page():
                 margin: 0 auto 15px auto;
                 box-shadow: 0 5px 15px rgba(255, 236, 210, 0.4);
             ">
-                <span style="font-size: 2rem;">📊</span>
+                <span style="font-size: 2rem;">4</span>
             </div>
             <h4 style="color: #ffecd2; margin: 0 0 10px 0;">Step 4</h4>
             <p style="margin: 0; font-size: 0.9rem; opacity: 0.8;">Results & Report</p>
@@ -949,7 +995,7 @@ def show_home_page():
     st.markdown("""
     <div id="feedback-section" style="text-align: center; margin-bottom: 30px;">
         <h2 style="color: #00d4aa; font-size: 2.2rem; margin-bottom: 10px;">
-            💬 Your Feedback Matters!
+            Your Feedback Matters!
         </h2>
         <p style="font-size: 1.1rem; color: #888; margin-bottom: 20px;">
             Help us improve Spamlyser by sharing your thoughts and suggestions
@@ -6782,6 +6828,38 @@ if st.session_state.get('dark_mode', False):
         .main, .stApp {
             background: #181f2f;
         }
+        
+        /* Sidebar dark mode styling */
+        .stSidebar {
+            background: #232a3d !important;
+            color: #f8fafc !important;
+        }
+        
+        .stSidebar .stMarkdown {
+            color: #f8fafc !important;
+        }
+        
+        .stSidebar label {
+            color: #f8fafc !important;
+        }
+        
+        .stSidebar .stExpander {
+            background: #232a3d !important;
+            border: 1px solid #324a7c !important;
+        }
+        
+        .stSidebar .stCheckbox label {
+            color: #f8fafc !important;
+        }
+        
+        .stSidebar .stRadio label {
+            color: #f8fafc !important;
+        }
+        
+        .stSidebar .stSelectbox label {
+            color: #f8fafc !important;
+        }
+        
         .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison {
             background: #232a3d;
             border-radius: 16px;
@@ -6846,6 +6924,204 @@ else:
         .main, .stApp {
             background: #f4f8ff;
         }
+        
+        /* Sidebar light mode styling */
+        .stSidebar {
+            background: #ffffff !important;
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stMarkdown {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stExpander {
+            background: #ffffff !important;
+            border: 1px solid #b3c7f7 !important;
+        }
+        
+        .stSidebar .stCheckbox label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stRadio label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stSelectbox label {
+            color: #232a3d !important;
+        }
+        
+        /* Additional sidebar elements for light mode */
+        .stSidebar .stText {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stMetric {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stSelectbox > div > div {
+            background: #ffffff !important;
+            color: #232a3d !important;
+            border: 1px solid #b3c7f7 !important;
+        }
+        
+        .stSidebar .stSelectbox > div > div > div {
+            background: #ffffff !important;
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stCheckbox > div > label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stRadio > div > label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stNumberInput label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stSlider label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stProgress label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stInfo {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stSuccess {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stWarning {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stError {
+            color: #232a3d !important;
+        }
+        
+        /* Force sidebar text visibility in light mode */
+        .stSidebar * {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar div {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar span {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar p {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar h1, .stSidebar h2, .stSidebar h3, .stSidebar h4, .stSidebar h5, .stSidebar h6 {
+            color: #232a3d !important;
+        }
+        
+        /* Specific targeting for Streamlit components */
+        .stSidebar [data-testid="stCheckbox"] label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar [data-testid="stRadio"] label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar [data-testid="stSelectbox"] label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar [data-testid="stExpander"] label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar [data-testid="stText"] {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar [data-testid="stMetric"] {
+            color: #232a3d !important;
+        }
+        
+        /* Override any inherited light colors */
+        .stSidebar .stMarkdown p {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stMarkdown div {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stMarkdown span {
+            color: #232a3d !important;
+        }
+        
+        /* Ensure form elements are visible */
+        .stSidebar .stForm label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stForm div {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stForm span {
+            color: #232a3d !important;
+        }
+        
+        /* Specific fix for Overall Statistics section */
+        .stSidebar .stMetric {
+            background: #ffffff !important;
+            border: 1px solid #b3c7f7 !important;
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stMetric > div {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stMetric label {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stMetric div {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stMetric span {
+            color: #232a3d !important;
+        }
+        
+        .stSidebar .stMetric p {
+            color: #232a3d !important;
+        }
+        
+        /* Force visibility for metric containers */
+        .stSidebar [data-testid="metric-container"] {
+            background: #ffffff !important;
+            border: 1px solid #b3c7f7 !important;
+            color: #232a3d !important;
+        }
+        
+        .stSidebar [data-testid="metric-container"] * {
+            color: #232a3d !important;
+        }
+        
         .metric-container, .prediction-card, .ensemble-card, .feature-card, .model-info, .ensemble-method, .method-comparison {
             background: #e3eafc;
             border-radius: 16px;
