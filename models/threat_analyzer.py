@@ -10,10 +10,16 @@ Threat Categories:
 - 💸 Scam/Fraud: Deceptive messages aimed at tricking the user into sending money
 - 📢 Unwanted Marketing: Legitimate but unsolicited advertising or promotional content
 - 🤖 Other: A general category for spam that doesn't fit neatly into the others
+
+Performance Optimizations:
+- Pre-compiled regex patterns for faster matching
+- Cached keyword sets for O(1) lookups
+- Optimized pattern matching with early exits
 """
 
 import re
-from typing import Dict, List, Union, Any, Tuple
+from typing import Dict, List, Union, Any, Tuple, Set
+from functools import lru_cache
 
 # Threat category indicators
 THREAT_CATEGORIES = {
@@ -84,9 +90,83 @@ THREAT_CATEGORIES = {
     }
 }
 
+# Pre-compile regex patterns for performance optimization
+_COMPILED_PATTERNS = {
+    # Phishing patterns
+    "phishing_verify": re.compile(r'(verify|confirm|update).{0,20}(account|password|information)', re.IGNORECASE),
+    "phishing_click": re.compile(r'(click|tap|follow).{0,10}(link|here)', re.IGNORECASE),
+    "phishing_account": re.compile(r'(account|login|password|bank|verify)', re.IGNORECASE),
+    
+    # Scam patterns
+    "scam_prize": re.compile(r'(won|winner|claim|prize).{0,20}(click|call|send)', re.IGNORECASE),
+    "scam_money": re.compile(r'(cash|\$\d+|money).{0,30}(click|yes|claim)', re.IGNORECASE),
+    "scam_urgent": re.compile(r'(million|lottery|inheritance|cash|money).{0,30}(urgent|now|today)', re.IGNORECASE),
+    "scam_won": re.compile(r'(you have won|won .{0,15}\$\d+|claim .{0,15}\$\d+|\$\d+ .{0,15}cash)', re.IGNORECASE),
+    
+    # Marketing patterns
+    "marketing_discount": re.compile(r'(discount|sale|off|save).{0,15}(\d+%|\$\d+)', re.IGNORECASE),
+    "marketing_buy": re.compile(r'(buy|purchase|shop|order).{0,20}(now|today|online)', re.IGNORECASE),
+    "marketing_exclude": re.compile(r'(account|password|verify|won|claim)', re.IGNORECASE),
+}
+
+# Pre-compile common scam phrases for faster checking
+_COMMON_SCAM_PHRASES = frozenset([
+    "you have won", "cash prize", "claim your", "free money",
+    "click yes", "lottery winner", "$5000", "$1000"
+])
+
+# Cache keyword sets for O(1) lookups instead of O(n) list searches
+_KEYWORD_SETS: Dict[str, Set[str]] = {}
+
+def _initialize_keyword_sets():
+    """Initialize keyword sets for faster lookups (called once on module load)"""
+    global _KEYWORD_SETS
+    for category, data in THREAT_CATEGORIES.items():
+        if data["keywords"]:
+            _KEYWORD_SETS[category] = set(kw.lower() for kw in data["keywords"])
+
+# Initialize keyword sets on module load
+_initialize_keyword_sets()
+
+@lru_cache(maxsize=1024)
+def _check_scam_phrases(message_lower: str) -> bool:
+    """
+    Cached check for common scam phrases.
+    Uses LRU cache to avoid repeated checks on similar messages.
+    """
+    return any(phrase in message_lower for phrase in _COMMON_SCAM_PHRASES)
+
+def _count_keyword_matches(message_lower: str, category: str) -> int:
+    """
+    Optimized keyword matching using pre-computed sets.
+    Uses set lookups (O(1)) instead of list iteration (O(n)).
+    """
+    if category not in _KEYWORD_SETS:
+        return 0
+    
+    # Split message into words for exact matching
+    message_words = set(message_lower.split())
+    
+    # Count exact word matches
+    exact_matches = len(message_words & _KEYWORD_SETS[category])
+    
+    # Count phrase matches (keywords that contain spaces)
+    phrase_matches = sum(
+        1 for keyword in _KEYWORD_SETS[category]
+        if ' ' in keyword and keyword in message_lower
+    )
+    
+    return exact_matches + phrase_matches
+
 def classify_threat_type(message: str, spam_probability: float) -> Tuple[str, float, Dict[str, Any]]:
     """
     Classify a spam message into a specific threat category.
+    
+    Optimizations:
+    - Pre-compiled regex patterns for faster matching
+    - Cached keyword sets for O(1) lookups
+    - Early exit conditions to avoid unnecessary processing
+    - LRU cache for common phrase checks
     
     Args:
         message: The message content
@@ -95,10 +175,11 @@ def classify_threat_type(message: str, spam_probability: float) -> Tuple[str, fl
     Returns:
         tuple: (threat_type, confidence, metadata)
     """
+    # Early exit if not spam
     if spam_probability < 0.5:
-        return None, 0.0, {}  # Not spam, no threat type
+        return None, 0.0, {}
         
-    # Convert to lowercase for matching
+    # Convert to lowercase once for all checks
     message_lower = message.lower()
     
     # Initialize scores for each category
@@ -109,62 +190,51 @@ def classify_threat_type(message: str, spam_probability: float) -> Tuple[str, fl
         "Other": 0.1  # Base score for Other category
     }
     
-    # Pre-check for common scam patterns and boost spam probability if found
-    if any(phrase in message_lower for phrase in [
-            "you have won", "cash prize", "claim your", "free money", 
-            "click yes", "lottery winner", "$5000", "$1000"
-        ]):
-        # These are very likely spam/scam messages
+    # Pre-check for common scam patterns using cached function
+    if _check_scam_phrases(message_lower):
         spam_probability = max(spam_probability, 0.85)
-        scores["Scam/Fraud"] = 0.2  # Give scam category a head start
+        scores["Scam/Fraud"] = 0.2
     
-    # Score each category based on keyword matches
-    for category, data in THREAT_CATEGORIES.items():
-        if category == "Other":
-            continue  # Skip, it's our fallback category
-        
-        # Calculate keyword matches
-        keywords = data["keywords"]
-        matches = sum(1 for keyword in keywords if keyword.lower() in message_lower)
-        
-        # Calculate score based on matches and keyword list length
-        if keywords:
-            scores[category] = min(1.0, (matches / len(keywords)) * 2.5) * spam_probability
+    # Score each category based on keyword matches using optimized function
+    for category in ["Phishing", "Scam/Fraud", "Unwanted Marketing"]:
+        keyword_count = len(_KEYWORD_SETS.get(category, set()))
+        if keyword_count > 0:
+            matches = _count_keyword_matches(message_lower, category)
+            scores[category] = min(1.0, (matches / keyword_count) * 2.5) * spam_probability
     
-    # Specific regex patterns for higher confidence in certain categories
-    # Phishing indicators - links with urgency
-    if re.search(r'(verify|confirm|update).{0,20}(account|password|information)', message_lower):
+    # Specific regex patterns for higher confidence - using pre-compiled patterns
+    # Phishing indicators
+    if _COMPILED_PATTERNS["phishing_verify"].search(message_lower):
         scores["Phishing"] += 0.25
-    if re.search(r'(click|tap|follow).{0,10}(link|here)', message_lower) and \
-       re.search(r'(account|login|password|bank|verify)', message_lower):
+    
+    if (_COMPILED_PATTERNS["phishing_click"].search(message_lower) and 
+        _COMPILED_PATTERNS["phishing_account"].search(message_lower)):
         scores["Phishing"] += 0.3
         
-    # Scam indicators - money and urgency
-    if re.search(r'(won|winner|claim|prize).{0,20}(click|call|send)', message_lower):
+    # Scam indicators
+    if _COMPILED_PATTERNS["scam_prize"].search(message_lower):
         scores["Scam/Fraud"] += 0.3
-        # This is clearly spam, so boost the overall spam score
         spam_probability = max(spam_probability, 0.85)
     
-    # Look for cash/money mentions with YES/claim/click patterns (common in scams)
-    if re.search(r'(cash|\$\d+|money).{0,30}(click|yes|claim)', message_lower, re.IGNORECASE):
+    if _COMPILED_PATTERNS["scam_money"].search(message_lower):
         scores["Scam/Fraud"] += 0.4
-        # This is clearly spam, so boost the overall spam score
         spam_probability = max(spam_probability, 0.9)
         
-    if re.search(r'(million|lottery|inheritance|cash|money).{0,30}(urgent|now|today)', message_lower):
+    if _COMPILED_PATTERNS["scam_urgent"].search(message_lower):
         scores["Scam/Fraud"] += 0.25
     
-    # Marketing indicators
-    if re.search(r'(discount|sale|off|save).{0,15}(\d+%|\$\d+)', message_lower):
-        scores["Unwanted Marketing"] += 0.3
-    if re.search(r'(buy|purchase|shop|order).{0,20}(now|today|online)', message_lower) and \
-       not re.search(r'(account|password|verify|won|claim)', message_lower):
-        scores["Unwanted Marketing"] += 0.2
+    # Special pattern for money scams
+    if _COMPILED_PATTERNS["scam_won"].search(message_lower):
+        spam_probability = max(spam_probability, 0.95)
+        scores["Scam/Fraud"] = max(scores["Scam/Fraud"], 0.8)
     
-    # Special pattern for money scams - detect even with low spam probability
-    if re.search(r'(you have won|won .{0,15}\$\d+|claim .{0,15}\$\d+|\$\d+ .{0,15}cash)', message_lower, re.IGNORECASE):
-        spam_probability = max(spam_probability, 0.95)  # Definitely spam
-        scores["Scam/Fraud"] = max(scores["Scam/Fraud"], 0.8)  # Boost scam score
+    # Marketing indicators
+    if _COMPILED_PATTERNS["marketing_discount"].search(message_lower):
+        scores["Unwanted Marketing"] += 0.3
+    
+    if (_COMPILED_PATTERNS["marketing_buy"].search(message_lower) and 
+        not _COMPILED_PATTERNS["marketing_exclude"].search(message_lower)):
+        scores["Unwanted Marketing"] += 0.2
     
     # Find the category with the highest score
     best_category = max(scores.items(), key=lambda x: x[1])
